@@ -10,7 +10,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Left Section - Problem Description -->
         <div class="left-section">
             <button class="expand-button" onclick="toggleSection('left')">Collapse</button>
             <h2>{{ problem.title }}</h2>
@@ -22,7 +21,6 @@
             <pre>Output: {{ problem.example.output }}</pre>
             <pre>Explanation: {{ problem.example.explanation }}</pre>
         </div>
-
         <div class="right-section">
             <button class="expand-button" onclick="toggleSection('right')">Collapse</button>
             <textarea id="code" placeholder="Enter your code here...">{{ problem.starter_code }}</textarea>
@@ -30,8 +28,6 @@
                 <button id="runButton" class="btn-run"><i class="fas fa-play"></i> Run Code</button>
             </div>
         </div>
-
-        <!-- Bottom Section - Test Cases and Output -->
         <div class="bottom-section">
             <button class="expand-button" onclick="toggleSection('bottom')">Collapse</button>
             <h3>Test Cases</h3>

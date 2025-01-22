@@ -20,24 +20,17 @@ def compile_run():
 
     if not code:
         return jsonify({"status": "error", "message": "Code cannot be empty!"})
-
-    # Load test cases from the problem JSON
     test_cases = problem_data.get('test_cases', [])
 
     if not test_cases:
         return jsonify({"status": "error", "message": "No test cases available in the problem data!"})
-
-    # Generate unique filenames
     filename = f"temp_{uuid.uuid4().hex}"
     c_file = f"{filename}.c"
     executable = f"{filename}.out"
 
     try:
-        # Write code to a temporary file
         with open(c_file, "w") as f:
             f.write(code)
-
-        # Compile the code
         t1 = time.time()
         compile_process = subprocess.run(
             ["gcc", c_file, "-o", executable],
@@ -45,16 +38,12 @@ def compile_run():
             text=True
         )
         t2 = time.time()
-
         if compile_process.returncode != 0:
-            # Compilation failed
             error_message = compile_process.stderr.replace('\n', '<br>')
             return jsonify({
                 "status": "error",
                 "message": f"Compilation Failed:<br>{error_message}"
             })
-
-        # Compilation successful
         compile_time = f"Compilation successful! (Time: {t2 - t1:.2f} seconds)"
 
         results = []
@@ -69,7 +58,7 @@ def compile_run():
                     input=input_values,
                     capture_output=True,
                     text=True,
-                    timeout=5  # Set a timeout to prevent infinite loops
+                    timeout=5
                 )
                 output = run_process.stdout.strip()
                 status = "success" if output == expected_output else "failure"
@@ -103,7 +92,5 @@ def compile_run():
             os.remove(c_file)
         if os.path.exists(executable):
             os.remove(executable)
-
-
 if __name__ == '__main__':
     app.run(debug=True)
