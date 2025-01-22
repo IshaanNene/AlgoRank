@@ -1,0 +1,45 @@
+{
+  "title": "Sum of Two Numbers",
+  "difficulty": "Easy",
+  "topics": ["Math", "Input/Output"],
+  "description": "Write a program that takes two integers, <code>a</code> and <code>b</code>, as input and returns their sum.<br><br><strong>Example:</strong><pre>Input: a = 3, b = 5\nOutput: 8</pre>",
+  "starter_code": "#include <stdio.h>\n\nint main() {\n    int a, b;\n    scanf(\"%d %d\", &a, &b);\n    printf(\"%d\\n\", a + b);\n    return 0;\n}",
+  "header_files": ["stdio.h"],
+  "example": {
+    "input": "3 5",
+    "output": "8",
+    "explanation": "3 + 5 = 8."
+  },
+  "test_cases": [
+    {
+      "id": 1,
+      "input": "3 5",
+      "output": "8",
+      "explanation": "3 + 5 = 8."
+    },
+    {
+      "id": 2,
+      "input": "10 20",
+      "output": "30",
+      "explanation": "10 + 20 = 30."
+    },
+    {
+      "id": 3,
+      "input": "-1 1",
+      "output": "0",
+      "explanation": "-1 + 1 = 0."
+    },
+    {
+      "id": 4,
+      "input": "0 0",
+      "output": "0",
+      "explanation": "0 + 0 = 0."
+    },
+    {
+      "id": 5,
+      "input": "123 456",
+      "output": "579",
+      "explanation": "123 + 456 = 579."
+    }
+  ]
+}
