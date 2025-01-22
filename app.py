@@ -17,13 +17,15 @@ def index():
 @app.route('/compile_run', methods=['POST'])
 def compile_run():
     code = request.form.get('code', '').strip()
-    test_cases = request.form.get('test_cases', '').strip()
 
     if not code:
         return jsonify({"status": "error", "message": "Code cannot be empty!"})
 
+    # Load test cases from the problem JSON
+    test_cases = problem_data.get('test_cases', [])
+
     if not test_cases:
-        return jsonify({"status": "error", "message": "Test cases cannot be empty!"})
+        return jsonify({"status": "error", "message": "No test cases available in the problem data!"})
 
     # Generate unique filenames
     filename = f"temp_{uuid.uuid4().hex}"
@@ -55,17 +57,13 @@ def compile_run():
         # Compilation successful
         compile_time = f"Compilation successful! (Time: {t2 - t1:.2f} seconds)"
 
-        # Parse test cases
-        test_cases = test_cases.split('\n')
         results = []
-
-        for i, test_case in enumerate(test_cases):
-            input_values = test_case.strip()
-            if not input_values:
-                continue
+        for test_case in test_cases:
+            input_values = test_case['input']
+            expected_output = test_case['output']
+            explanation = test_case.get('explanation', '')
 
             try:
-                # Run the program with input values
                 run_process = subprocess.run(
                     [f"./{executable}"],
                     input=input_values,
@@ -74,25 +72,24 @@ def compile_run():
                     timeout=5  # Set a timeout to prevent infinite loops
                 )
                 output = run_process.stdout.strip()
+                status = "success" if output == expected_output else "failure"
+
                 results.append({
-                    "test_case": i + 1,
+                    "test_case": test_case['id'],
                     "input": input_values,
-                    "output": output,
-                    "status": "success"
+                    "expected_output": expected_output,
+                    "actual_output": output,
+                    "status": status,
+                    "explanation": explanation
                 })
             except subprocess.TimeoutExpired:
                 results.append({
-                    "test_case": i + 1,
+                    "test_case": test_case['id'],
                     "input": input_values,
-                    "output": "Time Limit Exceeded",
-                    "status": "error"
-                })
-            except subprocess.CalledProcessError as e:
-                results.append({
-                    "test_case": i + 1,
-                    "input": input_values,
-                    "output": f"Runtime Error: {e.stderr}",
-                    "status": "error"
+                    "expected_output": expected_output,
+                    "actual_output": "Time Limit Exceeded",
+                    "status": "error",
+                    "explanation": explanation
                 })
 
         return jsonify({
@@ -106,6 +103,7 @@ def compile_run():
             os.remove(c_file)
         if os.path.exists(executable):
             os.remove(executable)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
