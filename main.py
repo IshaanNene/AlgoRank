@@ -1,9 +1,4 @@
-import subprocess
-import json
-import os
-import logging
-import sys
-import time
+import subprocess,json,os,logging,sys,time
 
 logging.basicConfig(
     level=logging.DEBUG,
