@@ -12,8 +12,6 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)]
 )
 
-
-# Function to compile the C file
 def c_compiler(c_filename, output_executable):
     compile_command = ["gcc", c_filename, "-O3", "-o", output_executable]
     logging.info("Compiling C code: %s", " ".join(compile_command))
@@ -27,8 +25,6 @@ def c_compiler(c_filename, output_executable):
     logging.info("Compilation successful.")
     return True
 
-
-# Function to execute the compiled C program with given inputs
 def test_case_exec(executable, a, b, expected):
     command = [f"./{executable}", str(a), str(b), str(expected)]
     logging.debug("Executing command: %s", " ".join(command))
@@ -45,8 +41,6 @@ def test_case_exec(executable, a, b, expected):
 
     return output
 
-
-# Function to load test cases from JSON
 def test_case_import(json_file, mode="Run"):
     if not os.path.exists(json_file):
         raise FileNotFoundError(f"{json_file} not found.")
@@ -65,31 +59,23 @@ def test_case_import(json_file, mode="Run"):
     return test_cases
 
 
-# Main function
 def main(mode="Run"):
-    c_filename = "same.c"  # The C program filename
+    c_filename = "same.c"
     output_executable = "program"
     json_file = "problem.json"
-
-    # Compile the C code
     if not c_compiler(c_filename, output_executable):
         logging.error("Compilation failed. Stopping execution.")
         return
-
-    # Load test cases
     try:
         test_cases = test_case_import(json_file, mode)
     except Exception as e:
         logging.error("Error loading test cases: %s", e)
         return
 
-    # Limit to 3 test cases for "Run" mode
     if mode == "Run":
         test_cases = test_cases[:3]
 
     start_time = time.time()
-
-    # Execute test cases
     for i, test in enumerate(test_cases, start=1):
         a, b, expected = test["a"], test["b"], test["expected"]
         logging.info("Running test case %d: a=%s, b=%s, expected=%s", i, a, b, expected)
@@ -100,8 +86,6 @@ def main(mode="Run"):
 
     logging.info("Total Runtime: %.2f ms", (time.time() - start_time) * 1000)
 
-
-# Entry point
 if __name__ == "__main__":
-    mode = sys.argv[1] if len(sys.argv) > 1 else "Run"  # Default mode is "Run"
+    mode = sys.argv[1] if len(sys.argv) > 1 else "Run"
     main(mode)
