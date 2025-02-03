@@ -1,10 +1,9 @@
-make:
-	docker build --cgroup-parent algo-rank .
-	docker run --rm algo-rank python3 main.py Run
-
-make_submit:
+build:
 	docker build -t algo-rank .
-	docker run --rm algo-rank python3 main.py Submit
+run:
+	docker run --rm --memory=128m --cpus="0.5" --read-only --security-opt seccomp=seccomp_profile.json --network=none --tmpfs /tmp:rw,exec,mode=1777 algo-rank python3 main.py Run
+submit:
+	docker run --rm --memory=128m --cpus="0.5" --read-only --security-opt seccomp=seccomp_profile.json --network=none --tmpfs /tmp:rw,exec,mode=1777 algo-rank python3 main.py Submit
 
 gits_up:
 	git status
