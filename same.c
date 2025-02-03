@@ -18,12 +18,9 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Usage: %s <a> <b> <expected>\n", argv[0]);
         return 1;
     }
-
     int a = atoi(argv[1]);
     int b = atoi(argv[2]);
     int expected = atoi(argv[3]);
-
     Checker(Sum, expected, a, b);
-
     return 0;
 }

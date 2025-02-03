@@ -1,11 +1,11 @@
-FROM python:slim
+FROM python:3.9-slim
 
-RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y gcc make
 
 WORKDIR /app
 
-COPY same.c .
-COPY main.py .
-COPY problem.json .
+COPY . /app
 
-CMD ["python3", "main.py"]
+RUN pip install -r requirements.txt
+
+ENTRYPOINT ["python3", "main.py"]
