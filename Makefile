@@ -7,3 +7,6 @@ gits_up:
 	 git add .
 	 git commit -m "Updates"
 	 git push
+clean:
+	rm a.out
+	rm program
