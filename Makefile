@@ -1,3 +1,7 @@
+make:
+	 docker build -t algo-rank .
+	 docker run --rm algo-rank
+
 gits_up:
 	 git status
 	 git add .
