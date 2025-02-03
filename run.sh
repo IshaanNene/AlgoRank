@@ -1,3 +1,3 @@
-docker build -t Code-Forge
+docker build -t algo-rank
 
-docker run --rm Code-Forge
+docker run --rm algo-rank
