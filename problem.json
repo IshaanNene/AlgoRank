@@ -1,5 +1,14 @@
 {
-  "testCases": [
+  "problem_num": 1,
+  "difficulty": "Easy",
+  "Expected Time Constraints": "nil",
+  "Expected Space Constraints": "nil",
+  "Run_testCases": [
+    { "a": 1, "b": 1, "expected": 2 },
+    { "a": 2, "b": 3, "expected": 5 },
+    { "a": -5, "b": 10, "expected": 5 }
+  ],
+  "Submit_testCases": [
     { "a": 1, "b": 1, "expected": 2 },
     { "a": 2, "b": 3, "expected": 5 },
     { "a": 0, "b": 0, "expected": 0 },
