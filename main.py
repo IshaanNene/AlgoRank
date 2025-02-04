@@ -61,6 +61,7 @@ def test_case_import(json_file, mode="Run"):
 
 def main(mode="Run"):
     c_filename = "same.c"
+    test_case_count = 0
     output_executable = "program"
     json_file = "problem.json"
     if not c_compiler(c_filename, output_executable):
@@ -77,6 +78,7 @@ def main(mode="Run"):
 
     start_time = time.time()
     for i, test in enumerate(test_cases, start=1):
+        test_case_count += 1
         a, b, expected = test["a"], test["b"], test["expected"]
         logging.info("Running test case %d: a=%s, b=%s, expected=%s", i, a, b, expected)
 
@@ -85,7 +87,7 @@ def main(mode="Run"):
         logging.info("-" * 40)
 
     logging.info("Total Runtime: %.2f ms", (time.time() - start_time) * 1000)
-
+    logging.info("Number of TestCases: %d",test_case_count)
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "Run"
     main(mode)
