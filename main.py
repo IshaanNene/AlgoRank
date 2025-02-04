@@ -62,7 +62,7 @@ def main(mode="Run"):
     test_case_count = 0
     passed_count = 0
     output_executable = "program"
-    json_file = "problem.json"
+    json_file = "Problem/problem.json"
     
     if not c_compiler(c_filename, output_executable):
         logging.error("Compilation failed. Stopping execution.")
