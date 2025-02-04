@@ -20,7 +20,6 @@ int search(int* nums, int numsSize, int target) {
             right = mid - 1;
         }
     }
-    
     return -1;
 }
 //End of user input
