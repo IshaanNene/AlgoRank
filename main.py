@@ -4,15 +4,12 @@ import os
 import logging
 import sys
 import time
-from flask import Flask, request, jsonify
 
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)]
 )
-
-app = Flask(__name__)
 
 def c_compiler(c_filename, output_executable):
     compile_command = ["gcc", c_filename, "-O3", "-o", output_executable]
@@ -57,8 +54,7 @@ def test_case_import(json_file, mode="Run"):
     if not test_cases:
         raise ValueError(f"No test cases found for mode: {mode}")
     logging.debug("First test case structure: %s", test_cases[0] if test_cases else "No test cases")
-    return test_cases
-
+    return test_cases 
 def main():
     if len(sys.argv) < 3:
         logging.error("Usage: python main.py <mode> <problem_number>")
@@ -81,18 +77,15 @@ def main():
     passed_count = 0
     output_executable = "program"
     json_file = f"Problem/problem{problem_num}.json"
-    
+
     if not c_compiler(c_filename, output_executable):
         logging.error("Compilation failed. Stopping execution.")
-        return
-    try:
-        test_cases = test_case_import(json_file, mode)
-    except Exception as e:
-        logging.error("Error loading test cases: %s", e)
-        return
+        return  # Ensure to return if compilation fails
+
+    test_cases = test_case_import(json_file, mode)  # Import test cases here
 
     if mode == "Run":
-        test_cases = test_cases[:3]
+        test_cases = test_cases[:3]  # Limit to first 3 test cases
         for i, test in enumerate(test_cases, start=1):
             test_case_count += 1
             try:
@@ -110,7 +103,6 @@ def main():
             except Exception as e:
                 logging.error("Error processing test case %d: %s", i, e)
                 continue
-
     elif mode == "Submit":
         start_time = time.time()
         for i, test in enumerate(test_cases, start=1):
@@ -130,38 +122,8 @@ def main():
             except Exception as e:
                 logging.error("Error processing test case %d: %s", i, e)
                 continue
-
         logging.info("Total Runtime: %.2f ms", (time.time() - start_time) * 1000)
         logging.info("Number of TestCases: %d", test_case_count)
         logging.info("Passed TestCases: %d/%d (%.1f%%)", passed_count, test_case_count, (passed_count/test_case_count*100) if test_case_count > 0 else 0)
-
-@app.route('/run', methods=['POST'])
-def run():
-    data = request.json
-    user_code = data['userCode']
-    expected = int(data['expected'])
-
-    with open("Solutions/user_solution.c", "w") as f:
-        f.write(user_code)
-
-    if not c_compiler("Solutions/user_solution.c", "user_program"):
-        return jsonify({"message": "Compilation failed."})
-
-    output, passed = test_case_exec("user_program", 0, 0, expected) 
-    return jsonify({"message": output})
-
-@app.route('/submit', methods=['POST'])
-def submit():
-    data = request.json
-    user_code = data['userCode']
-    expected = int(data['expected'])
-
-    with open("Solutions/user_solution.c", "w") as f:
-        f.write(user_code)
-    if not c_compiler("Solutions/user_solution.c", "user_program"):
-        return jsonify({"message": "Compilation failed."})
-    output, passed = test_case_exec("user_program", 0, 0, expected)  
-    return jsonify({"message": output})
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    main()
