@@ -72,7 +72,7 @@ def main():
         logging.error("Problem number must be an integer")
         return
         
-    c_filename = f"Solutions/solution{problem_num}.c"
+    c_filename = f"C_Solutions/solution{problem_num}.c"
     test_case_count = 0
     passed_count = 0
     output_executable = "program"
@@ -80,12 +80,12 @@ def main():
 
     if not c_compiler(c_filename, output_executable):
         logging.error("Compilation failed. Stopping execution.")
-        return  # Ensure to return if compilation fails
+        return 
 
-    test_cases = test_case_import(json_file, mode)  # Import test cases here
+    test_cases = test_case_import(json_file, mode) 
 
     if mode == "Run":
-        test_cases = test_cases[:3]  # Limit to first 3 test cases
+        test_cases = test_cases[:3]  
         for i, test in enumerate(test_cases, start=1):
             test_case_count += 1
             try:
