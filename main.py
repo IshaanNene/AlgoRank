@@ -4,12 +4,15 @@ import os
 import logging
 import sys
 import time
+from flask import Flask, request, jsonify
 
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)]
 )
+
+app = Flask(__name__)
 
 def c_compiler(c_filename, output_executable):
     compile_command = ["gcc", c_filename, "-O3", "-o", output_executable]
@@ -132,6 +135,33 @@ def main():
         logging.info("Number of TestCases: %d", test_case_count)
         logging.info("Passed TestCases: %d/%d (%.1f%%)", passed_count, test_case_count, (passed_count/test_case_count*100) if test_case_count > 0 else 0)
 
+@app.route('/run', methods=['POST'])
+def run():
+    data = request.json
+    user_code = data['userCode']
+    expected = int(data['expected'])
+
+    with open("Solutions/user_solution.c", "w") as f:
+        f.write(user_code)
+
+    if not c_compiler("Solutions/user_solution.c", "user_program"):
+        return jsonify({"message": "Compilation failed."})
+
+    output, passed = test_case_exec("user_program", 0, 0, expected) 
+    return jsonify({"message": output})
+
+@app.route('/submit', methods=['POST'])
+def submit():
+    data = request.json
+    user_code = data['userCode']
+    expected = int(data['expected'])
+
+    with open("Solutions/user_solution.c", "w") as f:
+        f.write(user_code)
+    if not c_compiler("Solutions/user_solution.c", "user_program"):
+        return jsonify({"message": "Compilation failed."})
+    output, passed = test_case_exec("user_program", 0, 0, expected)  
+    return jsonify({"message": output})
 
 if __name__ == "__main__":
-    main()
+    app.run(debug=True)

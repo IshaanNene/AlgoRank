@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend</title>
+    <script>
+        function runCode() {
+            const a = document.getElementById("inputA").value;
+            const b = document.getElementById("inputB").value;
+            const expected = document.getElementById("inputExpected").value;
+
+            // Send data to the backend for running the code
+            fetch('/run', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ a, b, expected }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            });
+        }
+
+        function submitCode() {
+            const a = document.getElementById("inputA").value;
+            const b = document.getElementById("inputB").value;
+            const expected = document.getElementById("inputExpected").value;
+
+            // Send data to the backend for submission
+            fetch('/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ a, b, expected }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Run C Code</h1>
+    <input type="number" id="inputA" placeholder="Enter A" required>
+    <input type="number" id="inputB" placeholder="Enter B" required>
+    <input type="number" id="inputExpected" placeholder="Enter Expected Result" required>
+    <button onclick="runCode()">Run</button>
+    <button onclick="submitCode()">Submit</button>
+</body>
+</html>
