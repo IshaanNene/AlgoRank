@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+//USer input
 int Sum(int a, int b) {
     return a + b;
 }
-
+//End of user input
 void Checker(int (*Sum)(int, int), int Res, int u1, int u2) {
     if (Sum(u1, u2) == Res) {
         printf("Test Case Passed: %d + %d = %d\n", u1, u2, Res);

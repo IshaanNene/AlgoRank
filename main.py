@@ -53,16 +53,31 @@ def test_case_import(json_file, mode="Run"):
     test_cases = data.get("Run_testCases" if mode == "Run" else "Submit_testCases", [])
     if not test_cases:
         raise ValueError(f"No test cases found for mode: {mode}")
-
+    logging.debug("First test case structure: %s", test_cases[0] if test_cases else "No test cases")
     return test_cases
 
-
-def main(mode="Run"):
-    c_filename = "same.c"
+def main():
+    if len(sys.argv) < 3:
+        logging.error("Usage: python main.py <mode> <problem_number>")
+        logging.error("mode: Run or Submit")
+        return
+        
+    mode = sys.argv[1]
+    if mode not in ["Run", "Submit"]:
+        logging.error("Invalid mode. Must be 'Run' or 'Submit'")
+        return
+        
+    try:
+        problem_num = int(sys.argv[2])
+    except ValueError:
+        logging.error("Problem number must be an integer")
+        return
+        
+    c_filename = f"Solutions/solution{problem_num}.c"
     test_case_count = 0
     passed_count = 0
     output_executable = "program"
-    json_file = "Problem/problem.json"
+    json_file = f"Problem/problem{problem_num}.json"
     
     if not c_compiler(c_filename, output_executable):
         logging.error("Compilation failed. Stopping execution.")
@@ -75,26 +90,48 @@ def main(mode="Run"):
 
     if mode == "Run":
         test_cases = test_cases[:3]
+        for i, test in enumerate(test_cases, start=1):
+            test_case_count += 1
+            try:
+                a, b, expected = test.get("a"), test.get("b"), test.get("expected")
+                if any(v is None for v in (a, b, expected)):
+                    logging.error("Test case %d is missing required fields. Test case structure: %s", i, test)
+                    continue
+                
+                logging.info("Running test case %d: a=%s, b=%s, expected=%s", i, a, b, expected)
+                output, passed = test_case_exec(output_executable, b, a, expected)
+                if passed:
+                    passed_count += 1
+                logging.info("Output: %s", output)
+                logging.info("-" * 40)
+            except Exception as e:
+                logging.error("Error processing test case %d: %s", i, e)
+                continue
+
     elif mode == "Submit":
         start_time = time.time()
         for i, test in enumerate(test_cases, start=1):
             test_case_count += 1
-            a, b, expected = test["a"], test["b"], test["expected"]
-            logging.info("Running test case %d: a=%s, b=%s, expected=%s", i, a, b, expected)
-
-            output, passed = test_case_exec(output_executable, a, b, expected)
-            if passed:
-                passed_count += 1
-            logging.info("Output: %s", output)
-            logging.info("-" * 40)
+            try:
+                a, b, expected = test.get("a"), test.get("b"), test.get("expected")
+                if any(v is None for v in (a, b, expected)):
+                    logging.error("Test case %d is missing required fields. Test case structure: %s", i, test)
+                    continue
+                
+                logging.info("Running test case %d: a=%s, b=%s, expected=%s", i, a, b, expected)
+                output, passed = test_case_exec(output_executable, a, b, expected)
+                if passed:
+                    passed_count += 1
+                logging.info("Output: %s", output)
+                logging.info("-" * 40)
+            except Exception as e:
+                logging.error("Error processing test case %d: %s", i, e)
+                continue
 
         logging.info("Total Runtime: %.2f ms", (time.time() - start_time) * 1000)
         logging.info("Number of TestCases: %d", test_case_count)
         logging.info("Passed TestCases: %d/%d (%.1f%%)", passed_count, test_case_count, (passed_count/test_case_count*100) if test_case_count > 0 else 0)
-    else:
-        logging.error("Invalid Mode")
 
 
 if __name__ == "__main__":
-    mode = sys.argv[1] if len(sys.argv) > 1 else "Run"
-    main(mode)
+    main()
