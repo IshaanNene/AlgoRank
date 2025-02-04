@@ -5,7 +5,6 @@ import logging
 import sys
 import time
 
-# Logging setup
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -32,14 +31,13 @@ def test_case_exec(executable, a, b, expected):
     try:
         result = subprocess.run(command, capture_output=True, text=True, check=True, timeout=5)
         output = result.stdout.strip()
+        return output, "Test Case Passed" in output
     except subprocess.TimeoutExpired:
         logging.error("Execution timed out!")
-        return "Timeout Error"
+        return "Timeout Error", False
     except subprocess.CalledProcessError as e:
         logging.error("Execution failed:\n%s", e.stderr)
-        return f"Execution Error: {e.stderr.strip()}"
-
-    return output
+        return f"Execution Error: {e.stderr.strip()}", False
 
 def test_case_import(json_file, mode="Run"):
     if not os.path.exists(json_file):
@@ -62,8 +60,10 @@ def test_case_import(json_file, mode="Run"):
 def main(mode="Run"):
     c_filename = "same.c"
     test_case_count = 0
+    passed_count = 0
     output_executable = "program"
     json_file = "problem.json"
+    
     if not c_compiler(c_filename, output_executable):
         logging.error("Compilation failed. Stopping execution.")
         return
@@ -75,19 +75,26 @@ def main(mode="Run"):
 
     if mode == "Run":
         test_cases = test_cases[:3]
+    elif mode == "Submit":
+        start_time = time.time()
+        for i, test in enumerate(test_cases, start=1):
+            test_case_count += 1
+            a, b, expected = test["a"], test["b"], test["expected"]
+            logging.info("Running test case %d: a=%s, b=%s, expected=%s", i, a, b, expected)
 
-    start_time = time.time()
-    for i, test in enumerate(test_cases, start=1):
-        test_case_count += 1
-        a, b, expected = test["a"], test["b"], test["expected"]
-        logging.info("Running test case %d: a=%s, b=%s, expected=%s", i, a, b, expected)
+            output, passed = test_case_exec(output_executable, a, b, expected)
+            if passed:
+                passed_count += 1
+            logging.info("Output: %s", output)
+            logging.info("-" * 40)
 
-        output = test_case_exec(output_executable, a, b, expected)
-        logging.info("Output: %s", output)
-        logging.info("-" * 40)
+        logging.info("Total Runtime: %.2f ms", (time.time() - start_time) * 1000)
+        logging.info("Number of TestCases: %d", test_case_count)
+        logging.info("Passed TestCases: %d/%d (%.1f%%)", passed_count, test_case_count, (passed_count/test_case_count*100) if test_case_count > 0 else 0)
+    else:
+        logging.error("Invalid Mode")
 
-    logging.info("Total Runtime: %.2f ms", (time.time() - start_time) * 1000)
-    logging.info("Number of TestCases: %d",test_case_count)
+
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "Run"
     main(mode)
