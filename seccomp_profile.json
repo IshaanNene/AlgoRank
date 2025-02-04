@@ -1,9 +1,0 @@
-{
-  "defaultAction": "SCMP_ACT_ALLOW",
-  "syscalls": [
-    {
-      "names": ["clone", "execve"],
-      "action": "SCMP_ACT_DENY"
-    }
-  ]
-}
