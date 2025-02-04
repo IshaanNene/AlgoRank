@@ -30,7 +30,7 @@ def test_case_exec(executable, a, b, expected):
 
     try:
         result = subprocess.run(command, capture_output=True, text=True, check=True, timeout=5)
-        output = result.stdout.strip()m
+        output = result.stdout.strip()
         return output, "Test Case Passed" in output
     except subprocess.TimeoutExpired:
         logging.error("Execution timed out!")
