@@ -2,11 +2,33 @@
 body {
     margin: 0;
     padding: 0;
-    background: #1e1e2f;
+    background: linear-gradient(135deg, #1e1e2f, #3a3a5a);
     color: #ffffff;
     font-family: 'Roboto', sans-serif;
     min-height: 100vh;
     overflow: hidden;
+    line-height: 1.5;
+}
+
+header {
+    background: #4a4a6a;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 2px solid #28a745;
+}
+
+header h1 {
+    font-size: 2.5em;
+    color: #28a745;
+}
+
+header nav .nav-link {
+    color: #ffffff;
+    margin: 0 15px;
+}
+
+header nav .nav-link:hover {
+    color: #28a745;
 }
 
 .container {
@@ -25,6 +47,11 @@ body {
     padding: 20px;
     overflow-y: auto;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s;
+}
+
+.left-section:hover {
+    background: #2b2b41;
 }
 
 .left-section h2 {
@@ -79,6 +106,11 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
+    transition: background 0.3s;
+}
+
+.right-section:hover {
+    background: #2b2b41;
 }
 
 .right-section textarea {
@@ -92,11 +124,12 @@ body {
     resize: none;
     flex: 1;
     outline: none;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, background 0.3s ease;
 }
 
 .right-section textarea:focus {
     border-color: #28a745;
+    background: #2a2a40;
 }
 
 .right-section .buttons {
@@ -128,6 +161,11 @@ body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
+    transition: background 0.3s;
+}
+
+.bottom-section:hover {
+    background: #2b2b41;
 }
 
 .bottom-section h3 {
@@ -199,9 +237,40 @@ body {
     border-radius: 5px;
     cursor: pointer;
     margin-bottom: 10px;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, transform 0.2s;
 }
 
 .expand-button:hover {
     background: #555;
+    transform: scale(1.05);
+}
+
+/* Test Cases */
+.test-case {
+    background: #3a3a5a;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.output {
+    background: #1e1e2f;
+    padding: 15px;
+    border: 2px solid #444;
+    border-radius: 8px;
+    color: #ffffff;
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
+/* Footer */
+footer {
+    background: #4a4a6a;
+    text-align: center;
+    padding: 10px;
+    position: relative;
+    bottom: 0;
+    width: 100%;
 }
