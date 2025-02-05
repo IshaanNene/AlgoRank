@@ -63,7 +63,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.0/prism.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script>
-        // Fetch problem data from JSON file
         fetch('Problem/problem1.json')
             .then(response => response.json())
             .then(data => {
@@ -71,12 +70,10 @@
                 document.getElementById('topics').innerText = `Topics: ${data.problem_name}`;
                 document.getElementById('description').innerText = data.description || "No description available.";
                 
-                // Example section
                 document.getElementById('example-input').innerText = `Input: ${data.Run_testCases[0].a}, ${data.Run_testCases[0].b}`;
                 document.getElementById('example-output').innerText = `Output: ${data.Run_testCases[0].expected}`;
                 document.getElementById('example-explanation').innerText = "Example explanation goes here.";
 
-                // Populate test cases
                 const testCasesContainer = document.getElementById('test-cases');
                 data.Run_testCases.forEach((test_case, index) => {
                     const item = document.createElement('div');
