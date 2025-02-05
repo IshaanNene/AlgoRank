@@ -113,6 +113,20 @@ header nav .nav-link:hover {
     background: #2b2b41;
 }
 
+.editor-container {
+    display: flex;
+    position: relative;
+}
+
+.line-numbers {
+    background: #1e1e2f;
+    color: #999;
+    padding: 15px;
+    border-radius: 8px 0 0 8px;
+    text-align: right;
+    user-select: none; /* Prevent text selection */
+}
+
 .right-section textarea {
     font-family: 'Courier New', monospace;
     font-size: 16px;
@@ -120,7 +134,7 @@ header nav .nav-link:hover {
     color: #ffffff;
     border: 2px solid #444;
     padding: 15px;
-    border-radius: 8px;
+    border-radius: 0 8px 8px 0;
     resize: none;
     flex: 1;
     outline: none;
@@ -150,6 +164,22 @@ header nav .nav-link:hover {
 
 .right-section .btn-run:hover {
     background: linear-gradient(135deg, #218838, #1e7e34);
+}
+
+.right-section .btn-reset {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: background 0.3s ease;
+}
+
+.right-section .btn-reset:hover {
+    background: linear-gradient(135deg, #c82333, #bd2130);
 }
 
 /* Bottom Section - Test Cases and Output */
