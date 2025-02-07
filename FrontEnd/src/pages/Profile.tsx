@@ -18,6 +18,8 @@ const Profile = () => {
       submissions: 280,
       acceptanceRate: '76%',
     },
+    bio: 'A passionate problem solver and software developer.',
+    profileCompletion: 85,
   };
 
   return (
@@ -133,8 +135,23 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      <div className="mt-4">
+        <p className="text-gray-600">{user.bio}</p>
+      </div>
+
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <p className="text-sm text-gray-500">Profile Completion</p>
+        <p className="text-2xl font-semibold">{user.profileCompletion}%</p>
+        <div className="h-2 bg-gray-200 rounded-full">
+          <div
+            className="h-2 bg-blue-500 rounded-full"
+            style={{ width: `${user.profileCompletion}%` }}
+          ></div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default Profile
+export default Profile;
