@@ -1,4 +1,3 @@
-import React from 'react';
 import { Activity, Award, Code, Target } from 'lucide-react';
 
 const Dashboard = () => {

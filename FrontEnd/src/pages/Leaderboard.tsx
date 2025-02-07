@@ -1,4 +1,3 @@
-import React from 'react';
 import { Medal, TrendingUp, Users } from 'lucide-react';
 
 const Leaderboard = () => {

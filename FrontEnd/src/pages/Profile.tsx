@@ -1,4 +1,3 @@
-import React from 'react';
 import { Calendar, Github, Mail, MapPin, Twitter } from 'lucide-react';
 
 const Profile = () => {

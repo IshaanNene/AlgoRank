@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from "@monaco-editor/react";
 import { Play, RotateCcw, ChevronLeft, CheckCircle2, XCircle } from 'lucide-react';
