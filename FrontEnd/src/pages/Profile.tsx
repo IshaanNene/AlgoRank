@@ -34,7 +34,7 @@ const Profile = () => {
                   className="h-full w-full object-cover"
                 />
               </div>
-              <div className="ml-4 -mt-8">
+              <div className="ml-4 -mt-16"> 
                 <h2 className="text-2xl font-bold text-gray-900">{user.name}</h2>
                 <p className="text-gray-500">@{user.username}</p>
               </div>
