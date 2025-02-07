@@ -15,13 +15,13 @@ const CodeEditor = () => {
   useEffect(() => {
     const fetchProblem = async () => {
       try {
-        const response = await fetch(`../Problem/problem1.json`);
+        const response = await fetch(`../../Problem/problem1.json`);
         if (!response.ok) throw new Error('Failed to fetch problem data');
         const data = await response.json();
         setProblem(data);
         setDescription(data.description);
         setTestCases(data.Run_testCases);
-        const codeResponse = await fetch(`../C_Solutions/solution1.c`);
+        const codeResponse = await fetch(`../../C_Solutions/solution1.c`);
         if (!codeResponse.ok) throw new Error('Failed to fetch C solution');
         const codeData = await codeResponse.text();
         setCode(codeData);
