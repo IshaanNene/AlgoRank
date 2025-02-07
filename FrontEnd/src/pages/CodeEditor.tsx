@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from "@monaco-editor/react";
 import { Play, RotateCcw, ChevronLeft, CheckCircle2, XCircle } from 'lucide-react';
@@ -6,30 +6,31 @@ import { Play, RotateCcw, ChevronLeft, CheckCircle2, XCircle } from 'lucide-reac
 const CodeEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [code, setCode] = useState(`function solution(nums) {
-  // Write your solution here
-}`);
+  const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
   const [status, setStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
-
-  // Mock problem data - in a real app, fetch this based on the id
-  const problem = {
-    id: parseInt(id || '1'),
-    title: 'Two Sum',
-    difficulty: 'Easy',
-    description: `Given an array of integers nums and an integer target, return indices of the two numbers in nums such that they add up to target.
-You may assume that each input would have exactly one solution, and you may not use the same element twice.
-You can return the answer in any order.
-
-Example 1:
-Input: nums = [2,7,11,15], target = 9
-Output: [0,1]
-Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].`,
-    testCases: [
-      { input: '[2,7,11,15], 9', expectedOutput: '[0,1]' },
-      { input: '[3,2,4], 6', expectedOutput: '[1,2]' },
-    ]
-  };
+  const [problem, setProblem] = useState(null);
+  const [description, setDescription] = useState('');
+  const [testCases, setTestCases] = useState([]);
+  useEffect(() => {
+    const fetchProblem = async () => {
+      try {
+        const response = await fetch(`../Problem/problem1.json`);
+        if (!response.ok) throw new Error('Failed to fetch problem data');
+        const data = await response.json();
+        setProblem(data);
+        setDescription(data.description);
+        setTestCases(data.Run_testCases);
+        const codeResponse = await fetch(`../C_Solutions/solution1.c`);
+        if (!codeResponse.ok) throw new Error('Failed to fetch C solution');
+        const codeData = await codeResponse.text();
+        setCode(codeData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchProblem();
+  }, [id]);
 
   const handleEditorChange = (value: string | undefined) => {
     if (value) setCode(value);
@@ -37,7 +38,6 @@ Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].`,
 
   const runCode = () => {
     setStatus('running');
-    // Simulate code execution
     setTimeout(() => {
       setOutput('Output: [0, 1]\nAll test cases passed!');
       setStatus('success');
@@ -45,9 +45,7 @@ Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].`,
   };
 
   const resetCode = () => {
-    setCode(`function solution(nums) {
-  // Write your solution here
-}`);
+    setCode('');
     setOutput('');
     setStatus('idle');
   };
@@ -67,13 +65,13 @@ Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].`,
                 <span>Back to Problems</span>
               </button>
               <div className="ml-6">
-                <h1 className="text-xl font-bold text-gray-900">{problem.title}</h1>
+                <h1 className="text-xl font-bold text-gray-900">{problem?.problem_name || 'Loading...'}</h1>
                 <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
-                  problem.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
-                  problem.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                  problem?.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
+                  problem?.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
                   'bg-red-100 text-red-800'
                 }`}>
-                  {problem.difficulty}
+                  {problem?.difficulty || 'Loading...'}
                 </span>
               </div>
             </div>
@@ -102,16 +100,16 @@ Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].`,
         <div className="w-1/3 bg-white border-r border-gray-200 p-6 overflow-y-auto">
           <div className="prose max-w-none">
             <h2 className="text-lg font-semibold mb-4">Problem Description</h2>
-            <p className="whitespace-pre-line">{problem.description}</p>
+            <p className="whitespace-pre-line">{description}</p>
             
             <h3 className="text-lg font-semibold mt-6 mb-4">Test Cases</h3>
             <div className="space-y-4">
-              {problem.testCases.map((testCase, index) => (
+              {testCases.map((testCase, index) => (
                 <div key={index} className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-600">Input:</p>
-                  <pre className="mt-1 text-sm">{testCase.input}</pre>
+                  <pre className="mt-1 text-sm">{`a: ${testCase.a}, b: ${testCase.b}`}</pre>
                   <p className="text-sm text-gray-600 mt-2">Expected Output:</p>
-                  <pre className="mt-1 text-sm">{testCase.expectedOutput}</pre>
+                  <pre className="mt-1 text-sm">{testCase.expected}</pre>
                 </div>
               ))}
             </div>
@@ -123,7 +121,7 @@ Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].`,
           <div className="flex-1">
             <Editor
               height="100%"
-              defaultLanguage="javascript"
+              defaultLanguage="c"
               theme="vs-dark"
               value={code}
               onChange={handleEditorChange}
