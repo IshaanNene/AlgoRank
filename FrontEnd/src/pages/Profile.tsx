@@ -1,6 +1,27 @@
 import { Calendar, Github, Mail, MapPin, Twitter } from 'lucide-react';
 
-const Profile = ({ user }) => {
+// Define the User interface
+interface User {
+  name: string;
+  username: string;
+  location: string;
+  email: string;
+  github: string;
+  twitter: string;
+  joinDate: string;
+  stats: {
+    totalSolved: number;
+    easySolved: number;
+    mediumSolved: number;
+    hardSolved: number;
+    submissions: number;
+    acceptanceRate: string;
+  };
+  bio: string;
+  profileCompletion: number;
+}
+
+const Profile = ({ user }: { user: User }) => {
   // Check if user is defined
   if (!user) {
     return <div className="text-red-500">User data is not available.</div>;
