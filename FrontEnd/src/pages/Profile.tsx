@@ -1,25 +1,10 @@
 import { Calendar, Github, Mail, MapPin, Twitter } from 'lucide-react';
 
-const Profile = () => {
-  const user = {
-    name: 'Alex Johnson',
-    username: 'alexj',
-    location: 'San Francisco, CA',
-    email: 'alex@example.com',
-    github: 'alexj',
-    twitter: '@alexj',
-    joinDate: 'January 2024',
-    stats: {
-      totalSolved: 142,
-      easySolved: 45,
-      mediumSolved: 28,
-      hardSolved: 12,
-      submissions: 280,
-      acceptanceRate: '76%',
-    },
-    bio: 'A passionate problem solver and software developer.',
-    profileCompletion: 85,
-  };
+const Profile = ({ user }) => {
+  // Check if user is defined
+  if (!user) {
+    return <div className="text-red-500">User data is not available.</div>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

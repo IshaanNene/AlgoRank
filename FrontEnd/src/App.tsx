@@ -18,7 +18,12 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} /> {/* Signup route */}
           <Route path="/problem/:id" element={<CodeEditor />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={
+            <>
+              <Navbar />
+              <Dashboard />
+            </>
+          } />
           <Route
             path="*"
             element={

@@ -15,7 +15,7 @@ const CodeEditor = () => {
   useEffect(() => {
     const fetchProblem = async () => {
       try {
-        const response = await fetch(`../../Problem/problem1.json`);
+        const response = await fetch(`/Problem/problem1.json`);
         if (!response.ok) throw new Error('Failed to fetch problem data');
         const data = await response.json();
         setProblem(data);

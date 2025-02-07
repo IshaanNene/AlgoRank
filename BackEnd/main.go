@@ -41,8 +41,18 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		// Initialize user stats to zero
+		user.Stats = UserStats{
+			TotalSolved:    0,
+			EasySolved:     0,
+			MediumSolved:   0,
+			HardSolved:     0,
+			Submissions:    0,
+			AcceptanceRate: "0%",
+		}
 		// Store user credentials in memory (for demonstration)
 		users[user.Email] = user.Password
+		// You may want to store user data in a more persistent way (e.g., database)
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(user)
 	} else {
@@ -64,9 +74,28 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 			return
 		}
-		// Successful login
+		// Successful login, return user data
+		userData := User{
+			Email:    user.Email,
+			Name:     user.Name,                // Use the actual name from the signup
+			Username: user.Username,             // Use the actual username from the signup
+			Location: user.Location,             // Use the actual location from the signup
+			GitHub:   user.GitHub,               // Use the actual GitHub from the signup
+			Twitter:  user.Twitter,              // Use the actual Twitter from the signup
+			JoinDate: "January 2024",            // This should be the actual join date
+			Stats: UserStats{                     // This should be fetched from a database in a real app
+				TotalSolved:    0,
+				EasySolved:     0,
+				MediumSolved:   0,
+				HardSolved:     0,
+				Submissions:    0,
+				AcceptanceRate: "0%",
+			},
+			Bio:               user.Bio,         // Use the actual bio from the signup
+			ProfileCompletion: 0,                 // This should also be fetched from a database
+		}
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(user)
+		json.NewEncoder(w).Encode(userData) // Send user data back
 	} else {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 	}

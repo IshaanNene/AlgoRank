@@ -7,7 +7,7 @@ const Login = () => {
     email: '',
     password: '',
   });
-
+  const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,6 +19,7 @@ const Login = () => {
     try {
       const response = await axios.post('http://localhost:8080/login', formData);
       console.log('User logged in:', response.data);
+      setUserData(response.data);
       navigate('/dashboard');
     } catch (error) {
       console.error('Error logging in:', error);
