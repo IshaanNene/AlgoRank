@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useUser } from '../context/UserContext';
 
 const Signup = () => {
+  const { setUser } = useUser();
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -22,6 +25,7 @@ const Signup = () => {
     try {
       const response = await axios.post('http://localhost:8080/signup', formData);
       console.log('User signed up:', response.data);
+      setUser(response.data);
       // Handle successful signup (e.g., redirect or show a message)
     } catch (error) {
       console.error('Error signing up:', error);

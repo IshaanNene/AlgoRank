@@ -1,4 +1,5 @@
 import { Calendar, Github, Mail, MapPin, Twitter } from 'lucide-react';
+import { useUser } from '../context/UserContext'; // Import useUser
 
 // Define the User interface
 interface User {
@@ -21,8 +22,9 @@ interface User {
   profileCompletion: number;
 }
 
-const Profile = ({ user }: { user: User }) => {
-  // Check if user is defined
+const Profile = () => {
+  const { user } = useUser(); // Get user from context
+
   if (!user) {
     return <div className="text-red-500">User data is not available.</div>;
   }
