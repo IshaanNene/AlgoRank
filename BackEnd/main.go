@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/handlers"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // Importing for side effects
 )
 
 type UserStats struct {
@@ -148,15 +148,27 @@ func forgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Email not found", http.StatusNotFound)
 			// Generate a temporary password or token instead of sending the actual password
 			tempPassword := "temporaryPassword123" // This should be securely generated
-			err = sendEmail(request.Email, tempPassword)
+			// Simulate sending an email (you need to implement this function)
+			err = simulateSendEmail(request.Email, tempPassword)
 			if err != nil {
 				http.Error(w, "Failed to send email", http.StatusInternalServerError)
 				return
 			}
-		json.NewEncoder(w).Encode("Password sent to your email")
+			json.NewEncoder(w).Encode("Password sent to your email")
+			return
+		}
+		http.Error(w, "Email not found", http.StatusNotFound)
 	} else {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 	}
+}
+
+// Simulate sending an email (placeholder function)
+func simulateSendEmail(email, tempPassword string) error {
+	// Here you would implement the actual email sending logic
+	// For example, using an SMTP server or a third-party email service
+	// This is a placeholder implementation
+	return nil // Return nil to indicate success for now
 }
 
 func main() {

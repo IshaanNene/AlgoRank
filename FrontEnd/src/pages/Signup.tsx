@@ -24,6 +24,9 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate form data here (e.g., email, password)
+
     try {
       const response = await axios.post('http://localhost:8080/signup', formData);
       console.log('User signed up:', response.data);
@@ -31,7 +34,11 @@ const Signup = () => {
       navigate('/login');
     } catch (error) {
       console.error('Error signing up:', error);
-      // Handle error (e.g., show an error message)
+      if (axios.isAxiosError(error)) {
+        alert(`Signup failed: ${error.response?.data?.message || 'An error occurred'}`);
+      } else {
+        alert('Signup failed. Please try again later.');
+      }
     }
   };
 

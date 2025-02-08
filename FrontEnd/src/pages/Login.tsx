@@ -18,6 +18,20 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Email validation regex
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(formData.email)) {
+      alert('Please enter a valid email address.');
+      return; // Exit the function if the email is invalid
+    }
+
+    // Check if password is provided
+    if (!formData.password) {
+      alert('Please enter your password.');
+      return; // Exit the function if the password is empty
+    }
+
     try {
       const response = await axios.post('http://localhost:8080/login', formData);
       console.log('User logged in:', response.data);
@@ -26,6 +40,7 @@ const Login = () => {
       navigate('/profile');
     } catch (error) {
       console.error('Error logging in:', error);
+      alert('Login failed. Please check your credentials and try again.');
     }
   };
 
