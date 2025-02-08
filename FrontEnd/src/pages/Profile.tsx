@@ -30,7 +30,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (contextUser) {
-        const response = await fetch(`http://localhost:8080/user/${contextUser.email}`); // Fetch user data from backend
+        const response = await fetch(`http://localhost:8080/user/${contextUser.username}`); // Fetch user data using username
         if (response.ok) {
           const userData = await response.json();
           setUser(userData); // Set user data in state

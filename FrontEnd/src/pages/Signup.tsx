@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
   const { setUser } = useUser();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -26,7 +28,7 @@ const Signup = () => {
       const response = await axios.post('http://localhost:8080/signup', formData);
       console.log('User signed up:', response.data);
       setUser(response.data);
-      // Handle successful signup (e.g., redirect or show a message)
+      navigate('/login');
     } catch (error) {
       console.error('Error signing up:', error);
       // Handle error (e.g., show an error message)
@@ -36,16 +38,18 @@ const Signup = () => {
   return (
     <div className="flex items-center justify-center h-screen bg-gradient-to-r from-blue-500 to-indigo-600">
       <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full">
-        <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
+        <h2 className="text-3xl font-bold text-center mb-6">Create Your Account</h2>
+        <p className="text-center text-gray-600 mb-4">Join us and start your journey!</p>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700">Email</label>
             <input
               type="email"
               name="email"
-              className="w-full p-2 border border-gray-300 rounded"
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
               onChange={handleChange}
+              placeholder="Enter your email"
             />
           </div>
           <div className="mb-4">
@@ -53,9 +57,10 @@ const Signup = () => {
             <input
               type="password"
               name="password"
-              className="w-full p-2 border border-gray-300 rounded"
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
               onChange={handleChange}
+              placeholder="Create a password"
             />
           </div>
           <div className="mb-4">
@@ -63,9 +68,10 @@ const Signup = () => {
             <input
               type="text"
               name="name"
-              className="w-full p-2 border border-gray-300 rounded"
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
               onChange={handleChange}
+              placeholder="Enter your name"
             />
           </div>
           <div className="mb-4">
@@ -114,10 +120,13 @@ const Signup = () => {
               onChange={handleChange}
             />
           </div>
-          <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition duration-200">
+          <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition duration-200 transform hover:scale-105">
             Sign Up
           </button>
         </form>
+        <p className="text-center text-gray-600 mt-4">
+          Already have an account? <a href="/login" className="text-indigo-600 hover:underline">Login</a>
+        </p>
       </div>
     </div>
   );

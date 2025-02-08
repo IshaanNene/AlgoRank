@@ -32,12 +32,11 @@ type User struct {
 	ProfileCompletion int       `json:"profileCompletion"`
 }
 
-// Initialize the database
 var db *sql.DB
 
 func init() {
 	var err error
-	db, err = sql.Open("sqlite3", "./users.db") // Create a new SQLite database
+	db, err = sql.Open("sqlite3", "./users.db")
 	if err != nil {
 		panic(err)
 	}
