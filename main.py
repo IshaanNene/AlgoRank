@@ -72,12 +72,7 @@ def main():
         logging.error("Problem number must be an integer")
         return
         
-    c_filename = f"C_Solutions/solution{problem_num}.c"
-    test_case_count = 0
-    passed_count = 0
-    output_executable = "program"
-    json_file = f"Problem/problem{problem_num}.json"
-
+    c_filename,test_case_count,passed_count,output_executable,json_file = f"C_Solutions/solution{problem_num}.c",0,0,"program",f"Problem/problem{problem_num}.json"
     if not c_compiler(c_filename, output_executable):
         logging.error("Compilation failed. Stopping execution.")
         return 
