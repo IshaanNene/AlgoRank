@@ -1,10 +1,12 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/handlers"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type UserStats struct {
@@ -30,8 +32,38 @@ type User struct {
 	ProfileCompletion int       `json:"profileCompletion"`
 }
 
-// In-memory user storage for demonstration purposes
-var users = make(map[string]string) // map of email to password
+// Initialize the database
+var db *sql.DB
+
+func init() {
+	var err error
+	db, err = sql.Open("sqlite3", "./users.db") // Create a new SQLite database
+	if err != nil {
+		panic(err)
+	}
+	// Create users table if it doesn't exist
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS users (
+		email TEXT PRIMARY KEY,
+		password TEXT,
+		name TEXT,
+		username TEXT,
+		location TEXT,
+		github TEXT,
+		twitter TEXT,
+		joinDate TEXT,
+		bio TEXT,
+		profileCompletion INTEGER,
+		totalSolved INTEGER,
+		easySolved INTEGER,
+		mediumSolved INTEGER,
+		hardSolved INTEGER,
+		submissions INTEGER,
+		acceptanceRate TEXT
+	)`)
+	if err != nil {
+		panic(err)
+	}
+}
 
 func signupHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
@@ -50,9 +82,15 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 			Submissions:    0,
 			AcceptanceRate: "0%",
 		}
-		// Store user credentials in memory (for demonstration)
-		users[user.Email] = user.Password
-		// You may want to store user data in a more persistent way (e.g., database)
+		// Store user data in the database
+		_, err = db.Exec(`INSERT INTO users (email, password, name, username, location, github, twitter, joinDate, bio, profileCompletion, totalSolved, easySolved, mediumSolved, hardSolved, submissions, acceptanceRate) 
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+			user.Email, user.Password, user.Name, user.Username, user.Location, user.GitHub, user.Twitter, user.JoinDate, user.Bio, user.ProfileCompletion,
+			user.Stats.TotalSolved, user.Stats.EasySolved, user.Stats.MediumSolved, user.Stats.HardSolved, user.Stats.Submissions, user.Stats.AcceptanceRate)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(user)
 	} else {
@@ -68,19 +106,30 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		// Check if the user exists and the password matches
-		storedPassword, exists := users[user.Email]
-		if !exists || storedPassword != user.Password {
+		var storedPassword string
+		err = db.QueryRow(`SELECT password FROM users WHERE email = ?`, user.Email).Scan(&storedPassword)
+		if err != nil || storedPassword != user.Password {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 			return
 		}
-		// Fetch user data from a persistent store (e.g., database)
-		userData := getUserData(user.Email) // Implement this function to fetch user data
+		userData := getUserData(user.Email) 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(userData) // Send complete user data back
+		json.NewEncoder(w).Encode(userData) 
 	} else {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 	}
+}
+
+func getUserData(email string) User {
+	var user User
+	row := db.QueryRow(`SELECT email, name, username, location, github, twitter, joinDate, bio, profileCompletion, totalSolved, easySolved, mediumSolved, hardSolved, submissions, acceptanceRate 
+		FROM users WHERE email = ?`, email)
+	err := row.Scan(&user.Email, &user.Name, &user.Username, &user.Location, &user.GitHub, &user.Twitter, &user.JoinDate, &user.Bio, &user.ProfileCompletion,
+		&user.Stats.TotalSolved, &user.Stats.EasySolved, &user.Stats.MediumSolved, &user.Stats.HardSolved, &user.Stats.Submissions, &user.Stats.AcceptanceRate)
+	if err != nil {
+		return User{} // Return an empty user if not found
+	}
+	return user
 }
 
 func main() {

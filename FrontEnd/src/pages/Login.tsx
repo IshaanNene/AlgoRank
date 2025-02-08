@@ -28,7 +28,7 @@ const Login = () => {
 
   return (
     <div className="flex items-center justify-center h-screen bg-gradient-to-r from-blue-500 to-indigo-600">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full backdrop-blur-md">
+      <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full">
         <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
@@ -53,7 +53,7 @@ const Login = () => {
               required
             />
           </div>
-          <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
+          <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition duration-200">
             Login
           </button>
         </form>

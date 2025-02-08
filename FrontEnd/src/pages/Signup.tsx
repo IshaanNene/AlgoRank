@@ -114,7 +114,7 @@ const Signup = () => {
               onChange={handleChange}
             />
           </div>
-          <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
+          <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition duration-200">
             Sign Up
           </button>
         </form>

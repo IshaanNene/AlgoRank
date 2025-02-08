@@ -1,5 +1,6 @@
 import { Calendar, Github, Mail, MapPin, Twitter } from 'lucide-react';
 import { useUser } from '../context/UserContext'; // Import useUser
+import { useEffect, useState } from 'react'; // Import useEffect and useState
 
 // Define the User interface
 interface User {
@@ -9,7 +10,7 @@ interface User {
   email: string;
   github: string;
   twitter: string;
-  joinDate: string;
+  joinDate: string; // Ensure this property exists in the user data
   stats: {
     totalSolved: number;
     easySolved: number;
@@ -23,9 +24,24 @@ interface User {
 }
 
 const Profile = () => {
-  const { user } = useUser(); // Get user from context
+  const { user: contextUser } = useUser(); // Get user from context
+  const [user, setUser] = useState<User | null>(null); // State to hold user data
 
-  if (!user) {
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (contextUser) {
+        const response = await fetch(`http://localhost:8080/user/${contextUser.email}`); // Fetch user data from backend
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData); // Set user data in state
+        }
+      }
+    };
+    fetchUserData();
+  }, [contextUser]);
+
+  // Check if user data is available and has the required properties
+  if (!user || !user.name || !user.username || !user.stats) {
     return <div className="text-red-500">User data is not available.</div>;
   }
 
@@ -75,7 +91,7 @@ const Profile = () => {
               </div>
               <div className="flex items-center space-x-2 text-gray-600">
                 <Calendar className="h-5 w-5" />
-                <span>Joined {user.joinDate}</span>
+                <span>Joined {user.joinDate || 'N/A'}</span> {/* Handle missing joinDate */}
               </div>
             </div>
             
