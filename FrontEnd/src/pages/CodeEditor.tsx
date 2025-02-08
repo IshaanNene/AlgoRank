@@ -3,13 +3,21 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Editor from "@monaco-editor/react";
 import { Play, RotateCcw, ChevronLeft, CheckCircle2, XCircle } from 'lucide-react';
 
+// Define the Problem interface
+interface Problem {
+  problem_name: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard'; // Adjust based on your actual difficulty values
+  description: string;
+  Run_testCases: Array<{ a: number; b: number; expected: any }>; // Adjust based on your test case structure
+}
+
 const CodeEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
   const [status, setStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
-  const [problem, setProblem] = useState(null);
+  const [problem, setProblem] = useState<Problem | null>(null);
   const [description, setDescription] = useState('');
   const [testCases, setTestCases] = useState([]);
   useEffect(() => {
@@ -17,7 +25,7 @@ const CodeEditor = () => {
       try {
         const response = await fetch(`../../../Problem/problem1.json`);
         if (!response.ok) throw new Error('Failed to fetch problem data');
-        const data = await response.json();
+        const data: Problem = await response.json();
         setProblem(data);
         setDescription(data.description);
         setTestCases(data.Run_testCases);
