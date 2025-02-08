@@ -40,9 +40,12 @@ const Profile = () => {
     fetchUserData();
   }, [contextUser]);
 
-  // Check if user data is available and has the required properties
-  if (!user || !user.name || !user.username || !user.stats) {
-    return <div className="text-red-500">User data is not available.</div>;
+  if (!contextUser) {
+    return <div className="text-red-500">You must be logged in to view your profile.</div>;
+  }
+
+  if (!user) {
+    return <div className="text-red-500">Loading user data...</div>;
   }
 
   return (

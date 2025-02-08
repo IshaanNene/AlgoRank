@@ -1,6 +1,13 @@
 import { Medal, TrendingUp, Users } from 'lucide-react';
+import { useUser } from '../context/UserContext';
 
 const Leaderboard = () => {
+  const { user } = useUser();
+
+  if (!user) {
+    return <div className="text-red-500">You must be logged in to view the leaderboard.</div>;
+  }
+
   const users = [
     { rank: 1, name: 'Alex Johnson', score: 2840, problems: 245, streak: 15 },
     { rank: 2, name: 'Sarah Chen', score: 2750, problems: 232, streak: 12 },

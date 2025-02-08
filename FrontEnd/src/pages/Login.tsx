@@ -8,7 +8,6 @@ const Login = () => {
     email: '',
     password: '',
   });
-  const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
   const { setUser } = useUser();
 
@@ -23,19 +22,16 @@ const Login = () => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(formData.email)) {
       alert('Please enter a valid email address.');
-      return; // Exit the function if the email is invalid
+      return;
     }
 
-    // Check if password is provided
     if (!formData.password) {
       alert('Please enter your password.');
-      return; // Exit the function if the password is empty
+      return;
     }
 
     try {
       const response = await axios.post('http://localhost:8080/login', formData);
-      console.log('User logged in:', response.data);
-      setUserData(response.data);
       setUser(response.data);
       navigate('/profile');
     } catch (error) {
@@ -48,7 +44,7 @@ const Login = () => {
     <div className="flex items-center justify-center h-screen bg-gradient-to-r from-blue-500 to-indigo-600">
       <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full">
         <h2 className="text-3xl font-bold text-center mb-6">Welcome Back!</h2>
-        <p className="text-center text-gray-600 mb-4">Please log in to your account</p>
+        <p className="text-center text-gray-600 mb-4">Please log in to access all features.</p>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700">Email</label>
