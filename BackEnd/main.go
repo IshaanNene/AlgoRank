@@ -111,9 +111,9 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 			return
 		}
-		userData := getUserData(user.Email) 
+		userData := getUserData(user.Email)
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(userData) 
+		json.NewEncoder(w).Encode(userData)
 	} else {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 	}
@@ -131,9 +131,38 @@ func getUserData(email string) User {
 	return user
 }
 
+func forgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		var request struct {
+			Email string `json:"email"`
+		}
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		var storedPassword string
+		err = db.QueryRow(`SELECT password FROM users WHERE email = ?`, request.Email).Scan(&storedPassword)
+		if err != nil {
+			http.Error(w, "Email not found", http.StatusNotFound)
+			// Generate a temporary password or token instead of sending the actual password
+			tempPassword := "temporaryPassword123" // This should be securely generated
+			err = sendEmail(request.Email, tempPassword)
+			if err != nil {
+				http.Error(w, "Failed to send email", http.StatusInternalServerError)
+				return
+			}
+		json.NewEncoder(w).Encode("Password sent to your email")
+	} else {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+	}
+}
+
 func main() {
 	http.HandleFunc("/signup", signupHandler)
 	http.HandleFunc("/login", loginHandler)
+	http.HandleFunc("/forgot-password", forgotPasswordHandler)
 
 	// CORS configuration
 	corsHandler := handlers.CORS(

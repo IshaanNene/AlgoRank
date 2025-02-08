@@ -8,6 +8,7 @@ import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
 import Problems from './pages/Problems';
 import CodeEditor from './pages/CodeEditor';
+import ForgotPassword from './pages/ForgotPassword';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
               <Dashboard />
             </>
           } />
+          <Route path="/forgot-password" element={<ForgotPassword />} /> {/* Forgot Password route */}
           <Route
             path="*"
             element={
