@@ -30,7 +30,7 @@ const Main = () => {
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-r from-blue-500 to-indigo-600">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-indigo-600">
       <h1 className="text-4xl font-bold text-white mb-6">Welcome to Our App</h1>
       <div className="space-x-4 mb-8">
         <Link to="/login">
