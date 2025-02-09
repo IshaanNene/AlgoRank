@@ -1,18 +1,68 @@
-import { useState } from 'react';
-import { Search, Filter } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Search, Filter, Tag, TrendingUp, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
+
+interface ProblemTag {
+  id: string;
+  name: string;
+  count: number;
+}
+
+interface Problem {
+  id: string;
+  title: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  acceptance: string;
+  frequency: number;
+  tags: string[];
+  solved: boolean;
+  premium: boolean;
+  likes: number;
+  dislikes: number;
+}
 
 const Problems = () => {
-  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
-  
-  const problems = [
-    { id: 1, title: 'Two Sum', difficulty: 'Easy', acceptance: '47%', solved: true },
-    { id: 2, title: 'Add Two Numbers', difficulty: 'Medium', acceptance: '35%', solved: false },
-    { id: 3, title: 'Longest Substring', difficulty: 'Medium', acceptance: '31%', solved: true },
-    { id: 4, title: 'Median of Arrays', difficulty: 'Hard', acceptance: '28%', solved: false },
-    { id: 5, title: 'Palindrome Number', difficulty: 'Easy', acceptance: '51%', solved: true },
-  ];
+  const { user } = useUser();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [problems, setProblems] = useState<Problem[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<'frequency' | 'acceptance' | 'difficulty'>('frequency');
+  const [showPremiumOnly, setShowPremiumOnly] = useState(false);
+  const [showSolvedOnly, setShowSolvedOnly] = useState(false);
+
+  // Filter and sort problems
+  const filteredProblems = useMemo(() => {
+    return problems
+      .filter(problem => {
+        const matchesSearch = problem.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesTags = selectedTags.length === 0 || 
+          selectedTags.every(tag => problem.tags.includes(tag));
+        const matchesDifficulty = selectedDifficulty.length === 0 || 
+          selectedDifficulty.includes(problem.difficulty);
+        const matchesPremium = !showPremiumOnly || problem.premium;
+        const matchesSolved = !showSolvedOnly || problem.solved;
+        
+        return matchesSearch && matchesTags && matchesDifficulty && 
+               matchesPremium && matchesSolved;
+      })
+      .sort((a, b) => {
+        switch (sortBy) {
+          case 'frequency':
+            return b.frequency - a.frequency;
+          case 'acceptance':
+            return parseFloat(b.acceptance) - parseFloat(a.acceptance);
+          case 'difficulty':
+            return ['Easy', 'Medium', 'Hard'].indexOf(a.difficulty) -
+                   ['Easy', 'Medium', 'Hard'].indexOf(b.difficulty);
+          default:
+            return 0;
+        }
+      });
+  }, [problems, searchQuery, selectedTags, selectedDifficulty, showPremiumOnly, 
+      showSolvedOnly, sortBy]);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
@@ -23,7 +73,7 @@ const Problems = () => {
     }
   };
 
-  const handleProblemClick = (id: number) => {
+  const handleProblemClick = (id: string) => {
     navigate(`/problem/${id}`);
   };
 
@@ -57,7 +107,7 @@ const Problems = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {problems.map((problem) => (
+            {filteredProblems.map((problem) => (
               <tr
                 key={problem.id}
                 className="hover:bg-gray-50 cursor-pointer"

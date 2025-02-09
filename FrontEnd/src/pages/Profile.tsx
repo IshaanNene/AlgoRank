@@ -1,4 +1,4 @@
-import { Calendar, Github, Mail, MapPin, Twitter } from 'lucide-react';
+import { Calendar, Github, Mail, MapPin, Twitter, Edit2, Save, X } from 'lucide-react';
 import { useUser } from '../context/UserContext'; // Import useUser
 import { useEffect, useState } from 'react'; // Import useEffect and useState
 
@@ -23,29 +23,84 @@ interface User {
   profileCompletion: number;
 }
 
+interface EditableField {
+  name: string;
+  value: string;
+  isEditing: boolean;
+}
+
 const Profile = () => {
-  const { user: contextUser } = useUser(); // Get user from context
-  const [user, setUser] = useState<User | null>(null); // State to hold user data
+  const { user, setUser } = useUser(); // Get user from context
+  const [userData, setUserData] = useState<User | null>(null); // State to hold user data
+  const [editableFields, setEditableFields] = useState<Record<string, EditableField>>({
+    bio: { name: 'Bio', value: user?.bio || '', isEditing: false },
+    location: { name: 'Location', value: user?.location || '', isEditing: false },
+    github: { name: 'GitHub', value: user?.github || '', isEditing: false },
+    twitter: { name: 'Twitter', value: user?.twitter || '', isEditing: false },
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'solutions' | 'submissions'>('overview');
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (contextUser) {
-        const response = await fetch(`http://localhost:8080/user/${contextUser.username}`); // Fetch user data using username
+      if (user) {
+        const response = await fetch(`http://localhost:8080/user/${user.username}`); // Fetch user data using username
         if (response.ok) {
           const userData = await response.json();
-          setUser(userData); // Set user data in state
+          setUserData(userData); // Set user data in state
         }
       }
     };
     fetchUserData();
-  }, [contextUser]);
+  }, [user]);
 
-  if (!contextUser) {
-    return <div className="text-red-500">You must be logged in to view your profile.</div>;
-  }
+  const handleEdit = (fieldKey: string) => {
+    setEditableFields(prev => ({
+      ...prev,
+      [fieldKey]: { ...prev[fieldKey], isEditing: true }
+    }));
+  };
+
+  const handleSave = async (fieldKey: string) => {
+    setIsLoading(true);
+    try {
+      // API call to update user profile
+      const response = await fetch(`http://localhost:8080/user/update`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          [fieldKey]: editableFields[fieldKey].value
+        })
+      });
+
+      if (response.ok) {
+        setEditableFields(prev => ({
+          ...prev,
+          [fieldKey]: { ...prev[fieldKey], isEditing: false }
+        }));
+        // Update user context with new value
+        setUser(prev => prev ? {
+          ...prev,
+          [fieldKey]: editableFields[fieldKey].value
+        } : null);
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (!user) {
-    return <div className="text-red-500">Loading user data...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800">Please log in to view your profile</h2>
+          <p className="mt-2 text-gray-600">You need to be logged in to access this page.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -74,48 +129,76 @@ const Profile = () => {
             </div>
           </div>
           
+          <div className="mt-6 border-b border-gray-200">
+            <nav className="flex space-x-8">
+              {['overview', 'solutions', 'submissions'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab as typeof activeTab)}
+                  className={`px-3 py-2 text-sm font-medium ${
+                    activeTab === tab
+                      ? 'border-b-2 border-indigo-500 text-indigo-600'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+            </nav>
+          </div>
+          
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex flex-col space-y-3">
-              <div className="flex items-center space-x-2 text-gray-600">
-                <MapPin className="h-5 w-5" />
-                <span>{user.location}</span>
+            {Object.entries(editableFields).map(([key, field]) => (
+              <div key={key} className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  {key === 'github' && <Github className="h-5 w-5 text-gray-400" />}
+                  {key === 'twitter' && <Twitter className="h-5 w-5 text-gray-400" />}
+                  {key === 'location' && <MapPin className="h-5 w-5 text-gray-400" />}
+                  <span className="text-gray-600">{field.name}:</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {field.isEditing ? (
+                    <>
+                      <input
+                        type="text"
+                        value={field.value}
+                        onChange={(e) => setEditableFields(prev => ({
+                          ...prev,
+                          [key]: { ...prev[key], value: e.target.value }
+                        }))}
+                        className="px-2 py-1 border rounded"
+                      />
+                      <button
+                        onClick={() => handleSave(key)}
+                        disabled={isLoading}
+                        className="text-green-500 hover:text-green-600"
+                      >
+                        <Save className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => setEditableFields(prev => ({
+                          ...prev,
+                          [key]: { ...prev[key], isEditing: false }
+                        }))}
+                        className="text-red-500 hover:text-red-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-gray-900">{field.value || 'Not set'}</span>
+                      <button
+                        onClick={() => handleEdit(key)}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center space-x-2 text-gray-600">
-                <Mail className="h-5 w-5" />
-                <span>{user.email}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-gray-600">
-                <Github className="h-5 w-5" />
-                <span>{user.github}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-gray-600">
-                <Twitter className="h-5 w-5" />
-                <span>{user.twitter}</span>
-              </div>
-              <div className="flex items-center space-x-2 text-gray-600">
-                <Calendar className="h-5 w-5" />
-                <span>Joined {user.joinDate || 'N/A'}</span> {/* Handle missing joinDate */}
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">Total Solved</p>
-                <p className="text-2xl font-semibold">{user.stats.totalSolved}</p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">Acceptance Rate</p>
-                <p className="text-2xl font-semibold">{user.stats.acceptanceRate}</p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">Submissions</p>
-                <p className="text-2xl font-semibold">{user.stats.submissions}</p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">Current Streak</p>
-                <p className="text-2xl font-semibold">7 days</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
