@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {Brain, Target, Users, ChevronRight,Search } from 'lucide-react';
+import { useUser } from '../context/UserContext';
 
 const Main = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { user } = useUser();
 
   const features = [
     {
@@ -44,6 +46,14 @@ const Main = () => {
           </button>
         </Link>
       </div>
+
+      {/* Joyful Message for Unauthenticated Users */}
+      {!user && (
+        <div className="bg-yellow-100 text-yellow-800 p-4 rounded-md mb-6">
+          <h2 className="text-lg font-bold">🎉 Welcome to AlgoRank!</h2>
+          <p className="text-sm">To start solving problems and improving your skills, please log in or sign up! We can't wait to see you succeed! 🌟</p>
+        </div>
+      )}
 
       {/* Hero Section */}
       <div className="text-center max-w-4xl mx-auto mb-16">

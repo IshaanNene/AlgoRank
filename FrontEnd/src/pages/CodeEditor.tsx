@@ -29,11 +29,19 @@ const CodeEditor = () => {
   const [description, setDescription] = useState('');
   const [testCases, setTestCases] = useState<TestCase[]>([]);
 
+  if (!id) {
+    console.error('Problem ID is undefined');
+    return <div>Error: Problem ID is required.</div>;
+  }
+
   useEffect(() => {
     const fetchProblem = async () => {
       try {
         const response = await fetch(`../../../Problem/problem${id}.json`);
-        if (!response.ok) throw new Error('Failed to fetch problem data');
+        if (!response.ok) {
+          console.error('Failed to fetch problem data:', response.statusText);
+          throw new Error('Failed to fetch problem data');
+        }
         const data: Problem = await response.json();
         setProblem(data);
         setDescription(data.description);
@@ -43,7 +51,7 @@ const CodeEditor = () => {
         const codeData = await codeResponse.text();
         setCode(codeData);
       } catch (error) {
-        console.error(error);
+        console.error('Error fetching problem:', error);
       }
     };
     fetchProblem();
