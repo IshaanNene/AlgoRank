@@ -2,13 +2,21 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from "@monaco-editor/react";
 import { Play, RotateCcw, ChevronLeft, CheckCircle2, XCircle } from 'lucide-react';
+import axios from 'axios';
 
 // Define the Problem interface
 interface Problem {
   problem_name: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard'; // Adjust based on your actual difficulty values
+  difficulty: 'Easy' | 'Medium' | 'Hard';
   description: string;
-  Run_testCases: Array<{ a: number; b: number; expected: any }>; // Adjust based on your test case structure
+  Run_testCases: Array<TestCase>;
+}
+
+// Define the TestCase interface
+interface TestCase {
+  a: number;
+  b: number;
+  expected: any;
 }
 
 const CodeEditor = () => {
@@ -19,17 +27,18 @@ const CodeEditor = () => {
   const [status, setStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
   const [problem, setProblem] = useState<Problem | null>(null);
   const [description, setDescription] = useState('');
-  const [testCases, setTestCases] = useState([]);
+  const [testCases, setTestCases] = useState<TestCase[]>([]);
+
   useEffect(() => {
     const fetchProblem = async () => {
       try {
-        const response = await fetch(`../../../Problem/problem1.json`);
+        const response = await fetch(`../../../Problem/problem${id}.json`);
         if (!response.ok) throw new Error('Failed to fetch problem data');
         const data: Problem = await response.json();
         setProblem(data);
         setDescription(data.description);
         setTestCases(data.Run_testCases);
-        const codeResponse = await fetch(`../../../C_Solutions/solution1.c`);
+        const codeResponse = await fetch(`../../../C_Solutions/solution${id}.c`);
         if (!codeResponse.ok) throw new Error('Failed to fetch C solution');
         const codeData = await codeResponse.text();
         setCode(codeData);
@@ -44,12 +53,30 @@ const CodeEditor = () => {
     if (value) setCode(value);
   };
 
-  const runCode = () => {
+  const runCode = async () => {
     setStatus('running');
-    setTimeout(() => {
-      setOutput('Output: [0, 1]\nAll test cases passed!');
+    try {
+      const response = await axios.post('http://localhost:8080/run', { code });
+      setOutput(response.data.output);
       setStatus('success');
-    }, 1000);
+    } catch (error) {
+      console.error('Error running code:', error);
+      setOutput('Error running code');
+      setStatus('error');
+    }
+  };
+
+  const submitCode = async () => {
+    setStatus('running');
+    try {
+      const response = await axios.post('http://localhost:8080/submit', { code });
+      setOutput(response.data.output);
+      setStatus('success');
+    } catch (error) {
+      console.error('Error submitting code:', error);
+      setOutput('Error submitting code');
+      setStatus('error');
+    }
   };
 
   const resetCode = () => {
@@ -97,6 +124,13 @@ const CodeEditor = () => {
               >
                 <Play className="h-4 w-4 mr-2" />
                 Run
+              </button>
+              <button
+                onClick={submitCode}
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+              >
+                <Play className="h-4 w-4 mr-2" />
+                Submit
               </button>
             </div>
           </div>

@@ -1,7 +1,8 @@
 {
   "problem_num": 1,
-  "problem_name":"Adding two numbers",
+  "problem_name": "Adding two numbers",
   "difficulty": "Easy",
+  "description": "This problem requires you to write a function that adds two integers.",
   "Expected Time Constraints": "nil",
   "Expected Space Constraints": "nil",
   "Run_testCases": [

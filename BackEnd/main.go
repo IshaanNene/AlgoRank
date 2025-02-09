@@ -91,6 +91,7 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		fmt.Fprintf(w, "User signed up successfully: %s", user.Email)
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(user)
 	} else {
@@ -113,6 +114,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		userData := getUserData(user.Email)
+		fmt.Fprintf(w, "User logged in successfully: %s", user.Email)
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(userData)
 	} else {
@@ -153,6 +155,7 @@ func forgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Failed to send email", http.StatusInternalServerError)
 				return
 			}
+			fmt.Fprintf(w, "Temporary password sent to: %s", request.Email)
 			json.NewEncoder(w).Encode("Password sent to your email")
 			return
 		}
@@ -185,10 +188,49 @@ func sendEmail(email, tempPassword string) error {
 	return nil
 }
 
+func runHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		var request struct {
+			Code string `json:"code"`
+		}
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Save the code to a temporary file and run it
+		// Implement the logic to compile and run the code
+		// Return the output as a response
+	} else {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+	}
+}
+
+func submitHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		var request struct {
+			Code string `json:"code"`
+		}
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Similar logic to runHandler, but handle all test cases
+		// Return the results of all test cases as a response
+	} else {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+	}
+}
+
 func main() {
 	http.HandleFunc("/signup", signupHandler)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/forgot-password", forgotPasswordHandler)
+	http.HandleFunc("/run", runHandler)
+	http.HandleFunc("/submit", submitHandler)
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://localhost:5173"}),  

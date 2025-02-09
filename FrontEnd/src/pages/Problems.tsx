@@ -24,7 +24,7 @@ const Problems = () => {
   };
 
   const handleProblemClick = (id: number) => {
-    navigate('/problem/\${id}');
+    navigate(`/problem/${id}`);
   };
 
   return (

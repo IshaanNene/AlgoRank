@@ -1,7 +1,8 @@
 {
-    "problem_num": 2,
+    "problem_num": 3,
     "problem_name": "Finding maximum of two numbers",
     "difficulty": "Easy",
+    "description": "Write a function that returns the maximum of two integers.",
     "Expected Time Constraints": "nil",
     "Expected Space Constraints": "nil",
     "Run_testCases": [

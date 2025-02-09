@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Trophy, Brain, Target, Users, ChevronRight, Github, Search, Code2 } from 'lucide-react';
+import {Brain, Target, Users, ChevronRight,Search } from 'lucide-react';
 
 const Main = () => {
   const [searchQuery, setSearchQuery] = useState('');

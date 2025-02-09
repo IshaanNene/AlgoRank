@@ -2,6 +2,7 @@
     "problem_num": 2,
     "problem_name": "Binary Search",
     "difficulty": "Easy",
+    "description": "Implement a binary search algorithm to find the index of a target value in a sorted array.",
     "Expected Time Constraints": "O(log n)",
     "Expected Space Constraints": "O(1)",
     "Run_testCases": [
