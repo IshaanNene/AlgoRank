@@ -43,18 +43,6 @@
     { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 2, "expected": 1 },
     { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 9, "expected": 8 },
     { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 4, "expected": 3 },
-    { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 7, "expected": 6 },
-    { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 5, "expected": 4 },
-    { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 1, "expected": 0 },
-    { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 10, "expected": 9 },
-    { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 0, "expected": -1 },
-    { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 11, "expected": -1 },
-    { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 6, "expected": 5 },
-    { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 3, "expected": 2 },
-    { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 8, "expected": 7 },
-    { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 2, "expected": 1 },
-    { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 9, "expected": 8 },
-    { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 4, "expected": 3 },
     { "array": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "target": 7, "expected": 6 }
   ]
 } 

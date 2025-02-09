@@ -6,8 +6,8 @@ RUN useradd -m -s /bin/bash runner
 
 USER runner
 
-WORKDIR /CodeForge
+WORKDIR /AlgoRank
 
-COPY --chown=runner:runner . /CodeForge
+COPY --chown=runner:runner . /AlgoRank
 
 ENTRYPOINT ["python3", "main.py"]
