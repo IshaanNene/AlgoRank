@@ -7,7 +7,6 @@ import time
 import colorama
 from colorama import Fore, Style
 
-# Force color output
 colorama.init(strip=False, convert=True)
 
 logging.basicConfig(
@@ -16,7 +15,6 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)]
 )
 
-# Custom logger class to add colors
 class ColoredFormatter(logging.Formatter):
     FORMATS = {
         logging.ERROR: f"{Fore.RED + Style.BRIGHT}%(asctime)s [%(levelname)s] %(message)s{Style.RESET_ALL}",
@@ -30,7 +28,6 @@ class ColoredFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
-# Apply custom formatter
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(ColoredFormatter())
 logging.getLogger().handlers = [handler]
@@ -53,7 +50,7 @@ def test_case_exec(executable, *args):
     try:
         result = subprocess.run(command, capture_output=True, text=True, check=True, timeout=5)
         output = result.stdout.strip()
-        return output, True # Always return True since test cases are passing
+        return output, True 
     except subprocess.TimeoutExpired:
         logging.error("Execution timed out!")
         return "Timeout Error", False
@@ -74,7 +71,6 @@ def test_case_import(json_file, mode="Run"):
         raise ValueError(f"No {test_type} found in {json_file}")
     return test_cases
 
-# Problem handler functions
 def import_problem1(test_case):
     return (test_case['a'], test_case['b'], test_case['expected'])
 
