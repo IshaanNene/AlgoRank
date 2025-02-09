@@ -4,12 +4,36 @@ import os
 import logging
 import sys
 import time
+import colorama
+from colorama import Fore, Style
+
+# Force color output
+colorama.init(strip=False, convert=True)
 
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)]
 )
+
+# Custom logger class to add colors
+class ColoredFormatter(logging.Formatter):
+    FORMATS = {
+        logging.ERROR: f"{Fore.RED + Style.BRIGHT}%(asctime)s [%(levelname)s] %(message)s{Style.RESET_ALL}",
+        logging.WARNING: f"{Fore.YELLOW + Style.BRIGHT}%(asctime)s [%(levelname)s] %(message)s{Style.RESET_ALL}",
+        logging.INFO: "%(asctime)s [%(levelname)s] %(message)s",
+        logging.DEBUG: f"{Fore.BLUE + Style.BRIGHT}%(asctime)s [%(levelname)s] %(message)s{Style.RESET_ALL}"
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
+# Apply custom formatter
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(ColoredFormatter())
+logging.getLogger().handlers = [handler]
 
 def c_compiler(c_filename, output_executable):
     compile_command = ["gcc", c_filename, "-O3", "-o", output_executable]
@@ -165,19 +189,23 @@ def main():
             args = handler['import'](test_case)
             output, passed = handler['exec'](executable, *args)
             
-            status = "PASS" if passed else "FAIL"
-            logging.info(f"Test {i}: {status}\n{output}")
             if passed:
+                status = f"{Fore.GREEN + Style.BRIGHT}PASS{Style.RESET_ALL}"
                 passed_count += 1
+            else:
+                status = f"{Fore.RED + Style.BRIGHT}FAIL{Style.RESET_ALL}"
+            logging.info(f"Test {i}: {status}\n{output}")
         except Exception as e:
             logging.error(f"Error processing test case {i}: {str(e)}")
 
     total_time = (time.time() - start_time) * 1000
     logging.info("\nTest Summary:")
     logging.info("Runtime: %.2f ms", total_time)
-    logging.info("Passed: %d/%d (%.1f%%)", 
-                passed_count, len(test_cases),
-                (passed_count/len(test_cases)*100) if test_cases else 0)
+    
+    pass_percentage = (passed_count/len(test_cases)*100) if test_cases else 0
+    result_color = Fore.GREEN + Style.BRIGHT if pass_percentage >= 80 else Fore.RED + Style.BRIGHT
+    logging.info(f"Passed: {result_color}%d/%d (%.1f%%){Style.RESET_ALL}", 
+                passed_count, len(test_cases), pass_percentage)
 
 if __name__ == "__main__":
     main()
