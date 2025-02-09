@@ -24,9 +24,6 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate form data here (e.g., email, password)
-
     try {
       const response = await axios.post('http://localhost:8080/signup', formData);
       console.log('User signed up:', response.data);
