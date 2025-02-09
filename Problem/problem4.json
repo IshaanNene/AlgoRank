@@ -1,0 +1,21 @@
+{
+  "problem_num": 4,
+  "problem_name": "Reverse a String",
+  "difficulty": "Easy",
+  "description": "Write a function that reverses a given string.",
+  "Expected Time Constraints": "O(n)",
+  "Expected Space Constraints": "O(n)",
+  "Run_testCases": [
+    { "input": "hello", "expected": "olleh" },
+    { "input": "world", "expected": "dlrow" },
+    { "input": "AlgoRank", "expected": "knaRoglA" }
+  ],
+  "Submit_testCases": [
+    { "input": "abcde", "expected": "edcba" },
+    { "input": "12345", "expected": "54321" },
+    { "input": "racecar", "expected": "racecar" },
+    { "input": "A man a plan a canal Panama", "expected": "amanaP lanac a nalp a nam A" },
+    { "input": " ", "expected": " " },
+    { "input": "", "expected": "" }
+  ]
+} 

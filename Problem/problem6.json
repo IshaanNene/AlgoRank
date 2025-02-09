@@ -1,0 +1,25 @@
+{
+  "problem_num": 6,
+  "problem_name": "Check for Palindrome",
+  "difficulty": "Easy",
+  "description": "Write a function that checks if a given string is a palindrome.",
+  "Expected Time Constraints": "O(n)",
+  "Expected Space Constraints": "O(1)",
+  "Run_testCases": [
+    { "input": "madam", "expected": true },
+    { "input": "hello", "expected": false },
+    { "input": "A man a plan a canal Panama", "expected": true }
+  ],
+  "Submit_testCases": [
+    { "input": "racecar", "expected": true },
+    { "input": "12321", "expected": true },
+    { "input": "notapalindrome", "expected": false },
+    { "input": "Able was I ere I saw Elba", "expected": true },
+    { "input": "No lemon, no melon", "expected": true },
+    { "input": "Was it a car or a cat I saw?", "expected": true },
+    { "input": "Step on no pets", "expected": true },
+    { "input": "Eva, can I see bees in a cave?", "expected": true },
+    { "input": "A Toyota's a Toyota", "expected": true },
+    { "input": "Not a palindrome", "expected": false }
+  ]
+} 

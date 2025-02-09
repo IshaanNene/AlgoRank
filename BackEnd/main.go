@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/handlers"
@@ -75,6 +76,7 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		log.Printf("User signup attempt: %s", user.Email)
 		user.Stats = UserStats{
 			TotalSolved:    0,
 			EasySolved:     0,
@@ -91,6 +93,7 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		log.Printf("User signed up successfully: %s", user.Email)
 		fmt.Fprintf(w, "User signed up successfully: %s", user.Email)
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(user)
@@ -107,12 +110,14 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		log.Printf("User login attempt: %s", user.Email)
 		var storedPassword string
 		err = db.QueryRow(`SELECT password FROM users WHERE email = ?`, user.Email).Scan(&storedPassword)
 		if err != nil || storedPassword != user.Password {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 			return
 		}
+		log.Printf("User logged in successfully: %s", user.Email)
 		userData := getUserData(user.Email)
 		fmt.Fprintf(w, "User logged in successfully: %s", user.Email)
 		w.WriteHeader(http.StatusOK)
@@ -129,7 +134,7 @@ func getUserData(email string) User {
 	err := row.Scan(&user.Email, &user.Name, &user.Username, &user.Location, &user.GitHub, &user.Twitter, &user.JoinDate, &user.Bio, &user.ProfileCompletion,
 		&user.Stats.TotalSolved, &user.Stats.EasySolved, &user.Stats.MediumSolved, &user.Stats.HardSolved, &user.Stats.Submissions, &user.Stats.AcceptanceRate)
 	if err != nil {
-		return User{} 
+		return User{}
 	}
 	return user
 }
@@ -149,7 +154,7 @@ func forgotPasswordHandler(w http.ResponseWriter, r *http.Request) {
 		err = db.QueryRow(`SELECT password FROM users WHERE email = ?`, request.Email).Scan(&storedPassword)
 		if err != nil {
 			http.Error(w, "Email not found", http.StatusNotFound)
-			tempPassword := "temporaryPassword123" 
+			tempPassword := "temporaryPassword123"
 			err = sendEmail(request.Email, tempPassword)
 			if err != nil {
 				http.Error(w, "Failed to send email", http.StatusInternalServerError)
@@ -233,10 +238,11 @@ func main() {
 	http.HandleFunc("/submit", submitHandler)
 
 	corsHandler := handlers.CORS(
-		handlers.AllowedOrigins([]string{"http://localhost:5173"}),  
-		handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"}), 
-		handlers.AllowedHeaders([]string{"Content-Type"}),           
+		handlers.AllowedOrigins([]string{"http://localhost:5173"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"}),
+		handlers.AllowedHeaders([]string{"Content-Type"}),
 	)(http.DefaultServeMux)
 
+	log.Println("Server starting on :8080")
 	http.ListenAndServe(":8080", corsHandler)
 }
