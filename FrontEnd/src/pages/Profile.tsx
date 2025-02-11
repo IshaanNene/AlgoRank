@@ -10,7 +10,7 @@ interface User {
   email: string;
   github: string;
   twitter: string;
-  joinDate: string; // Ensure this property exists in the user data
+  joinDate: string; 
   stats: {
     totalSolved: number;
     easySolved: number;
@@ -30,8 +30,8 @@ interface EditableField {
 }
 
 const Profile = () => {
-  const { user, setUser } = useUser(); // Get user from context
-  const [userData, setUserData] = useState<User | null>(null); // State to hold user data
+  const { user, setUser } = useUser(); 
+  const [userData, setUserData] = useState<User | null>(null);
   const [editableFields, setEditableFields] = useState<Record<string, EditableField>>({
     bio: { name: 'Bio', value: user?.bio || '', isEditing: false },
     location: { name: 'Location', value: user?.location || '', isEditing: false },
@@ -45,10 +45,10 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       if (user) {
-        const response = await fetch(`http://localhost:8080/user/${user.username}`); // Fetch user data using username
+        const response = await fetch(`http://localhost:8080/user/${user.username}`); 
         if (response.ok) {
           const userData = await response.json();
-          setUserData(userData); // Set user data in state
+          setUserData(userData); 
         }
       }
     };
@@ -80,10 +80,13 @@ const Profile = () => {
           [fieldKey]: { ...prev[fieldKey], isEditing: false }
         }));
         // Update user context with new value
-        setUser(prev => prev ? {
-          ...prev,
-          [fieldKey]: editableFields[fieldKey].value
-        } : null);
+        if (user) {
+          const updatedUser: User = {
+            ...user,
+            [fieldKey]: editableFields[fieldKey].value
+          };
+          setUser(updatedUser);
+        }
       }
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -98,7 +101,7 @@ const Profile = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800">Please log in to view your profile</h2>
           <p className="mt-2 text-gray-600">You need to be logged in to access this page.</p>
-        </div>
+        </div>  
       </div>
     );
   }

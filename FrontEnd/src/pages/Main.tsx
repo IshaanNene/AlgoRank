@@ -62,11 +62,11 @@ const Main = () => {
       <div className="container mx-auto px-4 pt-20 pb-32">
         <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            Master Your Coding Skills with
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500"> AI-Powered</span> Learning
+            Master Coding with a
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500"> Guided</span> Learning Approach
           </h1>
           <p className="text-xl text-gray-300 mb-8">
-            Practice coding problems, track your progress, and improve your algorithmic thinking with our intelligent learning platform.
+            Tackle coding problems, track your growth, and refine your algorithmic thinking with our comprehensive platform.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
