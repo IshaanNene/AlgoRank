@@ -236,17 +236,56 @@ func submitHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func authCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method != http.MethodGet {
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid request method"})
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	sessionToken := r.Header.Get("Authorization")
+	if sessionToken == "" {
+		json.NewEncoder(w).Encode(map[string]string{"error": "Unauthorized"})
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	// TODO: Implement proper session verification
+	// For now, we'll just get the first user as an example
+	var userEmail string
+	err := db.QueryRow("SELECT email FROM users LIMIT 1").Scan(&userEmail)
+	if err != nil {
+		json.NewEncoder(w).Encode(map[string]string{"error": "No users found"})
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	user := getUserData(userEmail)
+	if user.Email == "" {
+		json.NewEncoder(w).Encode(map[string]string{"error": "User not found"})
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
+}
+
 func main() {
 	http.HandleFunc("/api/auth/login", loginHandler)
 	http.HandleFunc("/api/auth/signup", signupHandler)
 	http.HandleFunc("/forgot-password", forgotPasswordHandler)
 	http.HandleFunc("/run", runHandler)
 	http.HandleFunc("/submit", submitHandler)
+	http.HandleFunc("/api/auth/check", authCheckHandler)
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://localhost:5173"}),
-		handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS"}),
-		handlers.AllowedHeaders([]string{"Content-Type"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+		handlers.ExposedHeaders([]string{"Content-Type"}),
+		handlers.AllowCredentials(),
 	)(http.DefaultServeMux)
 
 	log.Println("Server starting on :8080")

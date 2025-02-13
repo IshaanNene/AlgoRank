@@ -112,20 +112,27 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/check');
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
-        } else {
-          const errorText = await response.text();
-          console.error('Auth check failed:', errorText);
-          // Handle unexpected token error
-          if (errorText.includes('<!doctype')) {
-            console.error('Received HTML instead of JSON. Check if the API endpoint is correct.');
+        const response = await fetch('/api/auth/check', {
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${yourAuthToken}`
           }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new TypeError("Received non-JSON response");
+        }
+
+        const userData = await response.json();
+        setUser(userData);
       } catch (error) {
         console.error('Auth check failed:', error);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
