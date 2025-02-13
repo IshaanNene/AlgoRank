@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { Eye, EyeOff, Mail, Lock, User, MapPin, Github, Twitter, AlertCircle } from 'lucide-react';
@@ -73,12 +72,28 @@ const Signup = () => {
     setIsLoading(true);
     try {
       const { confirmPassword, ...submitData } = formData;
-      const response = await axios.post('http://localhost:8080/signup', submitData);
-      setUser(response.data);
+      const response = await fetch('http://localhost:8080/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submitData)
+      });
+
+      if (response.status === 409) {
+        setError('Username or email already exists. Please choose another.');
+        return;
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Signup failed');
+      }
+
+      const data = await response.json();
+      setUser(data);
       navigate('/dashboard');
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        setError(error.response?.data?.message || 'Signup failed. Please try again.');
+      if (error instanceof Error) {
+        setError(error.message);
       } else {
         setError('An unexpected error occurred. Please try again.');
       }

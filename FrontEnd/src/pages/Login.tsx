@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
 import { useUser } from '../context/UserContext';
 import Button from '../components/Button';
 import Card from '../components/Card';
@@ -9,7 +9,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -29,18 +29,21 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8080/login', {
+      const response = await fetch('http://localhost:8080/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password
+        }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Login failed');
       }
 
+      const data = await response.json();
       setUser(data);
       navigate('/dashboard');
     } catch (err) {
@@ -72,19 +75,18 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Email Address
+              Username
             </label>
             <div className="mt-1 relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
-                type="email"
-                name="email"
+                type="text"
+                name="username"
                 required
-                value={formData.email}
+                value={formData.username}
                 onChange={handleChange}
                 className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Enter your email"
-                disabled={isLoading}
+                placeholder="Enter your username"
               />
             </div>
           </div>

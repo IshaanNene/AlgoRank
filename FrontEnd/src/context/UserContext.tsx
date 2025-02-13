@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 interface UserStats {
   totalSolved: number;
@@ -20,9 +20,9 @@ interface UserPreferences {
 }
 
 interface User {
-  email: string;
-  name: string;
   username: string;
+  name: string;
+  email: string;
   location: string;
   github: string;
   twitter: string;
@@ -41,17 +41,27 @@ interface User {
 
 interface UserContextType {
   user: User | null;
-  setUser: (user: User) => void;
+  setUser: (user: User | null) => void;
   updatePreferences: (preferences: Partial<UserPreferences>) => void;
   saveSolution: (problemId: string, code: string) => void;
   addActivity: (activity: User['recentActivity'][0]) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
+  isLoading: boolean;
 }
 
-const UserContext = createContext<UserContextType | undefined>(undefined);
+const UserContext = createContext<UserContextType>({
+  user: null,
+  setUser: () => {},
+  updatePreferences: () => {},
+  saveSolution: () => {},
+  addActivity: () => {},
+  logout: async () => {},
+  isLoading: true,
+});
 
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const updatePreferences = useCallback((newPreferences: Partial<UserPreferences>) => {
     setUser(prev => {
@@ -89,9 +99,38 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, []);
 
-  const logout = useCallback(() => {
-    setUser(null);
-    // Additional cleanup if needed
+  const logout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      setUser(null);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+  // Add useEffect to check auth status on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/check');
+        if (response.ok) {
+          const userData = await response.json();
+          setUser(userData);
+        } else {
+          const errorText = await response.text();
+          console.error('Auth check failed:', errorText);
+          // Handle unexpected token error
+          if (errorText.includes('<!doctype')) {
+            console.error('Received HTML instead of JSON. Check if the API endpoint is correct.');
+          }
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkAuth();
   }, []);
 
   return (
@@ -102,7 +141,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updatePreferences, 
         saveSolution, 
         addActivity,
-        logout 
+        logout,
+        isLoading
       }}
     >
       {children}
@@ -110,10 +150,4 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (!context) {
-    throw new Error('useUser must be used within a UserProvider');
-  }
-  return context;
-}; 
+export const useUser = () => useContext(UserContext); 

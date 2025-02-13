@@ -70,31 +70,36 @@ func init() {
 
 func signupHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		var user User
+		var user struct {
+			Username string `json:"username"`
+			Password string `json:"password"`
+			Name     string `json:"name"`
+			Email    string `json:"email"`
+			// ... other fields ...
+		}
+
 		err := json.NewDecoder(r.Body).Decode(&user)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		log.Printf("User signup attempt: %s", user.Email)
-		user.Stats = UserStats{
-			TotalSolved:    0,
-			EasySolved:     0,
-			MediumSolved:   0,
-			HardSolved:     0,
-			Submissions:    0,
-			AcceptanceRate: "0%",
+
+		// Check if username already exists
+		var exists bool
+		err = db.QueryRow(`SELECT EXISTS(SELECT 1 FROM users WHERE username = ?)`, user.Username).Scan(&exists)
+		if err != nil || exists {
+			http.Error(w, "Username already exists", http.StatusConflict)
+			return
 		}
-		_, err = db.Exec(`INSERT INTO users (email, password, name, username, location, github, twitter, joinDate, bio, profileCompletion, totalSolved, easySolved, mediumSolved, hardSolved, submissions, acceptanceRate) 
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			user.Email, user.Password, user.Name, user.Username, user.Location, user.GitHub, user.Twitter, user.JoinDate, user.Bio, user.ProfileCompletion,
-			user.Stats.TotalSolved, user.Stats.EasySolved, user.Stats.MediumSolved, user.Stats.HardSolved, user.Stats.Submissions, user.Stats.AcceptanceRate)
+
+		// Insert new user
+		_, err = db.Exec(`INSERT INTO users (username, password, name, email) VALUES (?, ?, ?, ?)`,
+			user.Username, user.Password, user.Name, user.Email)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		log.Printf("User signed up successfully: %s", user.Email)
-		fmt.Fprintf(w, "User signed up successfully: %s", user.Email)
+
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(user)
 	} else {
@@ -104,24 +109,25 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		var user User
-		err := json.NewDecoder(r.Body).Decode(&user)
+		var credentials struct {
+			Username string `json:"username"`
+			Password string `json:"password"`
+		}
+		err := json.NewDecoder(r.Body).Decode(&credentials)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		log.Printf("User login attempt: %s", user.Email)
-		var storedPassword string
-		err = db.QueryRow(`SELECT password FROM users WHERE email = ?`, user.Email).Scan(&storedPassword)
-		if err != nil || storedPassword != user.Password {
+
+		var user User
+		err = db.QueryRow(`SELECT email, password FROM users WHERE username = ?`, credentials.Username).Scan(&user.Email, &user.Password)
+		if err != nil || user.Password != credentials.Password {
 			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 			return
 		}
-		log.Printf("User logged in successfully: %s", user.Email)
-		userData := getUserData(user.Email)
-		fmt.Fprintf(w, "User logged in successfully: %s", user.Email)
+
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(userData)
+		json.NewEncoder(w).Encode(user)
 	} else {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 	}
@@ -231,8 +237,8 @@ func submitHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/signup", signupHandler)
-	http.HandleFunc("/login", loginHandler)
+	http.HandleFunc("/api/auth/login", loginHandler)
+	http.HandleFunc("/api/auth/signup", signupHandler)
 	http.HandleFunc("/forgot-password", forgotPasswordHandler)
 	http.HandleFunc("/run", runHandler)
 	http.HandleFunc("/submit", submitHandler)
