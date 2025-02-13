@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
+import { auth } from '../App';
 
 interface UserStats {
   totalSolved: number;
@@ -47,111 +48,71 @@ interface UserContextType {
   addActivity: (activity: User['recentActivity'][0]) => void;
   logout: () => Promise<void>;
   isLoading: boolean;
+  checkAuth: () => Promise<void>;
 }
 
-const UserContext = createContext<UserContextType>({
-  user: null,
-  setUser: () => {},
-  updatePreferences: () => {},
-  saveSolution: () => {},
-  addActivity: () => {},
-  logout: async () => {},
-  isLoading: true,
-});
+const UserContext = createContext<UserContextType>({} as UserContextType);
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const updatePreferences = useCallback((newPreferences: Partial<UserPreferences>) => {
-    setUser(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        preferences: {
-          ...prev.preferences,
-          ...newPreferences
-        }
-      };
-    });
+  const updatePreferences = useCallback((preferences: Partial<UserPreferences>) => {
+    setUser(prev => prev ? {
+      ...prev,
+      preferences: { ...prev.preferences, ...preferences }
+    } : null);
   }, []);
 
   const saveSolution = useCallback((problemId: string, code: string) => {
-    setUser(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        savedSolutions: {
-          ...prev.savedSolutions,
-          [problemId]: code
-        }
-      };
-    });
+    setUser(prev => prev ? {
+      ...prev,
+      savedSolutions: { ...prev.savedSolutions, [problemId]: code }
+    } : null);
   }, []);
 
   const addActivity = useCallback((activity: User['recentActivity'][0]) => {
-    setUser(prev => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        recentActivity: [activity, ...prev.recentActivity].slice(0, 50) // Keep last 50 activities
-      };
-    });
+    setUser(prev => prev ? {
+      ...prev,
+      recentActivity: [activity, ...prev.recentActivity].slice(0, 10)
+    } : null);
   }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await auth.logout();
+      localStorage.removeItem('authToken');
       setUser(null);
     } catch (error) {
       console.error('Logout failed:', error);
+      throw error;
     }
-  };
+  }, []);
 
-  // Add useEffect to check auth status on mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch('/api/auth/check', {
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${yourAuthToken}`
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new TypeError("Received non-JSON response");
-        }
-
-        const userData = await response.json();
-        setUser(userData);
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    checkAuth();
+  const checkAuth = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const userData = await auth.checkAuth();
+      setUser(userData);
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   return (
-    <UserContext.Provider 
-      value={{ 
-        user, 
-        setUser, 
-        updatePreferences, 
-        saveSolution, 
-        addActivity,
-        logout,
-        isLoading
-      }}
-    >
+    <UserContext.Provider value={{
+      user,
+      setUser,
+      updatePreferences,
+      saveSolution,
+      addActivity,
+      logout,
+      isLoading,
+      checkAuth
+    }}>
       {children}
     </UserContext.Provider>
   );

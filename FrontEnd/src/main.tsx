@@ -8,19 +8,19 @@ import './index.css';
 import 'tailwindcss/tailwind.css';
 
 // Create theme context for dark mode
-import { createContext, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 interface ThemeContextType {
   isDarkMode: boolean;
   toggleDarkMode: () => void;
 }
 
-export const ThemeContext = createContext<ThemeContextType>({
+const ThemeContext = createContext<ThemeContextType>({
   isDarkMode: false,
   toggleDarkMode: () => {},
 });
 
-const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const toggleDarkMode = () => {
@@ -34,6 +34,8 @@ const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     </ThemeContext.Provider>
   );
 };
+
+export const useTheme = () => useContext(ThemeContext);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

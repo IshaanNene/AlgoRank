@@ -3,8 +3,12 @@ module Algo-Rank
 go 1.23.4
 
 require (
-	github.com/gorilla/handlers v1.5.2
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gorilla/mux v1.8.1
+	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.24
+	github.com/rs/cors v1.11.1
+	golang.org/x/crypto v0.32.0
 	google.golang.org/api v0.220.0
 )
 
@@ -24,7 +28,6 @@ require (
 	go.opentelemetry.io/otel v1.34.0 // indirect
 	go.opentelemetry.io/otel/metric v1.34.0 // indirect
 	go.opentelemetry.io/otel/trace v1.34.0 // indirect
-	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/oauth2 v0.25.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
