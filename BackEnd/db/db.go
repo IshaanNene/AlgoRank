@@ -41,7 +41,19 @@ func createTables(db *sql.DB) error {
 			title VARCHAR(255) NOT NULL,
 			description TEXT NOT NULL,
 			difficulty VARCHAR(20) NOT NULL,
-			created_at TIMESTAMP NOT NULL
+			tags TEXT[] DEFAULT '{}',
+			examples JSONB DEFAULT '[]',
+			constraints TEXT[] DEFAULT '{}',
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			submissions INTEGER DEFAULT 0,
+			accepted INTEGER DEFAULT 0
+		)`,
+		`CREATE TABLE IF NOT EXISTS test_cases (
+			id SERIAL PRIMARY KEY,
+			problem_id INTEGER REFERENCES problems(id),
+			input TEXT NOT NULL,
+			expected_output TEXT NOT NULL,
+			is_hidden BOOLEAN DEFAULT false
 		)`,
 		`CREATE TABLE IF NOT EXISTS submissions (
 			id SERIAL PRIMARY KEY,
@@ -50,7 +62,9 @@ func createTables(db *sql.DB) error {
 			code TEXT NOT NULL,
 			language VARCHAR(50) NOT NULL,
 			status VARCHAR(20) NOT NULL,
-			created_at TIMESTAMP NOT NULL
+			runtime INTEGER,
+			memory INTEGER,
+			created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 		)`,
 	}
 

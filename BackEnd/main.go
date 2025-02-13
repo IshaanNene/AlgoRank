@@ -6,10 +6,10 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
-
 	"github.com/IshaanNene/AlgoRank/config"
 	"github.com/IshaanNene/AlgoRank/db"
 	"github.com/IshaanNene/AlgoRank/handlers"
+	
 )
 
 func main() {

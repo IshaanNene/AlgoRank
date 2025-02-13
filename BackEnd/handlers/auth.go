@@ -49,7 +49,15 @@ func (s *Server) setupRoutes() {
 
 	// Code execution routes
 	protected.HandleFunc("/code/run", s.handleRunCode).Methods("POST")
-	protected.HandleFunc("/code/submit", s.handleSubmitCode).Methods("POST")
+	protected.HandleFunc("/submissions", s.handleGetSubmissions).Methods("GET")
+
+	// User routes
+	protected.HandleFunc("/users/{username}", s.handleGetProfile).Methods("GET")
+	protected.HandleFunc("/users/profile", s.handleUpdateProfile).Methods("PUT")
+	protected.HandleFunc("/users/stats", s.handleGetStats).Methods("GET")
+
+	// Leaderboard routes
+	protected.HandleFunc("/leaderboard", s.handleGetLeaderboard).Methods("GET")
 }
 
 type Claims struct {
@@ -204,13 +212,15 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte(s.jwtSecret), nil
 		})
-
+		type contextKey string
+		const userIDKey contextKey = "userID"
 		if err != nil || !token.Valid {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "userID", claims.UserID)
+
+		ctx := context.WithValue(r.Context(), userIDKey, claims.UserID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -225,4 +235,40 @@ func (s *Server) generateToken(userID string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(s.jwtSecret))
+}
+func (s *Server) handleAuthCheck(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value("userID").(string)
+	type User struct {
+		ID                string    `json:"id"`
+		Email             string    `json:"email"`
+		Username          string    `json:"username"`
+		Name              string    `json:"name"`
+		PasswordHash      string    `json:"-"`
+		Location          string    `json:"location"`
+		GitHub            string    `json:"github"`
+		Twitter           string    `json:"twitter"`
+		Bio               string    `json:"bio"`
+		CreatedAt         time.Time `json:"createdAt"`
+		ProfileCompletion int       `json:"profileCompletion"`
+	}
+
+	var user User
+	err := s.db.QueryRow(
+		"SELECT id, email, username, name, location, github, twitter, bio, created_at, profile_completion FROM users WHERE id = $1",
+		userID,
+	).Scan(
+		&user.ID, &user.Email, &user.Username, &user.Name, &user.Location,
+		&user.GitHub, &user.Twitter, &user.Bio, &user.CreatedAt, &user.ProfileCompletion,
+	)
+
+	if err == sql.ErrNoRows {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	} else if err != nil {
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
 }
