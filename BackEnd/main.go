@@ -50,10 +50,3 @@ func main() {
 	log.Printf("Starting server on port %s", cfg.Port)
 	log.Fatal(http.ListenAndServe(":"+cfg.Port, handler))
 }
-
-func authCheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	// For now, return a mock response
-	w.Write([]byte(`{"user": null}`))
-}
