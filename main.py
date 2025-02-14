@@ -14,11 +14,11 @@ from enum import Enum
 init(strip=False, convert=True)
 
 class Language(Enum):
-    C = "c"
-    CPP = "cpp"
-    JAVA = "java"
-    GO = "go"
-    RUST = "rust"
+    C = "C"
+    CPP = "CPP"
+    JAVA = "Java"
+    GO = "Go"
+    RUST = "Rust"
 
 @dataclass
 class ExecutionResult:
@@ -51,11 +51,11 @@ class CodeExecutor:
     def __init__(self, language: Language):
         self.language = language
         self.compile_commands = {
-            Language.C: ["gcc", "-O3", "-Wall"],
-            Language.CPP: ["g++", "-O3", "-Wall", "-std=c++17"],
-            Language.JAVA: ["javac"],
-            Language.GO: ["go", "build"],
-            Language.RUST: ["rustc", "-O"]
+            Language.C: ["gcc", "-O3", "-march=native", "-Wall", "-fopenmp", "-flto"],
+            Language.CPP: ["g++", "-O3", "-march=native", "-Wall", "-std=c++17", "-fopenmp", "-flto"],
+            Language.JAVA: ["javac", "-Xlint:all", "-g:none"],
+            Language.GO: ["go", "build", "-ldflags", "-s -w -extldflags '-static'"],
+            Language.RUST: ["rustc", "--release", "--emit=exe"]
         }
         self.file_extensions = {
             Language.C: ".c",
@@ -174,7 +174,7 @@ class TestRunner:
         if mode == "Run":
             test_cases = test_cases[:3]  # Limited test cases for Run mode
 
-        source_file = f"Solutions/{self.executor.language.value}_Solutions/solution{self.problem_id}{self.executor.file_extensions[self.executor.language]}"
+        source_file = f"AlgoRank/Solutions/{self.executor.language.value}_Solutions/solution{self.problem_id}{self.executor.file_extensions[self.executor.language]}"
         executable = f"solution_{self.problem_id}"
 
         success, error = self.executor.compile(source_file, executable)

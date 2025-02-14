@@ -39,3 +39,7 @@ gits_up:
 	git add .
 	git commit -m "Update"
 	git push
+
+nene:
+	chmod +x run.sh
+	./run.sh
