@@ -4,16 +4,35 @@ import os
 import logging
 import sys
 import time
+import psutil
+import resource
 from colorama import Fore, Style, init
-from typing import Dict, List, Tuple
-from dataclasses import dataclass
+from typing import Dict, List, Tuple, Optional
+from dataclasses import dataclass, field
+from enum import Enum
 
 init(strip=False, convert=True)
+
+class Language(Enum):
+    C = "c"
+    CPP = "cpp"
+    JAVA = "java"
+    GO = "go"
+    RUST = "rust"
+
+@dataclass
+class ExecutionResult:
+    output: str
+    success: bool
+    execution_time: float
+    memory_usage: float
+    cpu_usage: float
+    error_message: Optional[str] = None
 
 @dataclass
 class TestMetrics:
     total_time: float = 0.0
-    execution_times: List[float] = None
+    execution_times: List[float] = field(default_factory=list)
     peak_memory: float = 0.0
     passed_count: int = 0
     failed_count: int = 0
@@ -22,218 +41,223 @@ class TestMetrics:
     slowest_test: int = 0
     fastest_test: int = 0
     peak_cpu_usage: float = 0.0
-    
-    def __post_init__(self):
-        self.execution_times = []
+    test_results: List[ExecutionResult] = field(default_factory=list)
 
-# Configure logging once at startup
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+class CodeExecutor:
+    TIMEOUT = 5  # seconds
+    MEMORY_LIMIT = 256 * 1024 * 1024  # 256MB
+    CPU_LIMIT = 0.5  # 50% CPU usage
 
-class ColoredFormatter(logging.Formatter):
-    FORMATS = {
-        logging.ERROR: f"{Fore.RED + Style.BRIGHT}%(asctime)s [%(levelname)s] %(message)s{Style.RESET_ALL}",
-        logging.WARNING: f"{Fore.YELLOW + Style.BRIGHT}%(asctime)s [%(levelname)s] %(message)s{Style.RESET_ALL}",
-        logging.INFO: "%(asctime)s [%(levelname)s] %(message)s", 
-        logging.DEBUG: f"{Fore.BLUE + Style.BRIGHT}%(asctime)s [%(levelname)s] %(message)s{Style.RESET_ALL}"
-    }
+    def __init__(self, language: Language):
+        self.language = language
+        self.compile_commands = {
+            Language.C: ["gcc", "-O3", "-Wall"],
+            Language.CPP: ["g++", "-O3", "-Wall", "-std=c++17"],
+            Language.JAVA: ["javac"],
+            Language.GO: ["go", "build"],
+            Language.RUST: ["rustc", "-O"]
+        }
+        self.file_extensions = {
+            Language.C: ".c",
+            Language.CPP: ".cpp",
+            Language.JAVA: ".java",
+            Language.GO: ".go",
+            Language.RUST: ".rs"
+        }
 
-    def format(self, record):
-        return logging.Formatter(self.FORMATS.get(record.levelno)).format(record)
+    def compile(self, source_file: str, output_file: str) -> Tuple[bool, Optional[str]]:
+        if self.language not in self.compile_commands:
+            return False, "Unsupported language"
 
-handler = logging.StreamHandler(sys.stdout)
-handler.setFormatter(ColoredFormatter())
-logger.handlers = [handler]
+        command = self.compile_commands[self.language] + [source_file, "-o", output_file]
+        
+        try:
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                timeout=self.TIMEOUT
+            )
+            if result.returncode != 0:
+                return False, result.stderr
+            return True, None
+        except subprocess.TimeoutExpired:
+            return False, "Compilation timed out"
+        except Exception as e:
+            return False, str(e)
 
-def c_compiler(c_filename: str, output_executable: str) -> bool:
-    compile_command = ["gcc", c_filename, "-O3", "-o", output_executable]
-    logging.info("Compiling C code: %s", " ".join(compile_command))
-
-    try:
-        subprocess.run(compile_command, capture_output=True, text=True, check=True)
-        return True
-    except subprocess.CalledProcessError as e:
-        logging.error("Compilation failed:\n%s", e.stderr)
-        return False
-
-def test_case_exec(executable: str, *args) -> tuple[str, bool]:
-    command = [f"./{executable}"] + [str(arg) for arg in args]
-    logging.debug("Executing command: %s", " ".join(command))
-
-    try:
+    def execute(self, executable: str, args: List[str]) -> ExecutionResult:
         start_time = time.time()
-        result = subprocess.run(command, capture_output=True, text=True, check=True, timeout=5)
-        execution_time = time.time() - start_time
-        return result.stdout.strip(), True, execution_time
-    except subprocess.TimeoutExpired:
-        logging.error("Execution timed out!")
-        return "Timeout Error", False, 5.0
-    except subprocess.CalledProcessError as e:
-        logging.error("Execution failed:\n%s", e.stderr)
-        return f"Execution Error: {e.stderr.strip()}", False, 0.0
+        process = None
 
-def test_case_import(json_file: str, mode: str = "Run") -> list:
-    if not os.path.exists(json_file):
-        raise FileNotFoundError(f"{json_file} not found.")
+        try:
+            process = subprocess.Popen(
+                [f"./{executable}"] + args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                preexec_fn=self._set_process_limits
+            )
 
-    with open(json_file) as f:
-        data = json.load(f)
+            stdout, stderr = process.communicate(timeout=self.TIMEOUT)
+            execution_time = time.time() - start_time
 
-    test_type = "Run_testCases" if mode == "Run" else "Submit_testCases"
-    test_cases = data.get(test_type)
-    if not test_cases:
-        raise ValueError(f"No {test_type} found in {json_file}")
-    return test_cases
+            if process.returncode != 0:
+                return ExecutionResult(
+                    output="",
+                    success=False,
+                    execution_time=execution_time,
+                    memory_usage=0,
+                    cpu_usage=0,
+                    error_message=stderr
+                )
 
-def array_to_str(array: list) -> str:
-    return '[' + ','.join(map(str, array)) + ']'
+            process_info = psutil.Process(process.pid)
+            memory_usage = process_info.memory_info().rss
+            cpu_usage = process_info.cpu_percent()
 
-def exec_with_array(executable: str, array: list, *args) -> tuple[str, bool, float]:
-    return test_case_exec(executable, array_to_str(array), *args)
+            return ExecutionResult(
+                output=stdout.strip(),
+                success=True,
+                execution_time=execution_time,
+                memory_usage=memory_usage,
+                cpu_usage=cpu_usage
+            )
 
-# Problem handler functions
-problem_handlers = {
-    1: {
-        'import': lambda t: (t['a'], t['b'], t['expected']),
-        'exec': test_case_exec
-    },
-    2: {
-        'import': lambda t: (t['array'], t['target'], t['expected']),
-        'exec': lambda exe, arr, target, expected: exec_with_array(exe, arr, target, expected)
-    },
-    3: {
-        'import': lambda t: (t['a'], t['b'], t['expected']),
-        'exec': test_case_exec
-    },
-    4: {
-        'import': lambda t: (t['input'], t['expected']),
-        'exec': test_case_exec
-    },
-    5: {
-        'import': lambda t: (t['n'], t['expected']),
-        'exec': test_case_exec
-    },
-    6: {
-        'import': lambda t: (t['input'], t['expected']),
-        'exec': lambda exe, i, e: test_case_exec(exe, i, 1 if e else 0)
-    },
-    7: {
-        'import': lambda t: (t['array'], t['expected']),
-        'exec': lambda exe, arr, expected: exec_with_array(exe, arr, expected)
-    },
-    8: {
-        'import': lambda t: (t['array'], t['expected']),
-        'exec': lambda exe, arr, e: test_case_exec(exe, e)
-    },
-    9: {
-        'import': lambda t: (t['numRows'],),
-        'exec': test_case_exec
-    },
-    10: {
-        'import': lambda t: (t['array'], t['target'], t['expected']),
-        'exec': test_case_exec
-    }
-}
+        except subprocess.TimeoutExpired:
+            if process:
+                process.kill()
+            return ExecutionResult(
+                output="",
+                success=False,
+                execution_time=self.TIMEOUT,
+                memory_usage=0,
+                cpu_usage=0,
+                error_message="Execution timed out"
+            )
+        except Exception as e:
+            return ExecutionResult(
+                output="",
+                success=False,
+                execution_time=0,
+                memory_usage=0,
+                cpu_usage=0,
+                error_message=str(e)
+            )
 
-def print_metrics(metrics: TestMetrics, mode: str):
-    logging.info(f"\n{mode} Test Summary:")
-    logging.info("Total Runtime: %.2f ms", metrics.total_time)
-    logging.info("Fastest Test Case: #%d (%.2f ms)", metrics.fastest_test, min(metrics.execution_times) * 1000)
-    logging.info("Slowest Test Case: #%d (%.2f ms)", metrics.slowest_test, max(metrics.execution_times) * 1000)
-    logging.info("Peak Memory Usage: %.2f MB", metrics.peak_memory)
-    logging.info("Peak CPU Usage: %.1f%%", metrics.peak_cpu_usage)
-    logging.info("Timeouts: %d", metrics.timeouts)
-    logging.info("Errors: %d", metrics.errors)
-    
-    pass_percentage = (metrics.passed_count/(metrics.passed_count + metrics.failed_count)*100) if (metrics.passed_count + metrics.failed_count) > 0 else 0
-    result_color = Fore.GREEN + Style.BRIGHT if pass_percentage >= 80 else Fore.RED + Style.BRIGHT
-    logging.info(f"Passed: {result_color}%d/%d (%.1f%%){Style.RESET_ALL}", 
-                metrics.passed_count, metrics.passed_count + metrics.failed_count, pass_percentage)
+    def _set_process_limits(self):
+        resource.setrlimit(resource.RLIMIT_AS, (self.MEMORY_LIMIT, self.MEMORY_LIMIT))
+        resource.setrlimit(resource.RLIMIT_CPU, (self.CPU_LIMIT, self.CPU_LIMIT))
+
+class TestRunner:
+    def __init__(self, problem_id: int, language: Language):
+        self.problem_id = problem_id
+        self.executor = CodeExecutor(language)
+        self.metrics = TestMetrics()
+
+    def load_test_cases(self, mode: str) -> List[Dict]:
+        json_file = f"Problem/problem{self.problem_id}.json"
+        if not os.path.exists(json_file):
+            raise FileNotFoundError(f"Problem file not found: {json_file}")
+
+        with open(json_file) as f:
+            data = json.load(f)
+
+        test_type = f"{mode}_testCases"
+        if test_type not in data:
+            raise ValueError(f"No {test_type} found in problem file")
+
+        return data[test_type]
+
+    def run_tests(self, mode: str) -> TestMetrics:
+        test_cases = self.load_test_cases(mode)
+        if mode == "Run":
+            test_cases = test_cases[:3]  # Limited test cases for Run mode
+
+        source_file = f"Solutions/{self.executor.language.value}_Solutions/solution{self.problem_id}{self.executor.file_extensions[self.executor.language]}"
+        executable = f"solution_{self.problem_id}"
+
+        success, error = self.executor.compile(source_file, executable)
+        if not success:
+            raise RuntimeError(f"Compilation failed: {error}")
+
+        start_time = time.time()
+
+        for i, test_case in enumerate(test_cases, 1):
+            result = self.executor.execute(
+                executable,
+                [str(arg) for arg in test_case["input"]]
+            )
+
+            self.metrics.test_results.append(result)
+            self.metrics.execution_times.append(result.execution_time)
+
+            if result.success and result.output == str(test_case["expected"]):
+                self.metrics.passed_count += 1
+            else:
+                self.metrics.failed_count += 1
+                if result.error_message and "timeout" in result.error_message.lower():
+                    self.metrics.timeouts += 1
+                elif result.error_message:
+                    self.metrics.errors += 1
+
+            self.metrics.peak_memory = max(self.metrics.peak_memory, result.memory_usage)
+            self.metrics.peak_cpu_usage = max(self.metrics.peak_cpu_usage, result.cpu_usage)
+
+        self.metrics.total_time = (time.time() - start_time) * 1000
+        self._update_test_statistics()
+        return self.metrics
+
+    def _update_test_statistics(self):
+        if self.metrics.execution_times:
+            min_time = min(self.metrics.execution_times)
+            max_time = max(self.metrics.execution_times)
+            self.metrics.fastest_test = self.metrics.execution_times.index(min_time) + 1
+            self.metrics.slowest_test = self.metrics.execution_times.index(max_time) + 1
 
 def main():
-    if len(sys.argv) < 3:
-        logging.error("Usage: python main.py <Run|Submit> <problem_number>")
+    if len(sys.argv) != 4:
+        print("Usage: python main.py <Run|Submit> <problem_number> <language>")
         return
 
-    mode, problem_num = sys.argv[1], sys.argv[2]
-    if mode not in {"Run", "Submit"}:
-        logging.error("Invalid mode. Must be 'Run' or 'Submit'")
-        return
-
+    mode, problem_id, lang = sys.argv[1], int(sys.argv[2]), sys.argv[3]
+    
     try:
-        problem_num = int(problem_num)
-    except ValueError:
-        logging.error("Problem number must be an integer")
-        return
+        language = Language(lang.lower())
+        runner = TestRunner(problem_id, language)
+        metrics = runner.run_tests(mode)
+        
+        # Output results in JSON format for frontend/backend integration
+        result = {
+            "status": "success",
+            "metrics": {
+                "total_time_ms": metrics.total_time,
+                "passed_count": metrics.passed_count,
+                "failed_count": metrics.failed_count,
+                "timeouts": metrics.timeouts,
+                "errors": metrics.errors,
+                "peak_memory_mb": metrics.peak_memory / (1024 * 1024),
+                "peak_cpu_percent": metrics.peak_cpu_usage,
+                "test_results": [
+                    {
+                        "success": result.success,
+                        "execution_time_ms": result.execution_time * 1000,
+                        "output": result.output,
+                        "error": result.error_message
+                    }
+                    for result in metrics.test_results
+                ]
+            }
+        }
+        print(json.dumps(result))
 
-    c_file = f"C_Solutions/solution{problem_num}.c"
-    json_file = f"Problem/problem{problem_num}.json"
-    executable = "solution_program"
-
-    if not os.path.exists(c_file):
-        logging.error("C solution file not found: %s", c_file)
-        return
-
-    if not c_compiler(c_file, executable):
-        logging.error("Compilation failed. Stopping execution.")
-        return
-
-    handler = problem_handlers.get(problem_num)
-    if not handler:
-        logging.error("No handler for problem %d", problem_num)
-        return
-
-    try:
-        test_cases = test_case_import(json_file, mode)
-        if mode == "Run":
-            test_cases = test_cases[:3]
     except Exception as e:
-        logging.error("Error loading test cases: %s", str(e))
-        return
-
-    metrics = TestMetrics()
-    start_time = time.time()
-
-    for i, test_case in enumerate(test_cases, 1):
-        try:
-            args = handler['import'](test_case)
-            output, passed, exec_time = handler['exec'](executable, *args)
-            
-            metrics.execution_times.append(exec_time)
-            if passed:
-                metrics.passed_count += 1
-            else:
-                metrics.failed_count += 1
-                if "Timeout Error" in output:
-                    metrics.timeouts += 1
-                elif "Execution Error" in output:
-                    metrics.errors += 1
-            
-            # Track fastest/slowest tests
-            if exec_time == min(metrics.execution_times):
-                metrics.fastest_test = i
-            if exec_time == max(metrics.execution_times):
-                metrics.slowest_test = i
-                
-            # Get resource usage
-            try:
-                process = subprocess.check_output(['ps', '-p', str(os.getpid()), '-o', '%cpu,%mem']).decode().split('\n')[1].split()
-                cpu_usage = float(process[0])
-                memory = float(process[1])
-                metrics.peak_cpu_usage = max(metrics.peak_cpu_usage, cpu_usage)
-                metrics.peak_memory = max(metrics.peak_memory, memory)
-            except:
-                pass
-                
-            status = f"{Fore.GREEN + Style.BRIGHT}PASS{Style.RESET_ALL}" if passed else f"{Fore.RED + Style.BRIGHT}FAIL{Style.RESET_ALL}"
-            logging.info(f"Test {i}: {status} (%.2f ms)\n%s", exec_time * 1000, output)
-            
-        except Exception as e:
-            logging.error(f"Error processing test case {i}: {str(e)}")
-            metrics.errors += 1
-
-    metrics.total_time = (time.time() - start_time) * 1000
-    print_metrics(metrics, mode)
+        error_result = {
+            "status": "error",
+            "message": str(e)
+        }
+        print(json.dumps(error_result))
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

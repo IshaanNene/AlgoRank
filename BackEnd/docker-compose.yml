@@ -1,15 +1,23 @@
 version: '3.8'
+
 services:
   db:
-    image: postgres:14
+    image: postgres:15
+    container_name: algorank-db
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: algorank
+      POSTGRES_PASSWORD: algorank123
       POSTGRES_DB: algorank
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - algorank_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U algorank"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  postgres_data: 
+  algorank_data: 

@@ -50,7 +50,7 @@ func (s *Server) handleRunCode(w http.ResponseWriter, r *http.Request) {
 
 	// If this is a submission, save it to the database
 	if req.Mode == "Submit" {
-		userID := r.Context().Value("userID").(string)
+		userID := r.Context().Value(userIDKey).(string)
 		submission := models.Submission{
 			UserID:    userID,
 			ProblemID: strconv.Itoa(req.ProblemID),

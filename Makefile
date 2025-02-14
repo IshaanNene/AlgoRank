@@ -1,19 +1,41 @@
+.PHONY: build run test clean
+
 build:
-	docker build -t algo-rank .
+	docker-compose build
+
 run:
-	docker run --rm --memory=256m --cpus="0.5" --pids-limit=50 --security-opt="no-new-privileges" --network=none --tmpfs /tmp:size=64m -v "$(pwd)":/AlgoRank/writable algo_rank Run 1
-submit:
-	docker run --rm --memory=256m --cpus="0.5" --pids-limit=50 --security-opt="no-new-privileges" --network=none --tmpfs /tmp:size=64m -v "$(pwd)":/AlgoRank/writable algo_rank Submit 1
+	docker-compose up
+
+stop:
+	docker-compose down
+
+clean:
+	docker-compose down -v
+	rm -rf dist
+	find . -name "*.pyc" -delete
+
+test:
+	cd BackEnd && go test ./...
+	cd FrontEnd && npm test
+
+dev:
+	docker-compose up -d db
+	cd BackEnd && go run main.go & 
+	cd FrontEnd && npm start
+
+install:
+	cd FrontEnd && npm install
+	cd BackEnd && go mod download
+
+lint:
+	cd FrontEnd && npm run lint
+	cd BackEnd && go fmt ./...
+
+migrate:
+	docker-compose exec db psql -U algorank -d algorank -f /docker-entrypoint-initdb.d/init.sql
 
 gits_up:
 	git status
 	git add .
-	git commit -m "Updates"
+	git commit -m "Update"
 	git push
-
-clean:
-	rm -f a.out program
-
-run:
-	chmod +x run.sh
-	./run.sh

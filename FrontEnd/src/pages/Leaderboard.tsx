@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Medal, TrendingUp, Users, Search, Filter, ChevronDown } from 'lucide-react';
 import { useUser } from '../context/UserContext';
+import { usersAPI } from '../services/api';
 
 interface LeaderboardEntry {
   rank: number;
@@ -15,25 +16,23 @@ interface LeaderboardEntry {
 
 const Leaderboard = () => {
   const { user } = useUser();
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [timeRange, setTimeRange] = useState<'weekly' | 'monthly' | 'allTime'>('weekly');
-  const [sortBy, setSortBy] = useState<'rank' | 'score' | 'problems' | 'streak'>('rank');
+  const [timeRange, setTimeRange] = useState('weekly');
+  const [sortBy, setSortBy] = useState('rank');
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
-      setIsLoading(true);
       try {
-        const response = await fetch(
-          `http://localhost:8080/leaderboard?timeRange=${timeRange}&sortBy=${sortBy}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setEntries(data);
-        }
-      } catch (error) {
-        console.error('Error fetching leaderboard:', error);
+        setIsLoading(true);
+        setError(null);
+        const data = await usersAPI.getLeaderboard();
+        setLeaderboardData(data);
+      } catch (err: any) {
+        setError(err.message || 'Failed to fetch leaderboard');
+        console.error('Error fetching leaderboard:', err);
       } finally {
         setIsLoading(false);
       }
@@ -42,7 +41,7 @@ const Leaderboard = () => {
     fetchLeaderboard();
   }, [timeRange, sortBy]);
 
-  const filteredEntries = entries.filter(entry =>
+  const filteredEntries = leaderboardData.filter(entry =>
     entry.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
     entry.name.toLowerCase().includes(searchQuery.toLowerCase())
   );

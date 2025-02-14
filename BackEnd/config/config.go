@@ -6,42 +6,33 @@ import (
 )
 
 type Config struct {
+	Port            string
 	DatabaseURL     string
 	JWTSecret       string
-	Port            string
 	CodeExecTimeout int
 	MaxMemoryLimit  int64
 }
 
-func Load() *Config {
+func LoadConfig() *Config {
 	return &Config{
-		DatabaseURL:     getEnv("DATABASE_URL", "postgres://user:password@localhost:5432/algorank?sslmode=disable"),
-		JWTSecret:       getEnv("JWT_SECRET", "your-secret-key"),
-		Port:            getEnv("PORT", "8080"),
-		CodeExecTimeout: getEnvAsInt("CODE_EXEC_TIMEOUT", 10),
-		MaxMemoryLimit:  getEnvAsInt64("MAX_MEMORY_LIMIT", 512*1024*1024), // 512MB default
+		Port:            getEnvOrDefault("PORT", "8080"),
+		DatabaseURL:     getEnvOrDefault("DATABASE_URL", "postgres://algorank:algorank123@localhost:5432/algorank?sslmode=disable"),
+		JWTSecret:       getEnvOrDefault("JWT_SECRET", "your-secret-key-here"),
+		CodeExecTimeout: getEnvIntOrDefault("CODE_EXEC_TIMEOUT", 10),
+		MaxMemoryLimit:  int64(getEnvIntOrDefault("MAX_MEMORY_LIMIT", 536870912)), // 512MB default
 	}
 }
 
-func getEnv(key, defaultValue string) string {
-	if value, exists := os.LookupEnv(key); exists {
+func getEnvOrDefault(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
 		return value
 	}
 	return defaultValue
 }
 
-func getEnvAsInt(key string, defaultVal int) int {
-	if val, exists := os.LookupEnv(key); exists {
-		if intVal, err := strconv.Atoi(val); err == nil {
-			return intVal
-		}
-	}
-	return defaultVal
-}
-
-func getEnvAsInt64(key string, defaultVal int64) int64 {
-	if val, exists := os.LookupEnv(key); exists {
-		if intVal, err := strconv.ParseInt(val, 10, 64); err == nil {
+func getEnvIntOrDefault(key string, defaultVal int) int {
+	if value := os.Getenv(key); value != "" {
+		if intVal, err := strconv.Atoi(value); err == nil {
 			return intVal
 		}
 	}

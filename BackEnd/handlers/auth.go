@@ -7,26 +7,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/IshaanNene/AlgoRank/db"
+	"github.com/IshaanNene/AlgoRank/models"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 )
-
-type Server struct {
-	db        *sql.DB
-	Router    *mux.Router
-	jwtSecret string
-}
-
-func NewServer(db *sql.DB, jwtSecret string) *Server {
-	s := &Server{
-		db:        db,
-		Router:    mux.NewRouter(),
-		jwtSecret: jwtSecret,
-	}
-	s.setupRoutes()
-	return s
-}
 
 func (s *Server) setupRoutes() {
 	api := s.Router.PathPrefix("/api").Subrouter()
@@ -75,6 +60,12 @@ type SignupRequest struct {
 	Password string `json:"password"`
 	Username string `json:"username"`
 	Name     string `json:"name"`
+}
+
+// AuthResponse represents the response structure for auth endpoints
+type AuthResponse struct {
+	User  *models.User `json:"user"`
+	Token string       `json:"token,omitempty"`
 }
 
 func (s *Server) handleSignup(w http.ResponseWriter, r *http.Request) {
@@ -219,7 +210,6 @@ func (s *Server) authMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-
 		ctx := context.WithValue(r.Context(), userIDKey, claims.UserID)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -236,39 +226,61 @@ func (s *Server) generateToken(userID string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(s.jwtSecret))
 }
+
 func (s *Server) handleAuthCheck(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("userID").(string)
-	type User struct {
-		ID                string    `json:"id"`
-		Email             string    `json:"email"`
-		Username          string    `json:"username"`
-		Name              string    `json:"name"`
-		PasswordHash      string    `json:"-"`
-		Location          string    `json:"location"`
-		GitHub            string    `json:"github"`
-		Twitter           string    `json:"twitter"`
-		Bio               string    `json:"bio"`
-		CreatedAt         time.Time `json:"createdAt"`
-		ProfileCompletion int       `json:"profileCompletion"`
-	}
-
-	var user User
-	err := s.db.QueryRow(
-		"SELECT id, email, username, name, location, github, twitter, bio, created_at, profile_completion FROM users WHERE id = $1",
-		userID,
-	).Scan(
-		&user.ID, &user.Email, &user.Username, &user.Name, &user.Location,
-		&user.GitHub, &user.Twitter, &user.Bio, &user.CreatedAt, &user.ProfileCompletion,
-	)
-
-	if err == sql.ErrNoRows {
-		http.Error(w, "User not found", http.StatusNotFound)
-		return
-	} else if err != nil {
-		http.Error(w, "Database error", http.StatusInternalServerError)
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
+
+	// Get token from header
+	token := r.Header.Get("Authorization")
+	if token == "" {
+		// No token, return null user
+		json.NewEncoder(w).Encode(AuthResponse{
+			User: nil,
+		})
+		return
+	}
+
+	// Remove "Bearer " prefix if present
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	// Validate token and get user
+	claims, err := validateToken(token, s.jwtSecret)
+	if err != nil {
+		// Invalid token, return null user
+		json.NewEncoder(w).Encode(AuthResponse{
+			User: nil,
+		})
+		return
+	}
+
+	// Get user from database using the db package function
+	user, err := db.GetUserByID(s.db, claims.UserID)
+	if err != nil {
+		// User not found, return null user
+		json.NewEncoder(w).Encode(AuthResponse{
+			User: nil,
+		})
+		return
+	}
+
+	// Return user data
+	json.NewEncoder(w).Encode(AuthResponse{
+		User: user,
+	})
+}
+
+// Add proper token validation
+func validateToken(tokenString string, secret string) (*Claims, error) {
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+
+	if err != nil || !token.Valid {
+		return nil, err
+	}
+
+	return claims, nil
 }

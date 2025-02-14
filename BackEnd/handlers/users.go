@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"strconv"
+
 	"github.com/IshaanNene/AlgoRank/models"
 	"github.com/IshaanNene/AlgoRank/utils"
 	"github.com/gorilla/mux"
-	"strconv"
 )
 
 func (s *Server) handleGetProfile(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +45,7 @@ func (s *Server) handleGetProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleUpdateProfile(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("userID").(string)
+	userID := r.Context().Value(userIDKey).(string)
 
 	var updates struct {
 		Name     *string `json:"name"`
@@ -191,7 +192,7 @@ func (s *Server) getUserStats(userID string) (*models.UserStats, error) {
 }
 
 func (s *Server) handleGetStats(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("userID").(string)
+	userID := r.Context().Value(userIDKey).(string)
 
 	stats, err := s.getUserStats(userID)
 	if err != nil {
