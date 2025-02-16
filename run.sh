@@ -1,4 +1,5 @@
 #!/bin/bash
+docker build -t algo_rank .
 
 LANGUAGES=("c" "cpp" "java" "go" "rust")
 
@@ -14,7 +15,8 @@ run_test() {
         --security-opt="no-new-privileges" \
         --network=none \
         --tmpfs /tmp:size=64m \
-        -v "$(pwd)":/CodeForge/writable \
+        -v "$(pwd)/Problem:/AlgoRank/Problem:ro" \
+        -v "$(pwd)/Solutions:/AlgoRank/Solutions:ro" \
         algo_rank "$mode" "$problem" "$lang"
 }
 
@@ -24,10 +26,8 @@ for lang in "${LANGUAGES[@]}"; do
     for problem in {1..10}; do
         echo "Running problem $problem in Run mode..."
         run_test "Run" "$problem" "$lang"
-    done
-    
-    for problem in {1..10}; do
-        echo "Running problem $problem in Submit mode..."
-        run_test "Submit" "$problem" "$lang"
+        
+        # echo "Running problem $problem in Submit mode..."
+        # run_test "Submit" "$problem" "$lang"
     done
 done

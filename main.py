@@ -44,9 +44,9 @@ class TestMetrics:
     test_results: List[ExecutionResult] = field(default_factory=list)
 
 class CodeExecutor:
-    TIMEOUT = 5  # seconds
-    MEMORY_LIMIT = 256 * 1024 * 1024  # 256MB
-    CPU_LIMIT = 0.5  # 50% CPU usage
+    TIMEOUT = 5
+    MEMORY_LIMIT = 256 * 1024 * 1024
+    CPU_LIMIT = 0.5
 
     def __init__(self, language: Language):
         self.language = language
@@ -223,11 +223,23 @@ def main():
     mode, problem_id, lang = sys.argv[1], int(sys.argv[2]), sys.argv[3]
     
     try:
-        language = Language(lang.lower())
+        # Update language handling to be case-insensitive
+        language_map = {
+            "c": Language.C,
+            "cpp": Language.CPP,
+            "java": Language.JAVA,
+            "go": Language.GO,
+            "rust": Language.RUST
+        }
+        
+        if lang.lower() not in language_map:
+            raise ValueError(f"Unsupported language: {lang}")
+            
+        language = language_map[lang.lower()]
         runner = TestRunner(problem_id, language)
         metrics = runner.run_tests(mode)
         
-        # Output results in JSON format for frontend/backend integration
+        # Format test results with proper output handling
         result = {
             "status": "success",
             "metrics": {
@@ -238,6 +250,8 @@ def main():
                 "errors": metrics.errors,
                 "peak_memory_mb": metrics.peak_memory / (1024 * 1024),
                 "peak_cpu_percent": metrics.peak_cpu_usage,
+                "fastest_test": metrics.fastest_test,
+                "slowest_test": metrics.slowest_test,
                 "test_results": [
                     {
                         "success": result.success,
@@ -249,14 +263,14 @@ def main():
                 ]
             }
         }
-        print(json.dumps(result))
+        print(json.dumps(result, indent=2))
 
     except Exception as e:
         error_result = {
             "status": "error",
             "message": str(e)
         }
-        print(json.dumps(error_result))
+        print(json.dumps(error_result, indent=2))
         sys.exit(1)
 
 if __name__ == "__main__":

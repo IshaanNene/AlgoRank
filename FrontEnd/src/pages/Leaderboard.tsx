@@ -56,89 +56,142 @@ const Leaderboard = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 py-8 px-4 sm:px-6 lg:px-8">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Global Leaderboard</h1>
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <input
-              type="text"
-              placeholder="Search users..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            />
+      <div className="max-w-7xl mx-auto mb-8">
+        <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10">
+          <h1 className="text-3xl font-bold text-white mb-4">Global Leaderboard</h1>
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            {/* Search Bar */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg 
+                         text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 
+                         focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Time Range Selector */}
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-gray-200 
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="weekly">This Week</option>
+              <option value="monthly">This Month</option>
+              <option value="allTime">All Time</option>
+            </select>
           </div>
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value as typeof timeRange)}
-            className="border border-gray-300 rounded-md px-4 py-2"
-          >
-            <option value="weekly">This Week</option>
-            <option value="monthly">This Month</option>
-            <option value="allTime">All Time</option>
-          </select>
+        </div>
+      </div>
+
+      {/* Top 3 Winners Podium */}
+      <div className="max-w-7xl mx-auto mb-12">
+        <div className="flex justify-center items-end space-x-4 h-48">
+          {/* Second Place */}
+          <div className="w-32 flex flex-col items-center">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 
+                          flex items-center justify-center mb-2 border-4 border-gray-700">
+              <span className="text-2xl font-bold text-gray-900">2</span>
+            </div>
+            <div className="h-24 w-full bg-gradient-to-t from-gray-700 to-gray-600 rounded-t-lg 
+                          flex flex-col items-center justify-end p-2">
+              <span className="text-white font-semibold">{filteredEntries[1]?.username}</span>
+              <span className="text-gray-300 text-sm">{filteredEntries[1]?.score} pts</span>
+            </div>
+          </div>
+
+          {/* First Place */}
+          <div className="w-32 flex flex-col items-center">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 
+                          flex items-center justify-center mb-2 border-4 border-yellow-600 
+                          transform hover:scale-110 transition-transform">
+              <span className="text-3xl font-bold text-yellow-900">1</span>
+            </div>
+            <div className="h-32 w-full bg-gradient-to-t from-yellow-700 to-yellow-600 rounded-t-lg 
+                          flex flex-col items-center justify-end p-2">
+              <span className="text-white font-semibold">{filteredEntries[0]?.username}</span>
+              <span className="text-yellow-200 text-sm">{filteredEntries[0]?.score} pts</span>
+            </div>
+          </div>
+
+          {/* Third Place */}
+          <div className="w-32 flex flex-col items-center">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-600 to-amber-700 
+                          flex items-center justify-center mb-2 border-4 border-amber-800">
+              <span className="text-2xl font-bold text-amber-100">3</span>
+            </div>
+            <div className="h-20 w-full bg-gradient-to-t from-amber-800 to-amber-700 rounded-t-lg 
+                          flex flex-col items-center justify-end p-2">
+              <span className="text-white font-semibold">{filteredEntries[2]?.username}</span>
+              <span className="text-amber-200 text-sm">{filteredEntries[2]?.score} pts</span>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Leaderboard Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Problems</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Streak</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredEntries.map((entry) => (
-              <tr key={entry.username} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className={`flex items-center ${getMedalColor(entry.rank)}`}>
-                    {entry.rank <= 3 ? (
-                      <Medal className="h-5 w-5 mr-1" />
-                    ) : null}
-                    <span className="text-sm">{entry.rank}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-sm font-medium">{entry.name[0]}</span>
-                    </div>
-                    <div className="ml-3">
-                      <div className="text-sm font-medium text-gray-900">{entry.name}</div>
-                      <div className="text-sm text-gray-500">@{entry.username}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.score}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.problems}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{entry.streak} days</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                    entry.change > 0 ? 'bg-green-100 text-green-800' : 
-                    entry.change < 0 ? 'bg-red-100 text-red-800' : 
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    <TrendingUp className={`h-4 w-4 mr-1 ${
-                      entry.change > 0 ? 'text-green-500' : 
-                      entry.change < 0 ? 'text-red-500' : 
-                      'text-gray-500'
-                    }`} />
-                    {entry.change > 0 ? '+' : ''}{entry.change}
-                  </span>
-                </td>
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white/5 backdrop-blur-lg rounded-xl border border-white/10 overflow-hidden">
+          <table className="min-w-full divide-y divide-gray-800">
+            <thead className="bg-gray-800/50">
+              <tr>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Rank</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">User</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Score</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Problems</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Streak</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Change</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-800 bg-transparent">
+              {filteredEntries.slice(3).map((entry) => (
+                <tr key={entry.username} 
+                    className="hover:bg-white/5 transition-colors cursor-pointer">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="text-gray-300 font-medium">#{entry.rank}</span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 
+                                    flex items-center justify-center">
+                        <span className="text-white font-medium">{entry.name[0]}</span>
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-white">{entry.name}</div>
+                        <div className="text-sm text-gray-400">@{entry.username}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="text-gray-300">{entry.score}</span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-300">{entry.problems}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="text-green-400">{entry.streak} days</span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                      ${entry.change > 0 
+                        ? 'bg-green-500/20 text-green-400' 
+                        : 'bg-red-500/20 text-red-400'}`}>
+                      <TrendingUp className={`h-4 w-4 mr-1 ${
+                        entry.change > 0 ? 'text-green-400' : 'text-red-400'
+                      }`} />
+                      {entry.change > 0 ? '+' : ''}{entry.change}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

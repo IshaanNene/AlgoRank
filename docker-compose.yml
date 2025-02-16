@@ -1,34 +1,26 @@
-version: '3.8'
-
 services:
   frontend:
-    build:
-      context: ./FrontEnd
-      dockerfile: Dockerfile
+    build: ./FrontEnd
     ports:
       - "5173:5173"
-    environment:
-      - REACT_APP_API_URL=http://backend:8080
-      - NODE_ENV=development
-      - VITE_DEV_SERVER_HOST=0.0.0.0
-      - VITE_API_URL=http://localhost:8080
     volumes:
       - ./FrontEnd:/app
       - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8080
     depends_on:
       - backend
 
   backend:
-    build:
-      context: ./BackEnd
-      dockerfile: Dockerfile
+    build: ./BackEnd
     ports:
       - "8080:8080"
     environment:
-      - DATABASE_URL=postgres://algorank:algorank123@db:5432/algorank?sslmode=disable
-      - JWT_SECRET=your-secret-key-here
-      - PORT=8080
-      - CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=algorank
     depends_on:
       db:
         condition: service_healthy
@@ -36,29 +28,18 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_USER: algorank
-      POSTGRES_PASSWORD: algorank123
-      POSTGRES_DB: algorank
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=algorank
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./BackEnd/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U algorank"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  code_runner:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - ./Solutions:/AlgoRank/Solutions
-    environment:
-      - MAX_EXECUTION_TIME=10
-      - MAX_MEMORY_MB=256
-
 volumes:
-  postgres_data: 
+  postgres_data:

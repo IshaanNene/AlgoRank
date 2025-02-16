@@ -128,184 +128,165 @@ const CodeEditor = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header Toolbar */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-slate-900">
+      {/* Header Section */}
+      <div className="border-b border-gray-800 bg-black/30 backdrop-blur-lg sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate('/problems')}
-                className="flex items-center text-gray-500 hover:text-gray-700"
+                className="text-gray-400 hover:text-white transition-colors"
               >
-                <ChevronLeft className="h-5 w-5" />
-                <span>Back to Problems</span>
+                <ChevronLeft className="w-6 h-6" />
               </button>
-              <div className="ml-6">
-                <h1 className="text-xl font-bold text-gray-900">{problem?.problem_name || 'Loading...'}</h1>
-                <span className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
-                  problem?.difficulty === 'Easy' ? 'bg-green-100 text-green-800' :
-                  problem?.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
-                }`}>
-                  {problem?.difficulty || 'Loading...'}
-                </span>
+              <div>
+                <h1 className="text-xl font-semibold text-white">{problem?.problem_name}</h1>
+                <div className="flex items-center space-x-3 mt-1">
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium
+                    ${problem?.difficulty === 'Easy' ? 'bg-green-500/20 text-green-400' :
+                      problem?.difficulty === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-red-500/20 text-red-400'}`}>
+                    {problem?.difficulty}
+                  </span>
+                  <span className="text-gray-400 text-sm">Acceptance: {problem?.acceptance_rate}%</span>
+                </div>
               </div>
             </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={resetCode}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Reset
-              </button>
-              <button
-                onClick={runCode}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                <Play className="h-4 w-4 mr-2" />
-                Run
-              </button>
-              <button
-                onClick={submitCode}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
-              >
-                <Play className="h-4 w-4 mr-2" />
-                Submit
-              </button>
-            </div>
             <div className="flex items-center space-x-4">
-              <select
-                value={selectedLanguage}
-                onChange={(e) => setSelectedLanguage(e.target.value)}
-                className="border rounded px-2 py-1"
-              >
-                <option value="python3">Python3</option>
-                <option value="java">Java</option>
-                <option value="cpp">C++</option>
-              </select>
-              <button
-                onClick={() => setIsAutoSave(!isAutoSave)}
-                className={`px-3 py-1 rounded ${
-                  isAutoSave ? 'bg-green-100 text-green-800' : 'bg-gray-100'
-                }`}
-              >
-                Auto-save: {isAutoSave ? 'On' : 'Off'}
+              <button className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors">
+                <ThumbsUp className="w-5 h-5" />
+                <span>{problem?.likes}</span>
+              </button>
+              <button className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors">
+                <ThumbsDown className="w-5 h-5" />
+                <span>{problem?.dislikes}</span>
+              </button>
+              <button className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors">
+                <MessageCircle className="w-5 h-5" />
+                <span>{problem?.discussion_count}</span>
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex">
+      <div className="flex h-[calc(100vh-5rem)]">
         {/* Problem Description Panel */}
-        <div className="w-1/3 bg-white border-r border-gray-200 overflow-y-auto">
-          <div className="p-6">
-            <h1 className="text-2xl font-bold mb-4">{problem?.problem_name}</h1>
-            
-            {/* Problem Metrics */}
-            <div className="flex items-center space-x-4 mb-6">
-              <div className="flex items-center">
-                <ThumbsUp className="w-4 h-4 mr-1" />
-                <span>{problem?.likes}</span>
-              </div>
-              <div className="flex items-center">
-                <ThumbsDown className="w-4 h-4 mr-1" />
-                <span>{problem?.dislikes}</span>
-              </div>
-              <div className="flex items-center">
-                <MessageCircle className="w-4 h-4 mr-1" />
-                <span>{problem?.discussion_count}</span>
-              </div>
+        <div className="w-2/5 bg-gray-900/50 backdrop-blur-sm border-r border-gray-800 overflow-y-auto">
+          <div className="p-6 space-y-6">
+            <div className="prose prose-invert max-w-none">
+              <div dangerouslySetInnerHTML={{ __html: description }} />
             </div>
 
-            <h2 className="text-lg font-semibold mb-4">Problem Description</h2>
-            <p className="whitespace-pre-line">{description}</p>
-            
-            <h3 className="text-lg font-semibold mt-6 mb-4">Test Cases</h3>
-            <div className="space-y-4">
-              {testCases.map((testCase, index) => (
-                <div key={testCase.id} className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600">Input:</p>
-                  <pre className="mt-1 text-sm">{`a: ${testCase.input.a}, b: ${testCase.input.b}`}</pre>
-                  <p className="text-sm text-gray-600 mt-2">Expected Output:</p>
-                  <pre className="mt-1 text-sm">{testCase.expected}</pre>
-                </div>
-              ))}
-            </div>
+            {showConstraints && (
+              <div className="bg-gray-800/50 rounded-lg p-4 space-y-2">
+                <h3 className="text-lg font-semibold text-white">Constraints</h3>
+                <ul className="list-disc list-inside text-gray-300 space-y-1">
+                  {problem?.constraints.map((constraint, index) => (
+                    <li key={index}>{constraint}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {showHints && (
+              <div className="bg-indigo-900/30 rounded-lg p-4 space-y-2">
+                <h3 className="text-lg font-semibold text-white">Hints</h3>
+                <ul className="list-disc list-inside text-gray-300 space-y-1">
+                  {problem?.hints.map((hint, index) => (
+                    <li key={index}>{hint}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Code Editor and Test Panels */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1">
-            <Editor
-              height="100%"
-              defaultLanguage="c"
-              theme="vs-dark"
-              value={code}
-              onChange={handleEditorChange}
-              options={{
-                minimap: { enabled: false },
-                fontSize: 14,
-                lineNumbers: 'on',
-                roundedSelection: false,
-                scrollBeyondLastLine: false,
-                automaticLayout: true
-              }}
-            />
+        {/* Code Editor and Output Panel */}
+        <div className="flex-1 flex flex-col bg-gray-900">
+          <div className="flex-1 relative">
+            <div className="absolute inset-0">
+              <Editor
+                height="100%"
+                defaultLanguage="c"
+                theme="vs-dark"
+                value={code}
+                onChange={handleEditorChange}
+                options={{
+                  fontSize: 14,
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  padding: { top: 10 },
+                  lineNumbers: 'on',
+                  roundedSelection: false,
+                  automaticLayout: true
+                }}
+              />
+            </div>
           </div>
-          
-          {/* Test Cases Panel */}
-          <div className="h-1/3 border-t border-gray-200">
-            <div className="flex border-b">
-              {testCases.map((testCase, index) => (
+
+          {/* Control Panel */}
+          <div className="bg-gray-800/70 backdrop-blur-sm border-t border-gray-700 p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
                 <button
-                  key={testCase.id}
-                  onClick={() => setActiveTestCase(testCase.id)}
-                  className={`px-4 py-2 ${
-                    activeTestCase === testCase.id
-                      ? 'border-b-2 border-blue-500'
-                      : ''
-                  }`}
+                  onClick={runCode}
+                  disabled={status === 'running'}
+                  className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors"
                 >
-                  Case {index + 1}
+                  {status === 'running' ? (
+                    <LoadingSpinner size="sm" color="white" />
+                  ) : (
+                    <Play className="w-5 h-5" />
+                  )}
+                  <span>Run Code</span>
                 </button>
-              ))}
-              <button
-                onClick={handleAddCustomTestCase}
-                className="px-4 py-2 text-blue-500"
+                <button
+                  onClick={resetCode}
+                  className="flex items-center space-x-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md transition-colors"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                  <span>Reset</span>
+                </button>
+              </div>
+              <select
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+                className="bg-gray-700 text-white rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500"
               >
-                + Custom
-              </button>
+                <option value="python3">Python 3</option>
+                <option value="cpp">C++</option>
+                <option value="java">Java</option>
+              </select>
             </div>
-            
-            {/* ... test case content and results ... */}
           </div>
-          
-          {/* Output panel */}
-          <div className="h-48 bg-gray-900 text-white p-4 font-mono text-sm overflow-y-auto">
-            <div className="flex items-center space-x-2 mb-2">
-              <span className="text-gray-400">Output:</span>
-              {status === 'running' && (
-                <span className="text-yellow-400">Running...</span>
-              )}
-              {status === 'success' && (
-                <span className="flex items-center text-green-400">
-                  <CheckCircle2 className="h-4 w-4 mr-1" />
-                  Success
-                </span>
-              )}
-              {status === 'error' && (
-                <span className="flex items-center text-red-400">
-                  <XCircle className="h-4 w-4 mr-1" />
-                  Error
-                </span>
-              )}
+
+          {/* Output Panel */}
+          <div className="h-48 bg-gray-800/70 backdrop-blur-sm border-t border-gray-700">
+            <div className="p-4">
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="text-gray-400">Output:</span>
+                {status === 'running' && (
+                  <span className="text-yellow-400">Running...</span>
+                )}
+                {status === 'success' && (
+                  <span className="flex items-center text-green-400">
+                    <CheckCircle2 className="h-4 w-4 mr-1" />
+                    Success
+                  </span>
+                )}
+                {status === 'error' && (
+                  <span className="flex items-center text-red-400">
+                    <XCircle className="h-4 w-4 mr-1" />
+                    Error
+                  </span>
+                )}
+              </div>
+              <pre className="text-gray-300 font-mono text-sm overflow-y-auto max-h-[120px]">
+                {output}
+              </pre>
             </div>
-            <pre className="text-gray-300">{output}</pre>
           </div>
         </div>
       </div>

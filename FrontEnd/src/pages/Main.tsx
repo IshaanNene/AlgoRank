@@ -57,28 +57,28 @@ const Main = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900">
       {/* Hero Section */}
-      <div className="container mx-auto px-4 pt-20 pb-32">
+      <div className="container mx-auto px-4 pt-24 pb-32">
         <div className="text-center max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            Master Coding with a
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500"> Guided</span> Learning Approach
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 animate-fade-in">
+            Master Coding with
+            <span className="bg-gradient-to-r from-cyan-400 to-purple-400 text-transparent bg-clip-text"> AI-Powered</span> Learning
           </h1>
-          <p className="text-xl text-gray-300 mb-8">
-            Tackle coding problems, track your growth, and refine your algorithmic thinking with our comprehensive platform.
+          <p className="text-xl text-gray-300 mb-12 leading-relaxed">
+            Join thousands of developers mastering algorithms through personalized learning paths and real-time feedback.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
             <Link
               to={user ? "/problems" : "/signup"}
-              className="px-8 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center"
+              className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-500 text-white rounded-xl font-medium hover:from-cyan-600 hover:to-purple-600 transition-all transform hover:scale-105 shadow-lg flex items-center group"
             >
               {user ? "Start Coding" : "Get Started"} 
-              <ChevronRight className="w-5 h-5 ml-2" />
+              <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
               to="/problems"
-              className="px-8 py-3 bg-gray-700 text-white rounded-lg font-medium hover:bg-gray-600 transition-colors"
+              className="px-8 py-4 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20 transition-all backdrop-blur-sm"
             >
               Browse Problems
             </Link>
@@ -86,14 +86,17 @@ const Main = () => {
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="bg-gray-800 py-16">
-        <div className="container mx-auto px-4">
+      {/* Stats Section with Glassmorphism */}
+      <div className="relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 backdrop-blur-lg"></div>
+        <div className="container mx-auto px-4 py-16 relative">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-white mb-2">{stat.number}</div>
-                <div className="text-gray-400">{stat.label}</div>
+              <div key={index} className="text-center transform hover:scale-105 transition-transform">
+                <div className="text-4xl md:text-5xl font-bold text-white mb-2 bg-gradient-to-r from-cyan-400 to-purple-400 text-transparent bg-clip-text">
+                  {stat.number}
+                </div>
+                <div className="text-gray-300">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -102,13 +105,16 @@ const Main = () => {
 
       {/* Features Section */}
       <div className="container mx-auto px-4 py-20">
-        <h2 className="text-3xl font-bold text-white text-center mb-12">Why Choose Our Platform?</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-16 bg-gradient-to-r from-cyan-400 to-purple-400 text-transparent bg-clip-text">
+          Why Choose Our Platform?
+        </h2>
         <div className="grid md:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <div key={index} className="bg-gray-800 rounded-xl p-6 hover:bg-gray-700 transition-colors">
-              <div className="mb-4">{feature.icon}</div>
-              <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-              <p className="text-gray-400">{feature.description}</p>
+            <div key={index} 
+                 className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 hover:bg-white/10 transition-all transform hover:scale-105 border border-white/10">
+              <div className="mb-6">{feature.icon}</div>
+              <h3 className="text-xl font-semibold text-white mb-4">{feature.title}</h3>
+              <p className="text-gray-300 leading-relaxed">{feature.description}</p>
             </div>
           ))}
         </div>

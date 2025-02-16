@@ -11,27 +11,7 @@ const api = axios.create({
   timeout: 5000, // 5 second timeout
 });
 
-// Add response interceptor for better error handling
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.code === 'ERR_NETWORK') {
-      console.error('Network error - Is the backend server running?');
-    } else if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      console.error('Response error:', error.response.data);
-    } else if (error.request) {
-      // The request was made but no response was received
-      console.error('Request error:', error.request);
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      console.error('Error:', error.message);
-    }
-    return Promise.reject(error);
-  }
-);
-
+// Add request interceptor for auth token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('authToken');
   if (token) {
@@ -39,6 +19,18 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('authToken');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const authAPI = {
   login: async (credentials: { username: string; password: string }) => {
@@ -88,6 +80,22 @@ export const usersAPI = {
   },
   updateProfile: async (userData: any) => {
     const response = await api.put('/api/users/profile', userData);
+    return response.data;
+  },
+};
+
+export const leaderboardAPI = {
+  getLeaderboard: async (params?: {
+    timeRange?: 'weekly' | 'monthly' | 'all';
+    page?: number;
+    limit?: number;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.timeRange) queryParams.append('timeRange', params.timeRange);
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    
+    const response = await api.get(`/api/leaderboard?${queryParams.toString()}`);
     return response.data;
   },
 };

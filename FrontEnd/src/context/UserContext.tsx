@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '../services/api';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 interface UserStats {
   totalSolved: number;
@@ -106,25 +107,29 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      setIsLoading(true);
-      setError(null);
-      const data = await authAPI.checkAuth();
-      setUser(data.user);
-    } catch (err: any) {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await authAPI.checkAuth();
+      setUser(response.data);
+    } catch (err) {
       console.error('Auth check failed:', err);
-      setUser(null);
-      setError(err.message || 'Failed to check authentication');
+      localStorage.removeItem('authToken'); // Clear invalid token
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    checkAuth().catch(console.error);
+    checkAuth();
   }, []);
 
+  // Don't render children until initial auth check is complete
   if (isLoading) {
-    return <div>Loading...</div>; // Or your loading component
+    return <LoadingSpinner size="lg" />;
   }
 
   return (

@@ -40,6 +40,9 @@ gits_up:
 	git commit -m "Update"
 	git push
 
-nene:
+nene: build-runner
 	chmod +x run.sh
 	./run.sh
+
+build-runner:
+	docker build -t algo_rank .

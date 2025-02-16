@@ -107,159 +107,164 @@ const Profile = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-        <div className="h-32 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
-        <div className="px-6 py-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center">
-              <div className="h-24 w-24 rounded-full bg-white border-4 border-white -mt-16 overflow-hidden">
-                <img
-                  src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`}
-                  alt={user.name}
-                  className="h-full w-full object-cover"
-                />
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Profile Header */}
+        <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 mb-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+            {/* Avatar Section */}
+            <div className="relative group">
+              <div className="w-32 h-32 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 
+                            flex items-center justify-center text-4xl font-bold text-white
+                            transform group-hover:scale-105 transition-all duration-300">
+                {user.name[0].toUpperCase()}
               </div>
-              <div className="ml-4 -mt-16"> 
-                <h2 className="text-2xl font-bold text-gray-900">{user.name}</h2>
-                <p className="text-gray-500">@{user.username}</p>
-              </div>
-            </div>
-            <div className="mt-4 md:mt-0 flex space-x-3">
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-                Edit Profile
+              <button className="absolute bottom-0 right-0 bg-gray-800 p-2 rounded-full 
+                               border-4 border-gray-900 text-gray-300 hover:text-white
+                               transform hover:scale-110 transition-all duration-300">
+                <Edit2 className="w-4 h-4" />
               </button>
             </div>
-          </div>
-          
-          <div className="mt-6 border-b border-gray-200">
-            <nav className="flex space-x-8">
-              {['overview', 'solutions', 'submissions'].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab as typeof activeTab)}
-                  className={`px-3 py-2 text-sm font-medium ${
-                    activeTab === tab
-                      ? 'border-b-2 border-indigo-500 text-indigo-600'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </button>
-              ))}
-            </nav>
-          </div>
-          
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {Object.entries(editableFields).map(([key, field]) => (
-              <div key={key} className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  {key === 'github' && <Github className="h-5 w-5 text-gray-400" />}
-                  {key === 'twitter' && <Twitter className="h-5 w-5 text-gray-400" />}
-                  {key === 'location' && <MapPin className="h-5 w-5 text-gray-400" />}
-                  <span className="text-gray-600">{field.name}:</span>
+
+            {/* User Info */}
+            <div className="flex-1">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-3xl font-bold text-white mb-2">{user.name}</h1>
+                  <p className="text-gray-400">@{user.username}</p>
                 </div>
-                <div className="flex items-center space-x-2">
-                  {field.isEditing ? (
-                    <>
-                      <input
-                        type="text"
-                        value={field.value}
-                        onChange={(e) => setEditableFields(prev => ({
-                          ...prev,
-                          [key]: { ...prev[key], value: e.target.value }
-                        }))}
-                        className="px-2 py-1 border rounded"
-                      />
-                      <button
-                        onClick={() => handleSave(key)}
-                        disabled={isLoading}
-                        className="text-green-500 hover:text-green-600"
-                      >
-                        <Save className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => setEditableFields(prev => ({
-                          ...prev,
-                          [key]: { ...prev[key], isEditing: false }
-                        }))}
-                        className="text-red-500 hover:text-red-600"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-gray-900">{field.value || 'Not set'}</span>
-                      <button
-                        onClick={() => handleEdit(key)}
-                        className="text-gray-400 hover:text-gray-600"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </button>
-                    </>
-                  )}
+                <div className="flex items-center space-x-4">
+                  <button className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white 
+                                   rounded-lg transition-colors flex items-center gap-2">
+                    <Edit2 className="w-4 h-4" />
+                    Edit Profile
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-        <h3 className="text-lg font-semibold mb-4">Problem Solving Statistics</h3>
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-600">Easy ({user.stats.easySolved}/100)</span>
-              <span className="text-green-600">{Math.round(user.stats.easySolved)}%</span>
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full">
-              <div
-                className="h-2 bg-green-500 rounded-full"
-                style={{ width: `${user.stats.easySolved}%` }}
-              ></div>
-            </div>
-          </div>
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-600">Medium ({user.stats.mediumSolved}/100)</span>
-              <span className="text-yellow-600">{Math.round(user.stats.mediumSolved)}%</span>
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full">
-              <div
-                className="h-2 bg-yellow-500 rounded-full"
-                style={{ width: `${user.stats.mediumSolved}%` }}
-              ></div>
-            </div>
-          </div>
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span className="text-gray-600">Hard ({user.stats.hardSolved}/100)</span>
-              <span className="text-red-600">{Math.round(user.stats.hardSolved)}%</span>
-            </div>
-            <div className="h-2 bg-gray-200 rounded-full">
-              <div
-                className="h-2 bg-red-500 rounded-full"
-                style={{ width: `${user.stats.hardSolved}%` }}
-              ></div>
+              {/* User Stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+                <div className="bg-gray-800/50 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-white">{user.stats.totalSolved}</div>
+                  <div className="text-sm text-gray-400">Problems Solved</div>
+                </div>
+                <div className="bg-gray-800/50 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-white">{user.stats.submissions}</div>
+                  <div className="text-sm text-gray-400">Total Submissions</div>
+                </div>
+                <div className="bg-gray-800/50 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-white">{user.stats.acceptanceRate}</div>
+                  <div className="text-sm text-gray-400">Acceptance Rate</div>
+                </div>
+                <div className="bg-gray-800/50 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-indigo-400">{user.profileCompletion}%</div>
+                  <div className="text-sm text-gray-400">Profile Completion</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="mt-4">
-        <p className="text-gray-600">{user.bio}</p>
-      </div>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Personal Info */}
+          <div className="space-y-8">
+            {/* Bio Section */}
+            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+              <h2 className="text-xl font-semibold text-white mb-4">About</h2>
+              <p className="text-gray-300">{user.bio || 'No bio added yet'}</p>
+            </div>
 
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <p className="text-sm text-gray-500">Profile Completion</p>
-        <p className="text-2xl font-semibold">{user.profileCompletion}%</p>
-        <div className="h-2 bg-gray-200 rounded-full">
-          <div
-            className="h-2 bg-blue-500 rounded-full"
-            style={{ width: `${user.profileCompletion}%` }}
-          ></div>
+            {/* Contact Info */}
+            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+              <h2 className="text-xl font-semibold text-white mb-4">Contact Information</h2>
+              <div className="space-y-4">
+                <div className="flex items-center text-gray-300">
+                  <Mail className="w-5 h-5 mr-3 text-gray-400" />
+                  {user.email}
+                </div>
+                <div className="flex items-center text-gray-300">
+                  <MapPin className="w-5 h-5 mr-3 text-gray-400" />
+                  {user.location || 'Location not specified'}
+                </div>
+                {user.github && (
+                  <div className="flex items-center text-gray-300">
+                    <Github className="w-5 h-5 mr-3 text-gray-400" />
+                    <a href={`https://github.com/${user.github}`} 
+                       className="hover:text-indigo-400 transition-colors"
+                       target="_blank" rel="noopener noreferrer">
+                      {user.github}
+                    </a>
+                  </div>
+                )}
+                {user.twitter && (
+                  <div className="flex items-center text-gray-300">
+                    <Twitter className="w-5 h-5 mr-3 text-gray-400" />
+                    <a href={`https://twitter.com/${user.twitter}`}
+                       className="hover:text-indigo-400 transition-colors"
+                       target="_blank" rel="noopener noreferrer">
+                      @{user.twitter}
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Center and Right Columns - Stats and Activity */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Problem Solving Progress */}
+            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+              <h2 className="text-xl font-semibold text-white mb-6">Problem Solving Progress</h2>
+              <div className="space-y-6">
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-400">Easy ({user.stats.easySolved}/100)</span>
+                    <span className="text-green-400">{Math.round(user.stats.easySolved)}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-green-500 rounded-full transition-all duration-500"
+                      style={{ width: `${user.stats.easySolved}%` }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-400">Medium ({user.stats.mediumSolved}/100)</span>
+                    <span className="text-yellow-400">{Math.round(user.stats.mediumSolved)}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-yellow-500 rounded-full transition-all duration-500"
+                      style={{ width: `${user.stats.mediumSolved}%` }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-400">Hard ({user.stats.hardSolved}/100)</span>
+                    <span className="text-red-400">{Math.round(user.stats.hardSolved)}%</span>
+                  </div>
+                  <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-red-500 rounded-full transition-all duration-500"
+                      style={{ width: `${user.stats.hardSolved}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity Calendar */}
+            <div className="bg-white/5 backdrop-blur-lg rounded-xl p-6 border border-white/10">
+              <h2 className="text-xl font-semibold text-white mb-4">Activity Calendar</h2>
+              <div className="h-32 flex items-center justify-center text-gray-400">
+                <Calendar className="w-6 h-6 mr-2" />
+                Activity calendar coming soon...
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

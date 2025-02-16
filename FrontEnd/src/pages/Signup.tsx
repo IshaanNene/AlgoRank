@@ -103,219 +103,264 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-xl w-full bg-white rounded-lg shadow-xl p-8">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">Create Your Account</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Join our community of developers
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto relative">
+        {/* Decorative Elements */}
+        <div className="absolute -top-12 -left-12 w-24 h-24 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute -bottom-12 -right-12 w-24 h-24 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
 
-        {error && (
-          <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-md flex items-center text-red-700">
-            <AlertCircle className="h-5 w-5 mr-2" />
-            <span className="text-sm">{error}</span>
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 shadow-2xl relative z-10">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-white mb-2">Create Your Account</h2>
+            <p className="text-gray-300">Join our community of developers</p>
           </div>
-        )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Required Fields Section */}
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email Address</label>
-                <div className="mt-1 relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Enter your email"
-                  />
+          {error && (
+            <div className="mb-6 p-4 rounded-lg bg-red-500/20 border border-red-500/50">
+              <div className="flex items-center">
+                <AlertCircle className="h-5 w-5 text-red-400 mr-2" />
+                <p className="text-red-300 text-sm">{error}</p>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Basic Information */}
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="block w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg 
+                               text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 
+                               focus:ring-indigo-500 focus:border-transparent transition-all"
+                      placeholder="John Doe"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Username</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="text"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      className="block w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg 
+                               text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 
+                               focus:ring-indigo-500 focus:border-transparent transition-all"
+                      placeholder="johndoe123"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="block w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg 
+                               text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 
+                               focus:ring-indigo-500 focus:border-transparent transition-all"
+                      placeholder="john@example.com"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Password</label>
-                <div className="mt-1 relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    name="password"
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Create a password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-gray-400" />
-                    )}
-                  </button>
+              {/* Additional Information */}
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="block w-full pl-10 pr-12 py-3 bg-gray-800/50 border border-gray-700 rounded-lg 
+                               text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 
+                               focus:ring-indigo-500 focus:border-transparent transition-all"
+                      placeholder="••••••••"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 
+                               hover:text-gray-300 focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
-                <div className="mt-1 relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    name="confirmPassword"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Confirm your password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400" />
-                    ) : (
-                      <Eye className="h-5 w-5 text-gray-400" />
-                    )}
-                  </button>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="block w-full pl-10 pr-12 py-3 bg-gray-800/50 border border-gray-700 rounded-lg 
+                               text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 
+                               focus:ring-indigo-500 focus:border-transparent transition-all"
+                      placeholder="••••••••"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 
+                               hover:text-gray-300 focus:outline-none"
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Location</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <input
+                      type="text"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleChange}
+                      className="block w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg 
+                               text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 
+                               focus:ring-indigo-500 focus:border-transparent transition-all"
+                      placeholder="City, Country"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Optional Fields Section */}
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                <div className="mt-1 relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <label className="block text-sm font-medium text-gray-300 mb-2">GitHub Username</label>
+                <div className="relative">
+                  <Github className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="text"
-                    name="name"
-                    required
-                    value={formData.name}
+                    name="github"
+                    value={formData.github}
                     onChange={handleChange}
-                    className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Enter your full name"
+                    className="block w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg 
+                             text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 
+                             focus:ring-indigo-500 focus:border-transparent transition-all"
+                    placeholder="github_username"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Username</label>
-                <div className="mt-1 relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <label className="block text-sm font-medium text-gray-300 mb-2">Twitter Handle</label>
+                <div className="relative">
+                  <Twitter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="text"
-                    name="username"
-                    required
-                    value={formData.username}
+                    name="twitter"
+                    value={formData.twitter}
                     onChange={handleChange}
-                    className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Choose a username"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Location</label>
-                <div className="mt-1 relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <input
-                    type="text"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleChange}
-                    className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Your location (optional)"
+                    className="block w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg 
+                             text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 
+                             focus:ring-indigo-500 focus:border-transparent transition-all"
+                    placeholder="@twitter_handle"
                   />
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Social Links */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">GitHub</label>
-              <div className="mt-1 relative">
-                <Github className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  name="github"
-                  value={formData.github}
-                  onChange={handleChange}
-                  className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="GitHub username (optional)"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Twitter</label>
-              <div className="mt-1 relative">
-                <Twitter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  name="twitter"
-                  value={formData.twitter}
-                  onChange={handleChange}
-                  className="pl-10 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Twitter handle (optional)"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Bio */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Bio</label>
-            <div className="mt-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">Bio</label>
               <textarea
                 name="bio"
-                rows={3}
                 value={formData.bio}
                 onChange={handleChange}
-                className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Tell us about yourself (optional)"
+                rows={3}
+                className="block w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg 
+                         text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 
+                         focus:ring-indigo-500 focus:border-transparent transition-all"
+                placeholder="Tell us about yourself..."
               />
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
-              isLoading ? 'opacity-75 cursor-not-allowed' : ''
-            }`}
-          >
-            {isLoading ? 'Creating account...' : 'Create account'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link
-              to="/login"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg 
+                       shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-500 
+                       to-purple-500 hover:from-indigo-600 hover:to-purple-600 focus:outline-none 
+                       focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all
+                       disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
             >
-              Sign in
-            </Link>
-          </p>
+              {isLoading ? (
+                <div className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating account...
+                </div>
+              ) : (
+                'Create account'
+              )}
+            </button>
+
+            <div className="text-center">
+              <p className="text-sm text-gray-400">
+                Already have an account?{' '}
+                <Link
+                  to="/login"
+                  className="font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+                >
+                  Sign in
+                </Link>
+              </p>
+            </div>
+          </form>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
   );
 };

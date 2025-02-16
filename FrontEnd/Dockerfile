@@ -2,12 +2,17 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+# Copy package files
 COPY package*.json ./
-RUN npm install
 
+# Install dependencies with legacy peer deps to avoid conflicts
+RUN npm install --legacy-peer-deps
+
+# Copy the rest of the application
 COPY . .
 
-EXPOSE 3000
+# Expose port
+EXPOSE 5173
 
-# Use development server instead of build
-CMD ["npm", "run", "dev"] 
+# Start the application
+CMD ["npm", "run", "dev"]
