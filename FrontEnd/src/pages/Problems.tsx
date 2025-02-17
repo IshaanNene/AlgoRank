@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Search, Filter, Tag, TrendingUp, BookOpen } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useUser } from '../context/UserContext';
+import { useState, useEffect } from "react";
+import { Search, Tag } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { useUser } from "../context/UserContext";
+import problemsAPI from "../api/problems";
 
 interface ProblemTag {
   id: string;
@@ -12,234 +13,169 @@ interface ProblemTag {
 interface Problem {
   id: string;
   title: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  acceptance: string;
-  frequency: number;
-  tags: string[];
+  difficulty: string;
+  acceptanceRate: number;
   solved: boolean;
-  premium: boolean;
-  likes: number;
-  dislikes: number;
 }
 
 const Problems = () => {
   const navigate = useNavigate();
   const { user } = useUser();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [problems, setProblems] = useState<Problem[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<'frequency' | 'acceptance' | 'difficulty'>('frequency');
-  const [showPremiumOnly, setShowPremiumOnly] = useState(false);
-  const [showSolvedOnly, setShowSolvedOnly] = useState(false);
-  const [showTagsFilter, setShowTagsFilter] = useState(false);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [availableTags, setAvailableTags] = useState<ProblemTag[]>([]);
+  const [showTagsFilter, setShowTagsFilter] = useState(false);
 
-  // Filter and sort problems
-  const filteredProblems = useMemo(() => {
-    return problems
-      .filter(problem => {
-        const matchesSearch = problem.title.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesTags = selectedTags.length === 0 || 
-          selectedTags.every(tag => problem.tags.includes(tag));
-        const matchesDifficulty = selectedDifficulty.length === 0 || 
-          selectedDifficulty.includes(problem.difficulty);
-        const matchesPremium = !showPremiumOnly || problem.premium;
-        const matchesSolved = !showSolvedOnly || problem.solved;
-        
-        return matchesSearch && matchesTags && matchesDifficulty && 
-               matchesPremium && matchesSolved;
-      })
-      .sort((a, b) => {
-        switch (sortBy) {
-          case 'frequency':
-            return b.frequency - a.frequency;
-          case 'acceptance':
-            return parseFloat(b.acceptance) - parseFloat(a.acceptance);
-          case 'difficulty':
-            return ['Easy', 'Medium', 'Hard'].indexOf(a.difficulty) -
-                   ['Easy', 'Medium', 'Hard'].indexOf(b.difficulty);
-          default:
-            return 0;
-        }
-      });
-  }, [problems, searchQuery, selectedTags, selectedDifficulty, showPremiumOnly, 
-      showSolvedOnly, sortBy]);
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty.toLowerCase()) {
-      case 'easy': return 'text-green-600 bg-green-50';
-      case 'medium': return 'text-yellow-600 bg-yellow-50';
-      case 'hard': return 'text-red-600 bg-red-50';
-      default: return 'text-gray-600 bg-gray-50';
+  const fetchProblems = async () => {
+    try {
+      setLoading(true);
+      const data = await problemsAPI.getProblems({ difficulty: selectedDifficulty });
+      setProblems(data);
+      setAvailableTags([
+        { id: "1", name: "Array", count: 20 },
+        { id: "2", name: "String", count: 15 },
+        { id: "3", name: "Graph", count: 10 }
+      ]);
+    } catch (err) {
+      setError("Failed to load problems.");
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchProblems();
+  }, [selectedDifficulty]);
+
   const handleProblemClick = (id: string) => {
-    navigate(`/problem/${id}`);
+    navigate(`/code-editor/${id}`);
   };
 
   const handleTagToggle = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag));
-    } else {
-      setSelectedTags([...selectedTags, tag]);
-    }
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
-        <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            {/* Search Bar */}
-            <div className="relative flex-1 max-w-lg">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search problems..."
-                className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg 
-                         text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 
-                         focus:ring-indigo-500 focus:border-transparent transition-all"
-              />
-            </div>
-
-            {/* Filters */}
-            <div className="flex flex-wrap gap-4">
-              <select
-                value={selectedDifficulty.join(',')}
-                onChange={(e) => setSelectedDifficulty(e.target.value.split(','))}
-                className="px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-gray-200 
-                         focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="">All Difficulties</option>
-                <option value="Easy">Easy</option>
-                <option value="Medium">Medium</option>
-                <option value="Hard">Hard</option>
-              </select>
-
-              <button
-                onClick={() => setShowTagsFilter(!showTagsFilter)}
-                className="flex items-center px-4 py-2 bg-gray-800/50 border border-gray-700 
-                         rounded-lg text-gray-200 hover:bg-gray-700 transition-colors"
-              >
-                <Tag className="w-4 h-4 mr-2" />
-                Tags
-              </button>
+        <h1 className="text-3xl font-bold text-white mb-6">Problems</h1>
+        <div className="mb-4 flex flex-wrap gap-4">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search problems..."
+              className="pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="w-5 h-5 text-gray-400" />
             </div>
           </div>
-
-          {/* Tags Filter */}
-          {showTagsFilter && (
-            <div className="mt-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
-              <div className="flex flex-wrap gap-2">
-                {availableTags.map((tag) => (
-                  <button
-                    key={tag.id}
-                    onClick={() => handleTagToggle(tag.name)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-all
-                      ${selectedTags.includes(tag.name)
-                        ? 'bg-indigo-500 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
-                  >
-                    {tag.name}
-                    <span className="ml-2 text-xs opacity-70">({tag.count})</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          <select
+            value={selectedDifficulty}
+            onChange={(e) => setSelectedDifficulty(e.target.value)}
+            className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="">All Difficulties</option>
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
+          </select>
+          <button
+            onClick={() => setShowTagsFilter((prev) => !prev)}
+            className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <Tag className="w-5 h-5 mr-2 inline" /> Tags
+          </button>
         </div>
-
-        {/* Problems Table */}
-        <div className="bg-white/5 backdrop-blur-lg rounded-xl border border-white/10 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-800">
-              <thead className="bg-gray-800/50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Title</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Difficulty</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Acceptance</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Tags</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Frequency</th>
+        {showTagsFilter && (
+          <div className="mb-4 flex gap-2">
+            {availableTags.map((tag) => (
+              <button
+                key={tag.id}
+                onClick={() => handleTagToggle(tag.name)}
+                className={`px-3 py-1 rounded-full text-sm border ${
+                  selectedTags.includes(tag.name)
+                    ? "bg-indigo-600 text-white"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
+                {tag.name} ({tag.count})
+              </button>
+            ))}
+          </div>
+        )}
+        {loading ? (
+          <div className="text-center text-white">Loading...</div>
+        ) : error ? (
+          <div className="text-center text-red-500">{error}</div>
+        ) : (
+          <div className="overflow-auto">
+            <table className="min-w-full bg-gray-800 rounded-md">
+              <thead>
+                <tr className="bg-gray-700">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    Title
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    Difficulty
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase">
+                    Acceptance Rate
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-800 bg-transparent">
-                {filteredProblems.map((problem) => (
-                  <tr
-                    key={problem.id}
-                    onClick={() => handleProblemClick(problem.id)}
-                    className="hover:bg-white/5 cursor-pointer transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`h-3 w-3 rounded-full ${
-                        problem.solved ? 'bg-green-500' : 
-                        'bg-gray-600 group-hover:bg-gray-500'
-                      }`} />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <span className="text-gray-200 font-medium hover:text-indigo-400 transition-colors">
+              <tbody>
+                {problems.length > 0 ? (
+                  problems.map((problem) => (
+                    <tr
+                      key={problem.id}
+                      className="border-t hover:bg-gray-600 cursor-pointer"
+                      onClick={() => handleProblemClick(problem.id)}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">{problem.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Link to={`/code-editor/${problem.id}`} className="text-blue-400 hover:text-blue-600">
                           {problem.title}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            problem.difficulty === "Easy"
+                              ? "bg-green-500/20 text-green-400"
+                              : problem.difficulty === "Medium"
+                              ? "bg-yellow-500/20 text-yellow-400"
+                              : "bg-red-500/20 text-red-400"
+                          }`}
+                        >
+                          {problem.difficulty}
                         </span>
-                        {problem.premium && (
-                          <span className="ml-2 px-2 py-0.5 rounded text-xs font-medium bg-yellow-500/20 text-yellow-400">
-                            Premium
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium
-                        ${problem.difficulty === 'Easy' ? 'bg-green-500/20 text-green-400' :
-                          problem.difficulty === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-red-500/20 text-red-400'}`}>
-                        {problem.difficulty}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-300">
-                      {problem.acceptance}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-2">
-                        {problem.tags.map((tag, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 rounded-md text-xs font-medium bg-gray-700 text-gray-300"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <TrendingUp className={`w-4 h-4 mr-2 ${
-                          problem.frequency > 75 ? 'text-green-400' :
-                          problem.frequency > 50 ? 'text-yellow-400' :
-                          'text-gray-400'
-                        }`} />
-                        <span className="text-gray-300">{problem.frequency}%</span>
-                      </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">{problem.acceptanceRate}%</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="text-center py-4 text-white">
+                      No problems available
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
-
-            {filteredProblems.length === 0 && (
-              <div className="text-center py-12">
-                <BookOpen className="w-12 h-12 mx-auto text-gray-500 mb-4" />
-                <p className="text-gray-400">No problems found matching your criteria</p>
-              </div>
-            )}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

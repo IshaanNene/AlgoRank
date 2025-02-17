@@ -6,7 +6,11 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { user, isLoading } = useUser();
 
   if (isLoading) {
-    return <LoadingSpinner size="lg" />;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
   }
 
   if (!user) {

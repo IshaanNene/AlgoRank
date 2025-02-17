@@ -15,34 +15,25 @@ export const useAuth = () => {
     try {
       const data = await authAPI.login({ username, password });
       setUser(data.user);
-      localStorage.setItem('authToken', data.token);
-      navigate('/dashboard');
+      localStorage.setItem('token', data.token);
+      navigate('/');
     } catch (err: any) {
-      const errorMsg = err.response?.data?.message || 'Login failed';
-      setError(errorMsg);
-      throw new Error(errorMsg);
+      setError(err.response?.data?.message || 'Login failed');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signup = async (userData: {
-    email: string;
-    password: string;
-    username: string;
-    name: string;
-  }) => {
+  const signup = async (userData: any) => {
     setIsLoading(true);
     setError(null);
     try {
       const data = await authAPI.signup(userData);
       setUser(data.user);
-      localStorage.setItem('authToken', data.token);
-      navigate('/dashboard');
+      localStorage.setItem('token', data.token);
+      navigate('/');
     } catch (err: any) {
-      const errorMsg = err.response?.data?.message || 'Signup failed';
-      setError(errorMsg);
-      throw new Error(errorMsg);
+      setError(err.response?.data?.message || 'Signup failed');
     } finally {
       setIsLoading(false);
     }
@@ -50,14 +41,14 @@ export const useAuth = () => {
 
   const logout = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       await authAPI.logout();
       setUser(null);
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('token');
       navigate('/login');
     } catch (err: any) {
-      const errorMsg = err.response?.data?.message || 'Logout failed';
-      setError(errorMsg);
+      setError(err.response?.data?.message || 'Logout failed');
     } finally {
       setIsLoading(false);
     }
@@ -68,6 +59,6 @@ export const useAuth = () => {
     signup,
     logout,
     isLoading,
-    error,
+    error
   };
 }; 

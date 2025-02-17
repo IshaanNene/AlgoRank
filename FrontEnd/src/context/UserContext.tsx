@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-interface UserStats {
+export interface UserStats {
   totalSolved: number;
   easySolved: number;
   mediumSolved: number;
@@ -13,33 +13,19 @@ interface UserStats {
   ranking: number;
 }
 
-interface UserPreferences {
-  theme: 'light' | 'dark';
-  fontSize: number;
-  tabSize: number;
-  language: string;
-  autoSave: boolean;
+export interface UserPreferences {
+  theme?: string;
+  language?: string;
 }
 
-interface User {
+export interface User {
   id: string;
-  username: string;
-  email: string;
   name: string;
-  location: string;
-  github: string;
-  twitter: string;
-  bio: string;
-  profileCompletion: number;
-  stats: UserStats;
-  preferences: UserPreferences;
-  savedSolutions: Record<string, string>;
-  recentActivity: Array<{
-    id: string;
-    type: 'solved' | 'attempted' | 'commented';
-    problemId: string;
-    timestamp: Date;
-  }>;
+  email: string;
+  stats?: UserStats;
+  preferences?: UserPreferences;
+  savedSolutions?: { [key: string]: string };
+  recentActivity?: { id: string; type: string; timestamp: Date }[];
 }
 
 interface UserContextType {
@@ -63,61 +49,53 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   const updatePreferences = (preferences: Partial<UserPreferences>) => {
-    setUser(prev => prev ? {
-      ...prev,
-      preferences: { ...prev.preferences, ...preferences }
-    } : null);
+    setUser(prev => prev ? { ...prev, preferences: { ...prev.preferences, ...preferences } } : null);
   };
 
   const saveSolution = (problemId: string, code: string) => {
-    setUser(prev => prev ? {
-      ...prev,
-      savedSolutions: { ...prev.savedSolutions, [problemId]: code }
-    } : null);
+    setUser(prev => prev ? { ...prev, savedSolutions: { ...prev.savedSolutions, [problemId]: code } } : null);
   };
 
   const addActivity = (activity: User['recentActivity'][0]) => {
-    setUser(prev => prev ? {
-      ...prev,
-      recentActivity: [activity, ...prev.recentActivity].slice(0, 10)
-    } : null);
+    setUser(prev => prev ? { ...prev, recentActivity: [activity, ...(prev.recentActivity || [])] } : null);
   };
 
   const login = async (username: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
     try {
-      const data = await authAPI.login(username, password);
+      const data = await authAPI.login({ username, password });
       setUser(data.user);
-      localStorage.setItem('authToken', data.token);
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
+      localStorage.setItem("token", data.token);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Login failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const logout = async () => {
+    setIsLoading(true);
     try {
       await authAPI.logout();
       setUser(null);
-      localStorage.removeItem('authToken');
-    } catch (error) {
-      console.error('Logout failed:', error);
-      throw error;
+      localStorage.removeItem("token");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Logout failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const checkAuth = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        setIsLoading(false);
-        return;
+      const token = localStorage.getItem("token");
+      if (token) {
+        const data = await authAPI.checkAuth();
+        setUser(data.user);
       }
-
-      const response = await authAPI.checkAuth();
-      setUser(response.data);
     } catch (err) {
-      console.error('Auth check failed:', err);
-      localStorage.removeItem('authToken'); // Clear invalid token
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -126,11 +104,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     checkAuth();
   }, []);
-
-  // Don't render children until initial auth check is complete
-  if (isLoading) {
-    return <LoadingSpinner size="lg" />;
-  }
 
   return (
     <UserContext.Provider value={{
@@ -145,7 +118,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       error,
       checkAuth
     }}>
-      {children}
+      {isLoading ? (
+        <div className="flex justify-center items-center min-h-screen">
+          <LoadingSpinner size="lg" />
+        </div>
+      ) : (
+        children
+      )}
     </UserContext.Provider>
   );
 }
@@ -153,7 +132,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 export function useUser() {
   const context = useContext(UserContext);
   if (context === undefined) {
-    throw new Error('useUser must be used within a UserProvider');
+    throw new Error("useUser must be used within a UserProvider");
   }
   return context;
 } 

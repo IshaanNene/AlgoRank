@@ -1,6 +1,8 @@
 services:
   frontend:
-    build: ./FrontEnd
+    build: 
+      context: ./FrontEnd
+      dockerfile: Dockerfile
     ports:
       - "5173:5173"
     volumes:
@@ -12,34 +14,35 @@ services:
       - backend
 
   backend:
-    build: ./BackEnd
+    build: 
+      context: ./BackEnd
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=algorank
+      - DATABASE_URL=postgres://algorank:algorank123@db:5432/algorank?sslmode=disable
     depends_on:
       db:
         condition: service_healthy
 
   db:
-    image: postgres:15
+    image: postgres:15-alpine
+    container_name: algorank-db
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=algorank
+      - POSTGRES_PASSWORD=algorank123
       - POSTGRES_DB=algorank
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./BackEnd/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U algorank"]
       interval: 5s
       timeout: 5s
       retries: 5
 
 volumes:
   postgres_data:
+    driver: local

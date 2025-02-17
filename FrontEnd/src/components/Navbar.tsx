@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { useTheme } from '../main';
@@ -12,201 +12,108 @@ import {
   User, 
   LogOut, 
   Moon, 
-  Sun, 
+  Sun,
   Search,
-  Bell
+  Bell 
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const { user, logout } = useUser();
   const { isDarkMode, toggleDarkMode } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [notifications, setNotifications] = useState([]);
 
   const navigation = [
-    { name: 'Home', href: '/', icon: Home, public: true },
-    { name: 'Problems', href: '/problems', icon: Code, protected: true },
-    { name: 'Dashboard', href: '/dashboard', icon: Layout, protected: true },
-    { name: 'Leaderboard', href: '/leaderboard', icon: Award, public: true },
+    { name: "Home", href: "/", icon: Home, public: true },
+    { name: "Problems", href: "/problems", icon: Code, protected: true },
+    { name: "Dashboard", href: "/dashboard", icon: Layout, protected: true },
+    { name: "Profile", href: "/profile", icon: User, protected: true },
+    { name: "Leaderboard", href: "/leaderboard", icon: Award, public: true }
   ];
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setIsSearchOpen(false);
-      setSearchQuery('');
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/');
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
-
   return (
-    <nav className={`
-      fixed top-0 left-0 right-0 z-50
-      transition-all duration-200 ease-in-out
-      ${isScrolled 
-        ? 'bg-white/80 backdrop-blur-md shadow-md dark:bg-gray-900/80' 
-        : 'bg-white dark:bg-gray-900'}
-    `}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="text-2xl font-bold text-indigo-600">
-                CodePro
-              </Link>
+    <nav className={`fixed top-0 w-full z-50 transition-all ${isScrolled ? "bg-black/80 shadow-lg" : "bg-transparent"}`}>
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <Link to="/" className="flex items-center space-x-2">
+          <motion.div
+            whileHover={{ scale: 1.1, rotate: 360 }}
+            transition={{ duration: 0.5 }}
+            className="relative"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg blur-sm" />
+            <div className="relative bg-black rounded-lg p-2">
+              <Code className="w-6 h-6 text-white" />
             </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              {navigation.map((item) => (
-                ((item.public || user) && (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={`
-                      inline-flex items-center px-1 pt-1 text-sm font-medium
-                      transition-colors duration-200
-                      ${location.pathname === item.href
-                        ? 'border-b-2 border-indigo-500 text-gray-900 dark:text-white'
-                        : 'text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
-                      }
-                    `}
-                  >
-                    <item.icon className="w-4 h-4 mr-2" />
-                    {item.name}
-                  </Link>
-                ))
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => setIsSearchOpen(true)}
-              className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white
-                         rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white
-                         rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-            >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-            {user && (
-              <div className="relative">
-                <button className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white
-                                 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
-                  <Bell className="w-5 h-5" />
-                  {notifications.length > 0 && (
-                    <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" />
-                  )}
-                </button>
-              </div>
-            )}
-            {user ? (
-              <div className="relative">
-                <Link
-                  to="/profile"
-                  className="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800
-                           transition-colors duration-200"
-                >
-                  <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white">
-                    {user.name[0].toUpperCase()}
-                  </div>
-                </Link>
-              </div>
-            ) : (
-              <Link
-                to="/login"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md
-                         text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200"
-              >
-                Sign in
-              </Link>
-            )}
-            <div className="flex items-center sm:hidden">
-              <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500
-                         hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-              >
-                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {isSearchOpen && (
-        <div className="fixed inset-0 z-50 bg-gray-900/50 backdrop-blur-sm">
-          <div className="max-w-2xl mx-auto mt-20 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl">
-              <form onSubmit={handleSearch} className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search problems, topics, or users..."
-                  className="w-full px-4 py-3 text-gray-900 placeholder-gray-500 border-0 focus:ring-0"
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  onClick={() => setIsSearchOpen(false)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className={`sm:hidden ${isOpen ? 'block' : 'hidden'}`}>
-        <div className="pt-2 pb-3 space-y-1">
-          {navigation.map((item) => (
-            ((item.public || user) && (
+          </motion.div>
+          <span className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 text-transparent bg-clip-text">
+            CodePro
+          </span>
+        </Link>
+        <div className="hidden md:flex items-center space-x-4">
+          {navigation.map((item) =>
+            (item.public || user) && (
               <Link
                 key={item.name}
                 to={item.href}
-                className={`flex items-center px-3 py-2 text-base font-medium
-                  ${location.pathname === item.href
-                    ? 'bg-indigo-50 border-l-4 border-indigo-500 text-indigo-700 dark:bg-gray-700 dark:text-white'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700'
-                  }`}
-                onClick={() => setIsOpen(false)}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  location.pathname === item.href ? "bg-indigo-600 text-white" : "text-gray-300 hover:bg-indigo-500 hover:text-white"
+                }`}
               >
-                <item.icon className="w-5 h-5 mr-3" />
                 {item.name}
               </Link>
-            ))
-          ))}
+            )
+          )}
+          <button onClick={toggleDarkMode} className="p-2 rounded-full hover:bg-gray-700 focus:outline-none">
+            {isDarkMode ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-gray-300" />}
+          </button>
+          {user && (
+            <button onClick={logout} className="p-2 rounded-full hover:bg-gray-700 focus:outline-none">
+              <LogOut className="w-5 h-5 text-gray-300" />
+            </button>
+          )}
+        </div>
+        <div className="md:hidden flex items-center">
+          <button onClick={() => setIsMobileMenuOpen((prev) => !prev)} className="p-2 rounded-full text-gray-300 hover:bg-gray-700 focus:outline-none">
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
       </div>
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-black/80 backdrop-blur-lg border-t border-gray-700"
+          >
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              {navigation.map((item) =>
+                (item.public || user) && (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-indigo-500 hover:text-white"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                )
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };

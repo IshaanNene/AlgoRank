@@ -72,31 +72,46 @@ const Signup = () => {
     setIsLoading(true);
     try {
       const { confirmPassword, ...submitData } = formData;
-      const response = await fetch('http://localhost:8080/api/auth/signup', {
+      submitData.email = submitData.email.toLowerCase();
+      
+      console.log('Attempting signup with:', submitData); // Debug log
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/signup`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        credentials: 'include',
         body: JSON.stringify(submitData)
       });
 
-      if (response.status === 409) {
-        setError('Username or email already exists. Please choose another.');
-        return;
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        data = { message: response.statusText };
       }
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Signup failed');
+        switch (response.status) {
+          case 409:
+            throw new Error('This email or username is already registered. Please try another.');
+          case 400:
+            throw new Error(data.message || 'Invalid signup data');
+          default:
+            throw new Error(data.message || 'Signup failed');
+        }
       }
 
-      const data = await response.json();
-      setUser(data);
+      if (!data.user) {
+        throw new Error('Invalid response from server');
+      }
+
+      setUser(data.user);
       navigate('/dashboard');
     } catch (error) {
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError('An unexpected error occurred. Please try again.');
-      }
+      console.error('Signup error:', error);
+      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -344,7 +359,7 @@ const Signup = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes blob {
           0% { transform: translate(0px, 0px) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }

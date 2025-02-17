@@ -1,31 +1,43 @@
 package utils
 
 import (
-	"encoding/json"
-	"os"
-	"path/filepath"
+	"database/sql"
 	"fmt"
 )
 
+var db *sql.DB
+
+func InitDB(database *sql.DB) {
+	db = database
+}
+
 func LoadProblemTestCases(problemID string, mode string) ([]byte, error) {
-	filename := filepath.Join("problems", problemID, "testcases.json")
-	data, err := os.ReadFile(filename)
+	if db == nil {
+		return nil, fmt.Errorf("database connection not initialized")
+	}
+
+	query := `
+		SELECT json_build_object(
+			'test_cases',
+			json_agg(
+				json_build_object(
+					'input', input,
+					'expected', expected
+				)
+			)
+		)
+		FROM test_cases
+		WHERE problem_id = $1
+		AND ($2 = 'Submit' OR NOT is_hidden)
+	`
+
+	var result []byte
+	err := db.QueryRow(query, problemID, mode).Scan(&result)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error querying test cases: %v", err)
 	}
 
-	var testCases map[string]interface{}
-	if err := json.Unmarshal(data, &testCases); err != nil {
-		return nil, err
-	}
-
-	// Filter test cases based on mode
-	key := mode + "_testCases"
-	filteredData := map[string]interface{}{
-		key: testCases[key],
-	}
-
-	return json.Marshal(filteredData)
+	return result, nil
 }
 
 func ValidateProblemInput(problem map[string]interface{}) error {
