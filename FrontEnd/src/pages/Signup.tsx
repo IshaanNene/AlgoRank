@@ -41,27 +41,69 @@ const Signup = () => {
   };
 
   const validateForm = () => {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Email validation with more comprehensive regex
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailPattern.test(formData.email)) {
       setError('Please enter a valid email address.');
       return false;
     }
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+
+    // Password validation with requirements
+    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordPattern.test(formData.password)) {
+      setError('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.');
       return false;
     }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match.');
       return false;
     }
-    if (!formData.username.trim()) {
-      setError('Username is required.');
+
+    // Username validation
+    const usernamePattern = /^[a-zA-Z0-9_]{3,20}$/;
+    if (!usernamePattern.test(formData.username)) {
+      setError('Username must be 3-20 characters long and can only contain letters, numbers, and underscores.');
       return false;
     }
-    if (!formData.name.trim()) {
-      setError('Name is required.');
+
+    // Name validation
+    const namePattern = /^[a-zA-Z\s]{2,50}$/;
+    if (!namePattern.test(formData.name)) {
+      setError('Name must be 2-50 characters long and can only contain letters and spaces.');
       return false;
     }
+
+    // Location validation (if provided)
+    if (formData.location && formData.location.length > 100) {
+      setError('Location must not exceed 100 characters.');
+      return false;
+    }
+
+    // GitHub username validation (if provided)
+    if (formData.github) {
+      const githubPattern = /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/;
+      if (!githubPattern.test(formData.github)) {
+        setError('Invalid GitHub username format.');
+        return false;
+      }
+    }
+
+    // Twitter handle validation (if provided)
+    if (formData.twitter) {
+      const twitterPattern = /^@?(\w){1,15}$/;
+      if (!twitterPattern.test(formData.twitter.replace('@', ''))) {
+        setError('Invalid Twitter handle format.');
+        return false;
+      }
+    }
+
+    // Bio validation
+    if (formData.bio && formData.bio.length > 500) {
+      setError('Bio must not exceed 500 characters.');
+      return false;
+    }
+
     return true;
   };
 

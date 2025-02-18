@@ -19,8 +19,8 @@ export default function App() {
 
   return (
     <Router>
-      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[#0A0F1C] via-[#1A1B3B] to-[#1F1147]">
-        {/* A gorgeous animated background for extra visual flare */}
+      <div className="min-h-screen relative overflow-hidden">
+        {/* Animated background rendered with a fixed position and -z-10 */}
         <AnimatedBackground />
         <div className="relative z-10">
           <Navbar />

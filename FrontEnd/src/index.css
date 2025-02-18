@@ -206,3 +206,47 @@
 .glass-card {
   backdrop-filter: blur(10px);
 }
+
+/* Add these new styles for the animated background gradient */
+@keyframes gradientShift {
+  0% {
+    background: linear-gradient(
+      to bottom right,
+      rgba(79,70,229,0.3),
+      rgba(147,51,234,0.3),
+      rgba(219,39,119,0.3),
+      rgba(59,130,246,0.3)
+    );
+  }
+  33% {
+    background: linear-gradient(
+      to bottom right,
+      rgba(219,39,119,0.3),
+      rgba(79,70,229,0.3),
+      rgba(59,130,246,0.3),
+      rgba(147,51,234,0.3)
+    );
+  }
+  66% {
+    background: linear-gradient(
+      to bottom right,
+      rgba(147,51,234,0.3),
+      rgba(59,130,246,0.3),
+      rgba(219,39,119,0.3),
+      rgba(79,70,229,0.3)
+    );
+  }
+  100% {
+    background: linear-gradient(
+      to bottom right,
+      rgba(59,130,246,0.3),
+      rgba(219,39,119,0.3),
+      rgba(79,70,229,0.3),
+      rgba(147,51,234,0.3)
+    );
+  }
+}
+
+.gradient-bg {
+  animation: gradientShift 30s linear infinite;
+}

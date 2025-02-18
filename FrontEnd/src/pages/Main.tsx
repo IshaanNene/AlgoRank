@@ -129,7 +129,7 @@ const Main = () => {
         </div>
       </div>
       <div className="container mx-auto px-4 py-20">
-        <div className="bg-gradient-to-r from-indigo-600 to-blue-500 rounded-2xl p-12 text-center">
+        <div className="bg-gradient-to-r from-indigo-600/80 to-blue-500/80 rounded-2xl p-12 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
             Ready to Start Your Coding Journey?
           </h2>
