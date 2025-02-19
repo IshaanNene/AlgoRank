@@ -34,12 +34,26 @@ lint:
 migrate:
 	docker-compose exec db psql -U algorank -d algorank -f /docker-entrypoint-initdb.d/init.sql
 
-gits_up:
+BackEnd:
 	git status
 	git add .
 	git commit -m "Update"
 	git push
-
+FrontEnd:
+	git status
+	git add .
+	git commit -m "Update"
+	git push
+Problem:
+	git status
+	git add .
+	git commit -m "Update"
+	git push
+Executor:
+	git status
+	git add .
+	git commit -m "Update"
+	git push
 nene: build-runner
 	chmod +x run.sh
 	./run.sh
