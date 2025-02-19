@@ -1,11 +1,4 @@
-import subprocess
-import json
-import os
-import logging
-import sys
-import time
-import psutil
-import resource
+import subprocess,json,os,logging,sys,time,psutil,resource
 from colorama import Fore, Style, init
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass, field
@@ -172,7 +165,7 @@ class TestRunner:
     def run_tests(self, mode: str) -> TestMetrics:
         test_cases = self.load_test_cases(mode)
         if mode == "Run":
-            test_cases = test_cases[:3]  # Limited test cases for Run mode
+            test_cases = test_cases[:3]  
 
         source_file = f"AlgoRank/Solutions/{self.executor.language.value}_Solutions/solution{self.problem_id}{self.executor.file_extensions[self.executor.language]}"
         executable = f"solution_{self.problem_id}"
@@ -239,7 +232,6 @@ def main():
         runner = TestRunner(problem_id, language)
         metrics = runner.run_tests(mode)
         
-        # Format test results with proper output handling
         result = {
             "status": "success",
             "metrics": {
