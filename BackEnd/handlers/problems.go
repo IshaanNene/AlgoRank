@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -9,6 +10,98 @@ import (
 	"github.com/IshaanNene/AlgoRank/utils"
 	"github.com/gorilla/mux"
 )
+
+type ProblemHandler struct {
+	db *sql.DB
+}
+
+func NewProblemHandler(db *sql.DB) *ProblemHandler {
+	return &ProblemHandler{db: db}
+}
+
+func (h *ProblemHandler) RegisterRoutes(r *mux.Router) {
+	r.HandleFunc("/api/problems", h.GetProblems).Methods("GET")
+	r.HandleFunc("/api/problems/{id}", h.GetProblem).Methods("GET")
+}
+
+func (h *ProblemHandler) GetProblems(w http.ResponseWriter, r *http.Request) {
+	problems, err := h.db.Query(`
+		SELECT id, title, difficulty, created_at, updated_at
+		FROM problems
+		ORDER BY id
+	`)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, "Failed to fetch problems")
+		return
+	}
+	defer problems.Close()
+
+	var problemsList []models.Problem
+	for problems.Next() {
+		var p models.Problem
+		err := problems.Scan(&p.ID, &p.Title, &p.Difficulty, &p.CreatedAt, &p.UpdatedAt)
+		if err != nil {
+			utils.RespondWithError(w, http.StatusInternalServerError, "Failed to scan problems")
+			return
+		}
+		problemsList = append(problemsList, p)
+	}
+
+	utils.RespondWithJSON(w, http.StatusOK, problemsList)
+}
+
+func (h *ProblemHandler) GetProblem(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		utils.RespondWithError(w, http.StatusBadRequest, "Invalid problem ID")
+		return
+	}
+
+	var problem models.Problem
+	err = h.db.QueryRow(`
+		SELECT id, title, description, difficulty, 
+			   time_complexity, space_complexity, created_at, updated_at
+		FROM problems
+		WHERE id = $1
+	`, id).Scan(
+		&problem.ID, &problem.Title, &problem.Description,
+		&problem.Difficulty, &problem.TimeComplexity, &problem.SpaceComplexity,
+		&problem.CreatedAt, &problem.UpdatedAt,
+	)
+
+	if err == sql.ErrNoRows {
+		utils.RespondWithError(w, http.StatusNotFound, "Problem not found")
+		return
+	} else if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, "Failed to fetch problem")
+		return
+	}
+
+	// Fetch examples
+	examples, err := h.db.Query(`
+		SELECT input, output, explanation
+		FROM problem_examples
+		WHERE problem_id = $1
+	`, id)
+	if err != nil {
+		utils.RespondWithError(w, http.StatusInternalServerError, "Failed to fetch examples")
+		return
+	}
+	defer examples.Close()
+
+	for examples.Next() {
+		var example models.Example
+		err := examples.Scan(&example.Input, &example.Output, &example.Explanation)
+		if err != nil {
+			utils.RespondWithError(w, http.StatusInternalServerError, "Failed to scan examples")
+			return
+		}
+		problem.Examples = append(problem.Examples, example)
+	}
+
+	utils.RespondWithJSON(w, http.StatusOK, problem)
+}
 
 func (s *Server) handleGetProblems(w http.ResponseWriter, r *http.Request) {
 	// Parse query parameters
@@ -19,8 +112,8 @@ func (s *Server) handleGetProblems(w http.ResponseWriter, r *http.Request) {
 
 	query := `
 		SELECT p.id, p.title, p.description, p.difficulty, p.tags, p.examples, 
-		       p.constraints, p.created_at, p.submissions, p.accepted,
-		       CASE WHEN s.status = 'Accepted' THEN true ELSE false END as solved
+			   p.constraints, p.created_at, p.submissions, p.accepted,
+			   CASE WHEN s.status = 'Accepted' THEN true ELSE false END as solved
 		FROM problems p
 		LEFT JOIN (
 			SELECT DISTINCT ON (problem_id) problem_id, status
@@ -112,7 +205,7 @@ func (s *Server) handleGetProblem(w http.ResponseWriter, r *http.Request) {
 
 	query := `
 		SELECT p.*, 
-		       CASE WHEN s.status = 'Accepted' THEN true ELSE false END as solved
+			   CASE WHEN s.status = 'Accepted' THEN true ELSE false END as solved
 		FROM problems p
 		LEFT JOIN (
 			SELECT DISTINCT ON (problem_id) problem_id, status

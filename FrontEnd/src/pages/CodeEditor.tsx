@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from "@monaco-editor/react";
-import { Play, RotateCcw, ChevronLeft, CheckCircle2, XCircle, MessageCircle, ThumbsUp, ThumbsDown, Maximize2, Minimize2, Save } from 'lucide-react';
-import axios from 'axios';
+import { Play, Save, RotateCcw, ChevronLeft, Settings, Share } from 'lucide-react';
+import { problemsAPI } from '../api/problems';
 import { motion } from 'framer-motion';
 import Card from '../components/Card';
 import Button from '../components/Button';
+import Alert from '../components/Alert';
+import Dropdown from '../components/Dropdown';
 
 // Define the Problem interface
 interface Problem {
@@ -45,7 +47,7 @@ const CodeEditor: React.FC = () => {
   const [problem, setProblem] = useState<Problem | null>(null);
   const [description, setDescription] = useState('');
   const [testCases, setTestCases] = useState<TestCase[]>([]);
-  const [selectedLanguage, setSelectedLanguage] = useState('python3');
+  const [selectedLanguage, setSelectedLanguage] = useState('python');
   const [activeTestCase, setActiveTestCase] = useState<string>('1');
   const [customTestCases, setCustomTestCases] = useState<TestCase[]>([]);
   const [showConstraints, setShowConstraints] = useState(true);
@@ -53,6 +55,14 @@ const CodeEditor: React.FC = () => {
   const [isAutoSave, setIsAutoSave] = useState(true);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
+  const [alert, setAlert] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+
+  const languageOptions = [
+    { label: 'Python', value: 'python' },
+    { label: 'JavaScript', value: 'javascript' },
+    { label: 'Java', value: 'java' },
+    { label: 'C++', value: 'cpp' }
+  ];
 
   if (!id) {
     console.error('Problem ID is undefined');
@@ -62,7 +72,7 @@ const CodeEditor: React.FC = () => {
   useEffect(() => {
     const fetchProblem = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/problems/${id}`);
+        const response = await problemsAPI.getProblem(Number(id));
         setProblem(response.data);
         setDescription(response.data.description);
         setTestCases(response.data.Run_testCases);
@@ -101,13 +111,13 @@ const CodeEditor: React.FC = () => {
     setIsRunning(true);
     setStatus('running');
     try {
-      const response = await axios.post('http://localhost:8080/run', { code, language: selectedLanguage });
-      setOutput(response.data.output);
+      const response = await problemsAPI.submitSolution(Number(id), code, selectedLanguage);
+      setOutput(response.output || 'Success!');
       setStatus('success');
+      setAlert({ type: 'success', message: 'Code executed successfully!' });
     } catch (error) {
-      console.error('Error running code:', error);
-      setOutput('Error running code');
       setStatus('error');
+      setAlert({ type: 'error', message: 'Error executing code. Please try again.' });
     } finally {
       setIsRunning(false);
     }
@@ -116,8 +126,8 @@ const CodeEditor: React.FC = () => {
   const submitCode = async () => {
     setStatus('running');
     try {
-      const response = await axios.post('http://localhost:8080/submit', { code });
-      setOutput(response.data.output);
+      const response = await problemsAPI.submitSolution(Number(id), code, selectedLanguage);
+      setOutput(response.output || 'Success!');
       setStatus('success');
     } catch (error) {
       console.error('Error submitting code:', error);
@@ -137,66 +147,95 @@ const CodeEditor: React.FC = () => {
   };
 
   return (
-    <div className="p-4">
-      <Button variant="outline" onClick={() => navigate(-1)} icon={<ChevronLeft className="w-4 h-4" />}>
-        Back
-      </Button>
-      <Card className="mt-4 h-[calc(100vh-160px)]">
-        <div className="prose prose-invert max-w-none p-4">
-          <h1 className="text-2xl font-bold text-white mb-4">{problem?.problem_name}</h1>
-          <div className="flex space-x-2 mb-4">
-            <span
-              className={`px-2 py-1 rounded-full text-xs font-medium ${
-                problem?.difficulty === 'Easy' ? 'bg-green-500/20 text-green-400' :
-                problem?.difficulty === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                'bg-red-500/20 text-red-400'}`}>
-              {problem?.difficulty}
-            </span>
-            <span className="text-gray-400 text-sm">Acceptance: {problem?.acceptance_rate}%</span>
-          </div>
-          <p>{description}</p>
-          {showConstraints && (
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold">Constraints:</h3>
-              <ul>
-                {problem?.constraints.map((constraint, idx) => (
-                  <li key={idx}>{constraint}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {showHints && (
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold">Hints:</h3>
-              <ul>
-                {problem?.hints.map((hint, idx) => (
-                  <li key={idx}>{hint}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="p-4 min-h-screen"
+    >
+      <div className="flex justify-between items-center mb-4">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate(-1)} 
+          icon={<ChevronLeft />}
+        >
+          Back
+        </Button>
+        <div className="flex gap-2">
+          <Dropdown
+            options={languageOptions}
+            value={selectedLanguage}
+            onChange={(value) => setSelectedLanguage(value as string)}
+            className="w-40"
+          />
+          <Button
+            variant="outline"
+            icon={<Settings />}
+            onClick={() => {/* Add settings modal */}}
+          />
+          <Button
+            variant="outline"
+            icon={<Share />}
+            onClick={() => {/* Add share functionality */}}
+          />
         </div>
-        <div className="flex flex-col h-full">
-          <div className="flex-1">
-            <Editor
-              height="100%"
-              defaultLanguage={selectedLanguage}
-              value={code}
-              onChange={handleEditorChange}
-              theme="vs-dark"
-            />
+      </div>
+
+      {alert && (
+        <Alert
+          type={alert.type}
+          message={alert.message}
+          onClose={() => setAlert(null)}
+          autoClose
+        />
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card className="h-[calc(100vh-200px)]">
+          <Editor
+            height="100%"
+            defaultLanguage={selectedLanguage}
+            value={code}
+            onChange={handleEditorChange}
+            theme="vs-dark"
+            options={{
+              minimap: { enabled: false },
+              fontSize: 14,
+              lineNumbers: 'on',
+              roundedSelection: false,
+              scrollBeyondLastLine: false,
+              automaticLayout: true
+            }}
+          />
+        </Card>
+
+        <Card className="h-[calc(100vh-200px)] flex flex-col">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">Output</h2>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                icon={<RotateCcw />}
+                onClick={() => setOutput('')}
+              >
+                Clear
+              </Button>
+              <Button
+                variant="primary"
+                icon={<Play />}
+                onClick={handleRunCode}
+                isLoading={status === 'running'}
+              >
+                Run
+              </Button>
+            </div>
           </div>
-          <div className="mt-4">
-            <Button variant="primary" onClick={handleRunCode} isLoading={isRunning} icon={<Play className="w-4 h-4" />}>
-              Run
-            </Button>
-          </div>
-          <div className="mt-4 bg-black/50 rounded-lg p-4 font-mono text-sm text-gray-300 h-32 overflow-auto">
+          
+          <div className="flex-1 bg-gray-900 rounded-lg p-4 font-mono text-sm overflow-auto">
             {output || 'Output will appear here...'}
           </div>
-        </div>
-      </Card>
-    </div>
+        </Card>
+      </div>
+    </motion.div>
   );
 };
 

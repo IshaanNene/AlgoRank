@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Activity, Award, Code, Target, TrendingUp, BookOpen } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Activity, Award, Code, Target, TrendingUp, BookOpen, Calendar } from 'lucide-react';
 import { useUser } from '../context/UserContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -14,120 +14,80 @@ interface ActivityItem {
   timestamp: Date;
 }
 
-const Dashboard = () => {
+const Dashboard: React.FC = () => {
   const { user } = useUser();
   const [selectedTimeRange, setSelectedTimeRange] = useState<'week' | 'month' | 'year'>('week');
   const [activities, setActivities] = useState<ActivityItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const totalSolved = user?.stats?.totalSolved || 0;
-  const streak = user?.stats?.streak || 0;
-  const ranking = user?.stats?.ranking || 0;
-  const acceptanceRate = user?.stats?.acceptanceRate || '0%';
-
-  const stats = [
-    { label: 'Problems Solved', value: totalSolved, total: 100, color: 'bg-green-500' },
-    { label: 'Current Streak', value: streak, total: 30, color: 'bg-yellow-500' },
-    { label: 'Ranking', value: ranking, total: 1000, color: 'bg-red-500' },
-    { label: 'Acceptance Rate', value: acceptanceRate, total: 100, color: 'bg-blue-500' }
-  ];
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
+    // Simulate API call
     setTimeout(() => {
       setActivities([
         { id: '1', type: 'solved', problemId: '101', problemName: 'Two Sum', timestamp: new Date() },
-        { id: '2', type: 'attempted', problemId: '102', problemName: 'Binary Search', timestamp: new Date() }
+        // Add more mock data
       ]);
       setIsLoading(false);
-    }, 1500);
+    }, 1000);
   }, [selectedTimeRange]);
 
+  const stats = [
+    { 
+      label: 'Problems Solved',
+      value: user?.stats?.totalSolved || 0,
+      icon: Code,
+      color: 'from-green-500 to-emerald-700'
+    },
+    { 
+      label: 'Current Streak',
+      value: user?.stats?.streak || 0,
+      icon: Calendar,
+      color: 'from-yellow-500 to-orange-700'
+    },
+    // Add more stats...
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 text-white p-6">
-      <motion.div 
-        className="max-w-7xl mx-auto mb-8"
+    <div className="min-h-screen p-6">
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        className="max-w-7xl mx-auto"
       >
-        <div className="relative bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 animate-gradient" />
-          
-          <h1 className="text-3xl font-bold mb-2 relative">
+        <Card variant="gradient" className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">
             Welcome back, {user?.name}!
           </h1>
-          <p className="text-gray-400 relative">
+          <p className="text-gray-400">
             Track your progress and continue your coding journey
           </p>
-        </div>
-      </motion.div>
-
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card>
-          <h2 className="text-xl font-semibold mb-6 flex items-center">
-            <TrendingUp className="w-5 h-5 mr-2 text-indigo-400" />
-            Progress Overview
-          </h2>
-          <div className="space-y-6">
-            {stats.map((category, idx) => (
-              <div key={idx}>
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-400">{category.label}</span>
-                  <span>{category.value}</span>
-                </div>
-                <div className="w-full bg-gray-800 rounded-full h-2.5">
-                  <div
-                    className={`${category.color} h-2.5 rounded-full`}
-                    style={{ width: `${(Number(category.value) / category.total) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
         </Card>
 
-        <Card>
-          <h2 className="text-xl font-semibold mb-6 flex items-center">
-            <Activity className="w-5 h-5 mr-2 text-indigo-400" />
-            Recent Activity
-          </h2>
-          <div className="flex justify-between items-center mb-6">
-            {['week', 'month', 'year'].map((range) => (
-              <button
-                key={range}
-                onClick={() => setSelectedTimeRange(range as 'week' | 'month' | 'year')}
-                className={`px-3 py-1 rounded-lg text-sm transition-colors duration-200 ${
-                  selectedTimeRange === range ? 'bg-indigo-500 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                }`}
-              >
-                {range.charAt(0).toUpperCase() + range.slice(1)}
-              </button>
-            ))}
-          </div>
-          {isLoading ? (
-            <div className="flex justify-center items-center h-32">
-              <LoadingSpinner size="lg" />
-            </div>
-          ) : activities.length > 0 ? (
-            <div className="space-y-4">
-              {activities.map((activity) => (
-                <div key={activity.id} className="flex justify-between items-center p-4 bg-gray-800 rounded-md">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Card className="h-full">
+                <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-medium">{activity.problemName}</p>
-                    <p className="text-sm text-gray-400">{activity.type}</p>
+                    <p className="text-gray-400 text-sm">{stat.label}</p>
+                    <h3 className="text-2xl font-bold mt-1">{stat.value}</h3>
                   </div>
-                  <span className="text-sm text-gray-400">{new Date(activity.timestamp).toLocaleDateString()}</span>
+                  <div className={`p-2 rounded-lg bg-gradient-to-br ${stat.color}`}>
+                    <stat.icon className="w-5 h-5 text-white" />
+                  </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center text-gray-500 py-8">
-              <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>No activities found</p>
-            </div>
-          )}
-        </Card>
-      </div>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Add more sections as needed */}
+      </motion.div>
     </div>
   );
 };

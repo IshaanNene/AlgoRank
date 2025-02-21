@@ -1,23 +1,25 @@
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import LoadingSpinner from './LoadingSpinner';
 
-const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const { user, isLoading } = useUser();
+interface ProtectedRouteProps {
+    children: React.ReactNode;
+}
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+    const { user, loading } = useUser();
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
 
-  return children;
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+
+    return <>{children}</>;
 };
-
-export default ProtectedRoute;

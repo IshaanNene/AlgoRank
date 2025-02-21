@@ -16,21 +16,33 @@ CREATE TABLE users (
     profile_completion INTEGER DEFAULT 0
 );
 
-CREATE TABLE problems (
+CREATE TABLE IF NOT EXISTS problems (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
-    difficulty VARCHAR(20) CHECK (difficulty IN ('Easy', 'Medium', 'Hard')),
-    acceptance_rate DECIMAL DEFAULT 0,
-    submissions_count INTEGER DEFAULT 0,
-    likes INTEGER DEFAULT 0,
-    dislikes INTEGER DEFAULT 0,
-    discussion_count INTEGER DEFAULT 0,
-    seen_in_interviews INTEGER DEFAULT 0,
-    tags TEXT[] DEFAULT '{}',
-    constraints TEXT[] DEFAULT '{}',
-    hints TEXT[] DEFAULT '{}',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    difficulty VARCHAR(50) NOT NULL,
+    time_complexity VARCHAR(50),
+    space_complexity VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS problem_examples (
+    id SERIAL PRIMARY KEY,
+    problem_id INTEGER REFERENCES problems(id),
+    input TEXT NOT NULL,
+    output TEXT NOT NULL,
+    explanation TEXT,
+    FOREIGN KEY (problem_id) REFERENCES problems(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS problem_test_cases (
+    id SERIAL PRIMARY KEY,
+    problem_id INTEGER REFERENCES problems(id),
+    input TEXT NOT NULL,
+    expected_output TEXT NOT NULL,
+    is_hidden BOOLEAN DEFAULT false,
+    FOREIGN KEY (problem_id) REFERENCES problems(id) ON DELETE CASCADE
 );
 
 CREATE TABLE submissions (
