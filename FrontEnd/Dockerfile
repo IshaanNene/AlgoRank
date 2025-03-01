@@ -1,34 +1,22 @@
 # Build stage
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
-
-# Copy package files
 COPY package*.json ./
+RUN npm install
 
-# Install all dependencies including TypeScript types
-RUN npm cache clean --force && \
-    npm install && \
-    npm install --save-dev @types/react @types/react-dom typescript@latest
-
-# Copy source code
 COPY . .
-
-# Type check and build
 RUN npm run build
 
 # Production stage
-FROM node:18-alpine
+FROM nginx:alpine
 
-WORKDIR /app
+# Copy the built app to nginx's serve directory
+COPY --from=builder /app/dist/demo /usr/share/nginx/html
 
-# Copy built assets and necessary files
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
+# Copy custom nginx config if needed
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port
-EXPOSE 5173
+EXPOSE 80
 
-# Modified command to allow external access
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+CMD ["nginx", "-g", "daemon off;"] 

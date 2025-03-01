@@ -37,22 +37,22 @@ migrate:
 gits_BackEnd:
 	git status
 	git add .
-	git commit -m "Update"
+	git commit -m "BackEnd"
 	git push
 gits_FrontEnd:
 	git status
 	git add .
-	git commit -m "Update"
+	git commit -m "FrontEnd"
 	git push
 Problem:
 	git status
 	git add .
-	git commit -m "Update"
+	git commit -m "Problem"
 	git push
 Executor:
 	git status
 	git add .
-	git commit -m "Update"
+	git commit -m "Executor"
 	git push
 nene: build-runner
 	chmod +x run.sh

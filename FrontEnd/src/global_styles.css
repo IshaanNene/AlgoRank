@@ -1,0 +1,204 @@
+/* Global styles for LeetCode Clone */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #2cbc63;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #25a355;
+}
+
+.btn-secondary {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background-color: #e0e0e0;
+}
+
+.card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.difficulty-easy {
+  color: #2cbc63;
+}
+
+.difficulty-medium {
+  color: #ffa116;
+}
+
+.difficulty-hard {
+  color: #ef4743;
+}
+
+.header {
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2cbc63;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-link {
+  color: #555;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: #2cbc63;
+}
+
+.editor-container {
+  height: calc(100vh - 200px);
+  min-height: 400px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.problem-description {
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.problem-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.problem-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  color: #666;
+}
+
+.problem-content {
+  line-height: 1.6;
+}
+
+.example {
+  background-color: #f7f9fa;
+  padding: 12px;
+  border-radius: 4px;
+  margin: 12px 0;
+  font-family: monospace;
+}
+
+.problem-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.problem-item {
+  display: grid;
+  grid-template-columns: 50px 1fr 120px 100px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 4px;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.problem-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaderboard-table th, .leaderboard-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.leaderboard-table th {
+  font-weight: 600;
+  color: #555;
+}
+
+.leaderboard-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.rank {
+  font-weight: bold;
+  width: 50px;
+}
+
+.top-rank {
+  color: #ffa116;
+}
+
+@media (max-width: 768px) {
+  .problem-item {
+    grid-template-columns: 40px 1fr 80px;
+  }
+  
+  .problem-item .problem-status {
+    display: none;
+  }
+}
