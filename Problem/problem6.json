@@ -1,14 +1,34 @@
 {
   "problem_num": 6,
-  "problem_name": "Check for Palindrome",
-  "difficulty": "Easy",
-  "description": "Write a function that checks if a given string is a palindrome.",
-  "Expected Time Constraints": "O(n)",
-  "Expected Space Constraints": "O(1)",
+  "problem_name": "ZigZag Conversion",
+  "description": "The string 'PAYPALISHIRING' is written in a zigzag pattern on a given number of rows like this: P   A   H   N, A P L S I I G, Y   I   R. Write the code that will take a string and make this conversion given a number of rows.",
+  "difficulty": "Medium",
+  "acceptance": 68,
+  "Expected_Time_Constraints": "O(n)",
+  "Expected_Space_Constraints": "O(n)",
+  "templates": {
+    "javascript": "/**\n * @param {string} s\n * @param {number} numRows\n * @return {string}\n */\nfunction convert(s, numRows) {\n    // Your code here\n}",
+    "python": "def convert(s: str, num_rows: int) -> str:\n    # Your code here\n    pass",
+    "java": "class Solution {\n    public String convert(String s, int numRows) {\n        // Your code here\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string convert(string s, int numRows) {\n        // Your code here\n    }\n};",
+    "go": "func convert(s string, numRows int) string {\n    // Your code here\n}",
+    "rust": "impl Solution {\n    pub fn convert(s: String, num_rows: i32) -> String {\n        // Your code here\n    }\n}"
+  },
   "Run_testCases": [
-    { "input": "madam", "expected": true },
-    { "input": "hello", "expected": false },
-    { "input": "A man a plan a canal Panama", "expected": true }
+    {
+      "input": {
+        "s": "PAYPALISHIRING",
+        "numRows": 3
+      },
+      "expected": "PAHNAPLSIIGYIR"
+    },
+    {
+      "input": {
+        "s": "PAYPALISHIRING",
+        "numRows": 4
+      },
+      "expected": "PINALSIGYAHRPI"
+    }
   ],
   "Submit_testCases": [
     { "input": "racecar", "expected": true },

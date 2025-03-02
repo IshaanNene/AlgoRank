@@ -3,6 +3,10 @@ from colorama import Fore, Style, init
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass, field
 from enum import Enum
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import uvicorn
 
 init(strip=False, convert=True)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -233,34 +237,78 @@ class TestRunner:
             self.metrics.slowest_test = self.metrics.execution_times.index(max_time) + 1
             logging.info("Fastest test: %d, Slowest test: %d", self.metrics.fastest_test, self.metrics.slowest_test)
 
-def main():
-    if len(sys.argv) != 4:
-        print("Usage: python main.py <Run|Submit> <problem_number> <language>")
-        logging.error("Invalid number of arguments provided")
-        return
+# New API models
+class TestCase(BaseModel):
+    input: any
+    expected: any
 
-    mode, problem_id, lang = sys.argv[1], int(sys.argv[2]), sys.argv[3]
-    logging.info("Starting main with mode: %s, problem_id: %d, language: %s", mode, problem_id, lang)
-    
+class Problem(BaseModel):
+    problem_num: int
+    problem_name: str
+    difficulty: str
+    description: str
+    Expected_Time_Constraints: str
+    Expected_Space_Constraints: str
+    Run_testCases: List[TestCase]
+    Submit_testCases: List[TestCase]
+
+class CodeSubmission(BaseModel):
+    code: str
+    language: str
+
+# Initialize FastAPI
+app = FastAPI()
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:80"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# API Routes
+@app.get("/api/problems")
+async def get_problems():
+    problems = []
+    problem_dir = 'Problem'
+    for filename in os.listdir(problem_dir):
+        if filename.endswith('.json'):
+            with open(os.path.join(problem_dir, filename), 'r') as f:
+                problem = json.load(f)
+                problems.append(problem)
+    return problems
+
+@app.get("/api/problems/{problem_id}")
+async def get_problem(problem_id: int):
     try:
-        # Update language handling to be case-insensitive
-        language_map = {
-            "c": Language.C,
-            "cpp": Language.CPP,
-            "java": Language.JAVA,
-            "go": Language.GO,
-            "rust": Language.RUST
-        }
+        with open(f'Problem/problem{problem_id}.json', 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Problem not found")
+
+@app.post("/api/problems/{problem_id}/run")
+async def run_test_case(problem_id: int, submission: CodeSubmission):
+    try:
+        # Save the submission
+        lang = submission.language.upper()
+        if lang not in [l.name for l in Language]:
+            raise HTTPException(status_code=400, detail="Unsupported language")
+
+        language = Language[lang]
+        solution_path = f"AlgoRank/Solutions/{language.value}_Solutions/temp_{problem_id}{CodeExecutor(language).file_extensions[language]}"
         
-        if lang.lower() not in language_map:
-            logging.error("Unsupported language: %s", lang)
-            raise ValueError(f"Unsupported language: {lang}")
-            
-        language = language_map[lang.lower()]
+        # Save the code
+        os.makedirs(os.path.dirname(solution_path), exist_ok=True)
+        with open(solution_path, "w") as f:
+            f.write(submission.code)
+
+        # Run tests
         runner = TestRunner(problem_id, language)
-        metrics = runner.run_tests(mode)
-        
-        result = {
+        metrics = runner.run_tests("Run")
+
+        return {
             "status": "success",
             "metrics": {
                 "total_time_ms": metrics.total_time,
@@ -270,8 +318,6 @@ def main():
                 "errors": metrics.errors,
                 "peak_memory_mb": metrics.peak_memory / (1024 * 1024),
                 "peak_cpu_percent": metrics.peak_cpu_usage,
-                "fastest_test": metrics.fastest_test,
-                "slowest_test": metrics.slowest_test,
                 "test_results": [
                     {
                         "success": result.success,
@@ -283,17 +329,123 @@ def main():
                 ]
             }
         }
-        logging.info("Test run successful for problem ID: %d", problem_id)
-        print(json.dumps(result, indent=2))
-
     except Exception as e:
-        logging.exception("An error occurred during test execution")
-        error_result = {
-            "status": "error",
-            "message": str(e)
+        logging.exception("Error running test case")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/problems/{problem_id}/submit")
+async def submit_solution(problem_id: int, submission: CodeSubmission):
+    try:
+        # Similar to run_test_case but uses the permanent solution path
+        lang = submission.language.upper()
+        if lang not in [l.name for l in Language]:
+            raise HTTPException(status_code=400, detail="Unsupported language")
+
+        language = Language[lang]
+        solution_path = f"AlgoRank/Solutions/{language.value}_Solutions/solution_{problem_id}{CodeExecutor(language).file_extensions[language]}"
+        
+        # Save the code
+        os.makedirs(os.path.dirname(solution_path), exist_ok=True)
+        with open(solution_path, "w") as f:
+            f.write(submission.code)
+
+        # Run tests
+        runner = TestRunner(problem_id, language)
+        metrics = runner.run_tests("Submit")
+
+        return {
+            "status": "success",
+            "metrics": {
+                "total_time_ms": metrics.total_time,
+                "passed_count": metrics.passed_count,
+                "failed_count": metrics.failed_count,
+                "timeouts": metrics.timeouts,
+                "errors": metrics.errors,
+                "peak_memory_mb": metrics.peak_memory / (1024 * 1024),
+                "peak_cpu_percent": metrics.peak_cpu_usage,
+                "test_results": [
+                    {
+                        "success": result.success,
+                        "execution_time_ms": result.execution_time * 1000,
+                        "output": result.output,
+                        "error": result.error_message
+                    }
+                    for result in metrics.test_results
+                ]
+            }
         }
-        print(json.dumps(error_result, indent=2))
-        sys.exit(1)
+    except Exception as e:
+        logging.exception("Error submitting solution")
+        raise HTTPException(status_code=500, detail=str(e))
+
+def main():
+    if len(sys.argv) > 1:
+        # Handle CLI mode
+        if len(sys.argv) != 4:
+            print("Usage: python main.py <Run|Submit> <problem_number> <language>")
+            logging.error("Invalid number of arguments provided")
+            return
+
+        mode, problem_id, lang = sys.argv[1], int(sys.argv[2]), sys.argv[3]
+        logging.info("Starting main with mode: %s, problem_id: %d, language: %s", mode, problem_id, lang)
+        
+        try:
+            # Update language handling to be case-insensitive
+            language_map = {
+                "c": Language.C,
+                "cpp": Language.CPP,
+                "java": Language.JAVA,
+                "go": Language.GO,
+                "rust": Language.RUST
+            }
+            
+            if lang.lower() not in language_map:
+                logging.error("Unsupported language: %s", lang)
+                raise ValueError(f"Unsupported language: {lang}")
+                
+            language = language_map[lang.lower()]
+            runner = TestRunner(problem_id, language)
+            metrics = runner.run_tests(mode)
+            
+            result = {
+                "status": "success",
+                "metrics": {
+                    "total_time_ms": metrics.total_time,
+                    "passed_count": metrics.passed_count,
+                    "failed_count": metrics.failed_count,
+                    "timeouts": metrics.timeouts,
+                    "errors": metrics.errors,
+                    "peak_memory_mb": metrics.peak_memory / (1024 * 1024),
+                    "peak_cpu_percent": metrics.peak_cpu_usage,
+                    "fastest_test": metrics.fastest_test,
+                    "slowest_test": metrics.slowest_test,
+                    "test_results": [
+                        {
+                            "success": result.success,
+                            "execution_time_ms": result.execution_time * 1000,
+                            "output": result.output,
+                            "error": result.error_message
+                        }
+                        for result in metrics.test_results
+                    ]
+                }
+            }
+            logging.info("Test run successful for problem ID: %d", problem_id)
+            print(json.dumps(result, indent=2))
+
+        except Exception as e:
+            logging.exception("An error occurred during test execution")
+            error_result = {
+                "status": "error",
+                "message": str(e)
+            }
+            print(json.dumps(error_result, indent=2))
+            sys.exit(1)
+
+    else:
+        # Start FastAPI server
+        logging.info("Starting FastAPI server")
+        uvicorn.run(app, host="0.0.0.0", port=8080)
 
 if __name__ == "__main__":
     main()

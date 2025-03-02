@@ -2,23 +2,26 @@ package models
 
 import "time"
 
+// Submission represents a code submission
 type Submission struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"userId"`
-	ProblemID string    `json:"problemId"`
-	Code      string    `json:"code"`
+	ID        int       `json:"id"`
+	ProblemID int       `json:"problem_id"`
+	UserID    string    `json:"user_id"`
 	Language  string    `json:"language"`
+	Code      string    `json:"code"`
 	Status    string    `json:"status"`
-	Runtime   int       `json:"runtime"`
-	Memory    int       `json:"memory"`
-	CreatedAt time.Time `json:"createdAt"`
+	Runtime   float64   `json:"runtime"`
+	Memory    int64     `json:"memory"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
-type TestCase struct {
-	Input        string `json:"input"`
-	Expected     string `json:"expected"`
-	ActualOutput string `json:"actualOutput,omitempty"`
-	Passed       bool   `json:"passed"`
-	Runtime      int    `json:"runtime"`
-	Memory       int    `json:"memory"`
+// SubmissionResult represents the result of a submission
+type SubmissionResult struct {
+	Success     bool         `json:"success"`
+	TestResults []TestResult `json:"test_results"`
+	TotalTime   float64      `json:"total_time_ms"`
+	MaxMemory   int64        `json:"peak_memory_mb"`
+	PassedCount int          `json:"passed_count"`
+	FailedCount int          `json:"failed_count"`
+	Error       string       `json:"error,omitempty"`
 }

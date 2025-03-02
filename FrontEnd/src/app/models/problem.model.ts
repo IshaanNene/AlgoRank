@@ -1,11 +1,22 @@
 export interface Problem {
+  id: number;
   problem_num: number;
   problem_name: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
+  title: string;
   description: string;
+  difficulty: string;
+  acceptance: number;
   Expected_Time_Constraints: string;
   Expected_Space_Constraints: string;
   Run_testCases: TestCase[];
+  templates: {
+    javascript?: string;
+    python?: string;
+    java?: string;
+    cpp?: string;
+    go?: string;
+    rust?: string;
+  };
   Submit_testCases: TestCase[];
 }
 

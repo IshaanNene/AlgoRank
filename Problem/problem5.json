@@ -1,14 +1,32 @@
 {
   "problem_num": 5,
-  "problem_name": "Fibonacci Sequence",
+  "problem_name": "Longest Palindromic Substring",
+  "description": "Given a string s, return the longest palindromic substring in s.",
   "difficulty": "Medium",
-  "description": "Implement a function to return the nth Fibonacci number.",
-  "Expected Time Constraints": "O(n)",
-  "Expected Space Constraints": "O(1)",
+  "acceptance": 72,
+  "Expected_Time_Constraints": "O(n²)",
+  "Expected_Space_Constraints": "O(1)",
+  "templates": {
+    "javascript": "/**\n * @param {string} s\n * @return {string}\n */\nfunction longestPalindrome(s) {\n    // Your code here\n}",
+    "python": "def longest_palindrome(s: str) -> str:\n    # Your code here\n    pass",
+    "java": "class Solution {\n    public String longestPalindrome(String s) {\n        // Your code here\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    string longestPalindrome(string s) {\n        // Your code here\n    }\n};",
+    "go": "func longestPalindrome(s string) string {\n    // Your code here\n}",
+    "rust": "impl Solution {\n    pub fn longest_palindrome(s: String) -> String {\n        // Your code here\n    }\n}"
+  },
   "Run_testCases": [
-    { "n": 0, "expected": 0 },
-    { "n": 1, "expected": 1 },
-    { "n": 5, "expected": 5 }
+    {
+      "input": {
+        "s": "babad"
+      },
+      "expected": "bab"
+    },
+    {
+      "input": {
+        "s": "cbbd"
+      },
+      "expected": "bb"
+    }
   ],
   "Submit_testCases": [
     { "n": 2, "expected": 1 },

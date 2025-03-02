@@ -14,15 +14,28 @@ type TestCase struct {
 	IsHidden bool   `json:"is_hidden"`
 }
 
+// Problem represents a coding problem
 type Problem struct {
-	ID              int        `json:"id"`
-	Title           string     `json:"title"`
-	Description     string     `json:"description"`
-	Difficulty      string     `json:"difficulty"`
-	TimeComplexity  string     `json:"timeComplexity"`
-	SpaceComplexity string     `json:"spaceComplexity"`
-	Examples        []Example  `json:"examples"`
-	TestCases       []TestCase `json:"testCases,omitempty"`
-	CreatedAt       time.Time  `json:"createdAt"`
-	UpdatedAt       time.Time  `json:"updatedAt"`
+	ID               int        `json:"problem_num"`
+	Name             string     `json:"problem_name"`
+	Description      string     `json:"description"`
+	Difficulty       string     `json:"difficulty"`
+	Acceptance       float64    `json:"acceptance"`
+	TimeConstraints  string     `json:"Expected_Time_Constraints"`
+	SpaceConstraints string     `json:"Expected_Space_Constraints"`
+	Templates        Templates  `json:"templates"`
+	RunTestCases     []TestCase `json:"Run_testCases"`
+	SubmitTestCases  []TestCase `json:"Submit_testCases"`
+	CreatedAt        time.Time  `json:"createdAt"`
+	UpdatedAt        time.Time  `json:"updatedAt"`
+}
+
+// Templates holds code templates for different programming languages
+type Templates struct {
+	JavaScript string `json:"javascript,omitempty"`
+	Python     string `json:"python,omitempty"`
+	Java       string `json:"java,omitempty"`
+	Cpp        string `json:"cpp,omitempty"`
+	Go         string `json:"go,omitempty"`
+	Rust       string `json:"rust,omitempty"`
 }

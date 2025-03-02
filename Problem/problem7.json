@@ -1,14 +1,38 @@
 {
   "problem_num": 7,
-  "problem_name": "Find the Maximum Number",
-  "difficulty": "Easy",
-  "description": "Write a function that finds the maximum number in an array.",
-  "Expected Time Constraints": "O(n)",
-  "Expected Space Constraints": "O(1)",
+  "problem_name": "Reverse Integer",
+  "description": "Given a signed 32-bit integer x, return x with its digits reversed. If reversing x causes the value to go outside the signed 32-bit integer range [-231, 231 - 1], then return 0.",
+  "difficulty": "Medium",
+  "acceptance": 70,
+  "Expected_Time_Constraints": "O(log|x|)",
+  "Expected_Space_Constraints": "O(1)",
+  "templates": {
+    "javascript": "/**\n * @param {number} x\n * @return {number}\n */\nfunction reverse(x) {\n    // Your code here\n}",
+    "python": "def reverse(x: int) -> int:\n    # Your code here\n    pass",
+    "java": "class Solution {\n    public int reverse(int x) {\n        // Your code here\n    }\n}",
+    "cpp": "class Solution {\npublic:\n    int reverse(int x) {\n        // Your code here\n    }\n};",
+    "go": "func reverse(x int) int {\n    // Your code here\n}",
+    "rust": "impl Solution {\n    pub fn reverse(x: i32) -> i32 {\n        // Your code here\n    }\n}"
+  },
   "Run_testCases": [
-    { "array": [1, 2, 3, 4, 5], "expected": 5 },
-    { "array": [-1, -2, -3], "expected": -1 },
-    { "array": [10, 20, 30, 40], "expected": 40 }
+    {
+      "input": {
+        "x": 123
+      },
+      "expected": 321
+    },
+    {
+      "input": {
+        "x": -123
+      },
+      "expected": -321
+    },
+    {
+      "input": {
+        "x": 120
+      },
+      "expected": 21
+    }
   ],
   "Submit_testCases": [
     { "array": [5, 1, 2, 3, 4], "expected": 5 },

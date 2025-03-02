@@ -1,14 +1,34 @@
 {
   "problem_num": 1,
-  "problem_name": "Adding two numbers",
+  "problem_name": "Two Sum",
+  "description": "Given an array of integers nums and an integer target, return indices of the two numbers in the array such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice.",
   "difficulty": "Easy",
-  "description": "This problem requires you to write a function that adds two integers.",
-  "Expected Time Constraints": "nil",
-  "Expected Space Constraints": "nil",
+  "acceptance": 85,
+  "Expected_Time_Constraints": "O(n)",
+  "Expected_Space_Constraints": "O(n)",
+  "templates": {
+    "javascript": "/**\n * @param {number[]} nums\n * @param {number} target\n * @return {number[]}\n */\nfunction twoSum(nums, target) {\n    // Your code here\n}",
+    "python": "def two_sum(nums: List[int], target: int) -> List[int]:\n    # Your code here\n    pass",
+    "java": "class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        // Your code here\n    }\n}",
+    "cpp": "#include <vector>\n\nclass Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        // Your code here\n    }\n};",
+    "go": "func twoSum(nums []int, target int) []int {\n    // Your code here\n}",
+    "rust": "impl Solution {\n    pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {\n        // Your code here\n    }\n}"
+  },
   "Run_testCases": [
-    { "a": 1, "b": 1, "expected": 2 },
-    { "a": 2, "b": 3, "expected": 5 },
-    { "a": -5, "b": 10, "expected": 5 }
+    {
+      "input": {
+        "nums": [2, 7, 11, 15],
+        "target": 9
+      },
+      "expected": [0, 1]
+    },
+    {
+      "input": {
+        "nums": [3, 2, 4],
+        "target": 6
+      },
+      "expected": [1, 2]
+    }
   ],
   "Submit_testCases": [
     { "a": 1, "b": 1, "expected": 2 },

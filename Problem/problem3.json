@@ -1,14 +1,38 @@
 {
     "problem_num": 3,
-    "problem_name": "Finding maximum of two numbers",
-    "difficulty": "Easy",
-    "description": "Write a function that returns the maximum of two integers.",
-    "Expected Time Constraints": "nil",
-    "Expected Space Constraints": "nil",
+    "problem_name": "Longest Substring Without Repeating Characters",
+    "description": "Given a string s, find the length of the longest substring without repeating characters.",
+    "difficulty": "Medium",
+    "acceptance": 78,
+    "Expected_Time_Constraints": "O(n)",
+    "Expected_Space_Constraints": "O(min(m,n))",
+    "templates": {
+      "javascript": "/**\n * @param {string} s\n * @return {number}\n */\nfunction lengthOfLongestSubstring(s) {\n    // Your code here\n}",
+      "python": "def length_of_longest_substring(s: str) -> int:\n    # Your code here\n    pass",
+      "java": "class Solution {\n    public int lengthOfLongestSubstring(String s) {\n        // Your code here\n    }\n}",
+      "cpp": "class Solution {\npublic:\n    int lengthOfLongestSubstring(string s) {\n        // Your code here\n    }\n};",
+      "go": "func lengthOfLongestSubstring(s string) int {\n    // Your code here\n}",
+      "rust": "impl Solution {\n    pub fn length_of_longest_substring(s: String) -> i32 {\n        // Your code here\n    }\n}"
+    },
     "Run_testCases": [
-      { "a": 1, "b": 2, "expected": 2 },
-      { "a": 5, "b": 3, "expected": 5 },
-      { "a": -5, "b": 10, "expected": 10 }
+      {
+        "input": {
+          "s": "abcabcbb"
+        },
+        "expected": 3
+      },
+      {
+        "input": {
+          "s": "bbbbb"
+        },
+        "expected": 1
+      },
+      {
+        "input": {
+          "s": "pwwkew"
+        },
+        "expected": 3
+      }
     ],
     "Submit_testCases": [
       { "a": 1, "b": 2, "expected": 2 },

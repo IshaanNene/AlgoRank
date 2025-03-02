@@ -40,6 +40,16 @@ import { MonacoEditorComponent } from '../monaco-editor/monaco-editor.component'
         </div>
 
         <div class="code-editor-panel">
+          <div class="editor-header">
+            <select class="language-selector" [(ngModel)]="selectedLanguage" (change)="onLanguageChange()">
+              <option value="javascript">JavaScript</option>
+              <option value="python">Python</option>
+              <option value="java">Java</option>
+              <option value="cpp">C++</option>
+              <option value="go">Go</option>
+              <option value="rust">Rust</option>
+            </select>
+          </div>
           <app-monaco-editor #editor></app-monaco-editor>
           <div class="action-buttons">
             <button (click)="runCode()">Run Code</button>
@@ -139,6 +149,7 @@ export class ProblemDetailComponent implements OnInit {
   @ViewChild('editor') editor!: MonacoEditorComponent;
   problem?: Problem;
   testResults: any;
+  selectedLanguage: string = 'javascript';
 
   constructor(
     private route: ActivatedRoute,
@@ -150,14 +161,29 @@ export class ProblemDetailComponent implements OnInit {
       const id = +params['id'];
       this.problemService.getProblem(id).subscribe(problem => {
         this.problem = problem;
+        this.loadLanguageTemplate();
       });
     });
+  }
+
+  onLanguageChange() {
+    this.loadLanguageTemplate();
+  }
+
+  loadLanguageTemplate() {
+    if (!this.problem || !this.editor) return;
+    
+    const template = this.problem.templates?.[this.selectedLanguage];
+    if (template) {
+      this.editor.setCode(template);
+      this.editor.setLanguage(this.selectedLanguage);
+    }
   }
 
   runCode() {
     if (!this.problem) return;
     const code = this.editor.getCode();
-    this.problemService.runTestCase(this.problem.problem_num, code, 'javascript')
+    this.problemService.runTestCase(this.problem.problem_num, code, this.selectedLanguage)
       .subscribe(results => {
         this.testResults = results;
       });
@@ -166,7 +192,7 @@ export class ProblemDetailComponent implements OnInit {
   submitSolution() {
     if (!this.problem) return;
     const code = this.editor.getCode();
-    this.problemService.submitSolution(this.problem.problem_num, code, 'javascript')
+    this.problemService.submitSolution(this.problem.problem_num, code, this.selectedLanguage)
       .subscribe(results => {
         this.testResults = results;
       });
