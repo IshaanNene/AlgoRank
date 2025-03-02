@@ -1,29 +1,35 @@
-# Build stage
-FROM golang:1.21-alpine AS builder
+FROM golang:1.20-alpine AS builder
 
 WORKDIR /app
 
-# Install required packages
-RUN apk add --no-cache gcc musl-dev
-
-# Copy only the go mod files first
+# Copy go mod files first for better caching
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy source code
+# Copy the rest of the application
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+RUN go build -o main .
 
 # Final stage
-FROM alpine:3.18
+FROM alpine:latest
 
 WORKDIR /app
 
-# Copy the binary from builder
-COPY --from=builder /app/main .
+# Install runtime dependencies
+RUN apk --no-cache add ca-certificates
 
+# Copy the binary from the builder stage
+COPY --from=builder /app/main .
+COPY --from=builder /app/.env .
+COPY --from=builder /app/init.sql .
+
+# Create directories for Problem and Solutions
+RUN mkdir -p /app/Problem /app/Solutions
+
+# Expose the port
 EXPOSE 8080
 
+# Run the application
 CMD ["./main"] 

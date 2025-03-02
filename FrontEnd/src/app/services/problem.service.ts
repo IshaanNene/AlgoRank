@@ -1,33 +1,33 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { Problem } from '../models/problem.model';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Problem } from '../models/problem.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProblemService {
-  private baseUrl = '/api/problems'; // Will need to configure this endpoint
+  private apiUrl = '/api/problems';
 
   constructor(private http: HttpClient) { }
 
   getProblems(): Observable<Problem[]> {
-    return this.http.get<Problem[]>(`${this.baseUrl}`);
+    return this.http.get<Problem[]>(this.apiUrl);
   }
 
-  getProblem(id: number): Observable<Problem | undefined> {
-    return this.http.get<Problem>(`${this.baseUrl}/${id}`);
+  getProblem(id: number): Observable<Problem> {
+    return this.http.get<Problem>(`${this.apiUrl}/${id}`);
   }
 
   submitSolution(problemId: number, code: string, language: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/${problemId}/submit`, {
+    return this.http.post(`${this.apiUrl}/${problemId}/submit`, {
       code,
       language
     });
   }
 
   runTestCase(problemId: number, code: string, language: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/${problemId}/run`, {
+    return this.http.post(`${this.apiUrl}/${problemId}/run`, {
       code,
       language
     });

@@ -19,7 +19,7 @@ import { ProblemService } from '../../services/problem.service';
           <div>Acceptance</div>
           <div>Difficulty</div>
         </div>
-        <div *ngFor="let problem of problems" class="problem-item" [routerLink]="['/problem', problem.id]">
+        <div *ngFor="let problem of problems" class="problem-item" [routerLink]="['/problems', problem.problem_num]">
           <div>{{ problem.problem_num }}</div>
           <div>{{ problem.problem_name }}</div>
           <div class="language-icons">
@@ -94,8 +94,13 @@ export class ProblemListComponent implements OnInit {
   constructor(private problemService: ProblemService) { }
 
   ngOnInit(): void {
-    this.problemService.getProblems().subscribe(problems => {
-      this.problems = problems;
+    this.problemService.getProblems().subscribe({
+      next: (problems) => {
+        this.problems = problems;
+      },
+      error: (err) => {
+        console.error('Failed to load problems:', err);
+      }
     });
   }
 }

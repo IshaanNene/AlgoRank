@@ -2,199 +2,164 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Problem } from '../../models/problem.model';
+import { HttpClient } from '@angular/common/http';
+import { Problem, TestCase, Example, Templates } from '../../models/problem.model';
 import { ProblemService } from '../../services/problem.service';
 import { MonacoEditorComponent } from '../monaco-editor/monaco-editor.component';
+
+interface TestResult {
+  input: any;
+  expected: any;
+  output: any;
+  passed: boolean;
+  timeMs: number;
+  memoryKb: number;
+  isHidden?: boolean;
+  error?: string;
+}
+
+interface ExecutionResult {
+  status: string;
+  runtime: number;
+  memory: number;
+  testResults: TestResult[];
+  error?: string;
+}
 
 @Component({
   selector: 'app-problem-detail',
   standalone: true,
   imports: [CommonModule, FormsModule, MonacoEditorComponent],
-  template: `
-    <div class="container" *ngIf="problem">
-      <div class="problem-layout">
-        <div class="problem-description-panel">
-          <div class="problem-description">
-            <div class="problem-title">
-              <h1>{{ problem.problem_num }}. {{ problem.problem_name }}</h1>
-              <span [ngClass]="'difficulty-' + problem.difficulty.toLowerCase()">
-                {{ problem.difficulty }}
-              </span>
-            </div>
-            <p>{{ problem.description }}</p>
-            
-            <div class="constraints">
-              <h3>Constraints:</h3>
-              <p>Time: {{ problem.Expected_Time_Constraints }}</p>
-              <p>Space: {{ problem.Expected_Space_Constraints }}</p>
-            </div>
-
-            <div class="test-cases">
-              <h3>Example Test Cases:</h3>
-              <div class="test-case" *ngFor="let test of problem.Run_testCases">
-                <p>Input: {{ test.input | json }}</p>
-                <p>Expected Output: {{ test.expected | json }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="code-editor-panel">
-          <div class="editor-header">
-            <select class="language-selector" [(ngModel)]="selectedLanguage" (change)="onLanguageChange()">
-              <option value="javascript">JavaScript</option>
-              <option value="python">Python</option>
-              <option value="java">Java</option>
-              <option value="cpp">C++</option>
-              <option value="go">Go</option>
-              <option value="rust">Rust</option>
-            </select>
-          </div>
-          <app-monaco-editor #editor></app-monaco-editor>
-          <div class="action-buttons">
-            <button (click)="runCode()">Run Code</button>
-            <button (click)="submitSolution()">Submit Solution</button>
-          </div>
-          <div class="results" *ngIf="testResults">
-            <h3>Test Results:</h3>
-            <pre>{{ testResults | json }}</pre>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .problem-layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-top: 20px;
-    }
-    
-    .problem-description-panel, .code-editor-panel {
-      height: calc(100vh - 120px);
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .editor-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    
-    .language-selector {
-      padding: 8px;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-    }
-    
-    .editor-actions {
-      display: flex;
-      gap: 10px;
-    }
-    
-    app-monaco-editor {
-      flex: 1;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    
-    .submission-result {
-      margin-top: 16px;
-      padding: 16px;
-      border-radius: 8px;
-      background-color: #f8f8f8;
-    }
-    
-    .result-status {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-    
-    .result-stats {
-      display: flex;
-      gap: 16px;
-      color: #666;
-    }
-    
-    .success {
-      background-color: #e6f7e6;
-      border-left: 4px solid #2cbc63;
-    }
-    
-    .error {
-      background-color: #ffeaea;
-      border-left: 4px solid #ef4743;
-    }
-    
-    @media (max-width: 1024px) {
-      .problem-layout {
-        grid-template-columns: 1fr;
-      }
-      
-      .problem-description-panel, .code-editor-panel {
-        height: auto;
-      }
-      
-      app-monaco-editor {
-        height: 400px;
-      }
-    }
-  `]
+  templateUrl: './problem-detail.component.html',
+  styleUrls: ['./problem-detail.component.css']
 })
 export class ProblemDetailComponent implements OnInit {
-  @ViewChild('editor') editor!: MonacoEditorComponent;
-  problem?: Problem;
-  testResults: any;
-  selectedLanguage: string = 'javascript';
+  @ViewChild(MonacoEditorComponent) editor!: MonacoEditorComponent;
+  
+  problem: Problem | null = null;
+  loading = true;
+  error = '';
+  selectedLanguage = 'javascript';
+  executionResult: ExecutionResult | null = null;
+  isExecuting = false;
+  
+  languages = [
+    { id: 'javascript', name: 'JavaScript' },
+    { id: 'python', name: 'Python' },
+    { id: 'java', name: 'Java' },
+    { id: 'cpp', name: 'C++' },
+    { id: 'go', name: 'Go' },
+    { id: 'rust', name: 'Rust' }
+  ];
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
+    private http: HttpClient,
     private problemService: ProblemService
   ) {}
 
   ngOnInit() {
-    this.route.params.subscribe(params => {
-      const id = +params['id'];
-      this.problemService.getProblem(id).subscribe(problem => {
-        this.problem = problem;
-        this.loadLanguageTemplate();
-      });
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.fetchProblem(parseInt(id, 10));
+      }
     });
   }
 
-  onLanguageChange() {
-    this.loadLanguageTemplate();
+  fetchProblem(id: number) {
+    this.loading = true;
+    this.problemService.getProblem(id).subscribe({
+      next: (data) => {
+        this.problem = data;
+        this.loading = false;
+        
+        // Set initial code template when editor is ready
+        setTimeout(() => this.setCodeTemplate(), 100);
+      },
+      error: (err) => {
+        this.error = 'Failed to load problem';
+        this.loading = false;
+        console.error(err);
+      }
+    });
   }
 
-  loadLanguageTemplate() {
+  setCodeTemplate() {
     if (!this.problem || !this.editor) return;
     
-    const template = this.problem.templates?.[this.selectedLanguage];
+    const lang = this.selectedLanguage as keyof Templates;
+    const template = this.problem.templates[lang] || '';
     if (template) {
       this.editor.setCode(template);
       this.editor.setLanguage(this.selectedLanguage);
     }
   }
 
-  runCode() {
-    if (!this.problem) return;
-    const code = this.editor.getCode();
-    this.problemService.runTestCase(this.problem.problem_num, code, this.selectedLanguage)
-      .subscribe(results => {
-        this.testResults = results;
-      });
+  onLanguageChange() {
+    this.setCodeTemplate();
   }
 
-  submitSolution() {
-    if (!this.problem) return;
+  runCode() {
+    if (!this.problem || !this.editor) return;
+    
     const code = this.editor.getCode();
-    this.problemService.submitSolution(this.problem.problem_num, code, this.selectedLanguage)
-      .subscribe(results => {
-        this.testResults = results;
-      });
+    if (!code) {
+      this.error = 'Please write some code first';
+      return;
+    }
+    
+    this.isExecuting = true;
+    this.executionResult = null;
+    this.error = '';
+    
+    this.http.post<ExecutionResult>('/api/code/run', {
+      problemId: this.problem.problem_num,
+      code: code,
+      language: this.selectedLanguage,
+      mode: 'Run'
+    }).subscribe({
+      next: (result) => {
+        this.executionResult = result;
+        this.isExecuting = false;
+      },
+      error: (err) => {
+        this.error = 'Failed to execute code';
+        this.isExecuting = false;
+        console.error(err);
+      }
+    });
+  }
+
+  submitCode() {
+    if (!this.problem || !this.editor) return;
+    
+    const code = this.editor.getCode();
+    if (!code) {
+      this.error = 'Please write some code first';
+      return;
+    }
+    
+    this.isExecuting = true;
+    this.executionResult = null;
+    this.error = '';
+    
+    this.http.post<ExecutionResult>('/api/code/submit', {
+      problemId: this.problem.problem_num,
+      code: code,
+      language: this.selectedLanguage,
+      mode: 'Submit'
+    }).subscribe({
+      next: (result) => {
+        this.executionResult = result;
+        this.isExecuting = false;
+      },
+      error: (err) => {
+        this.error = 'Failed to submit code';
+        this.isExecuting = false;
+        console.error(err);
+      }
+    });
   }
 }

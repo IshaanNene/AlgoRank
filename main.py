@@ -1,6 +1,6 @@
 import subprocess, json, os, logging, sys, time, psutil, resource
 from colorama import Fore, Style, init
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 from fastapi import FastAPI, HTTPException
@@ -239,8 +239,8 @@ class TestRunner:
 
 # New API models
 class TestCase(BaseModel):
-    input: any
-    expected: any
+    input: Any
+    expected: Any
 
 class Problem(BaseModel):
     problem_num: int
@@ -257,16 +257,25 @@ class CodeSubmission(BaseModel):
     language: str
 
 # Initialize FastAPI
-app = FastAPI()
+app = FastAPI(
+    title="AlgoRank Executor",
+    description="Code execution service for AlgoRank",
+    version="1.0.0"
+)
 
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:80"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add a health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
 
 # API Routes
 @app.get("/api/problems")
@@ -378,6 +387,7 @@ async def submit_solution(problem_id: int, submission: CodeSubmission):
         logging.exception("Error submitting solution")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Main function
 def main():
     if len(sys.argv) > 1:
         # Handle CLI mode
@@ -445,7 +455,7 @@ def main():
     else:
         # Start FastAPI server
         logging.info("Starting FastAPI server")
-        uvicorn.run(app, host="0.0.0.0", port=8080)
+        uvicorn.run(app, host="0.0.0.0", port=8000)
 
 if __name__ == "__main__":
     main()

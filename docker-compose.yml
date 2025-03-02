@@ -6,12 +6,18 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./FrontEnd:/app
-      - /app/node_modules
+      - ./FrontEnd:/app:ro
     environment:
       - VITE_API_URL=http://localhost:8080
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
 
   backend:
     build: 
@@ -19,11 +25,48 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    volumes:
+      - ./Problem:/app/Problem:ro
+      - ./Solutions:/app/Solutions
     environment:
       - DATABASE_URL=postgres://algorank:algorank123@db:5432/algorank?sslmode=disable
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/problems"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+
+  executor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./Problem:/AlgoRank/Problem:ro
+      - ./Solutions:/AlgoRank/Solutions
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8000:8000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: on-failure:5
 
   db:
     image: postgres:15-alpine
@@ -42,6 +85,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
 volumes:
   postgres_data:

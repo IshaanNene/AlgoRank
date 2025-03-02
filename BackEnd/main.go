@@ -3,50 +3,55 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
-	"github.com/IshaanNene/AlgoRank/config"
-	"github.com/IshaanNene/AlgoRank/db"
-	"github.com/IshaanNene/AlgoRank/handlers"
-	_ "github.com/lib/pq"
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 )
 
 func main() {
-	// Load configuration
-	cfg := config.LoadConfig()
-
-	// Initialize database
-	database, err := db.Initialize(cfg)
+	// Load environment variables
+	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Could not initialize database:", err)
+		log.Println("Error loading .env file, using default environment variables")
 	}
-	defer database.Close()
 
-	// Create server instance
-	server := handlers.NewServer(database, cfg.JWTSecret)
+	// Connect to database
+	db, err := ConnectDB()
+	if err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
+	defer db.Close()
 
-	// Setup CORS with more permissive settings for development
-	c := cors.New(cors.Options{
-		AllowedOrigins: []string{
-			"http://localhost:3000",
-			"http://localhost:5173", // Vite dev server
-		},
-		AllowedMethods: []string{
-			"GET", "POST", "PUT", "DELETE", "OPTIONS",
-		},
-		AllowedHeaders: []string{
-			"Content-Type",
-			"Authorization",
-			"X-Requested-With",
-		},
-		AllowCredentials: true,
-		Debug:            true, // Enable for debugging
+	// Create router
+	router := mux.NewRouter()
+
+	// Register routes
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("AlgoRank API"))
 	})
 
-	// Wrap router with CORS handler
-	handler := c.Handler(server.Router)
+	// Register API routes
+	apiRouter := router.PathPrefix("/api").Subrouter()
+	registerAuthRoutes(apiRouter, db)
+	registerProblemRoutes(apiRouter, db)
+	registerCodeRoutes(apiRouter, db)
+
+	// Configure CORS
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	})
+	handler := c.Handler(router)
 
 	// Start server
-	log.Printf("Starting server on port %s", cfg.Port)
-	log.Fatal(http.ListenAndServe(":"+cfg.Port, handler))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Println("Server starting on port", port)
+	log.Fatal(http.ListenAndServe(":"+port, handler))
 }

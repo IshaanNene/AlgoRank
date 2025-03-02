@@ -1,0 +1,137 @@
+<div class="problem-detail-container" *ngIf="!loading && problem">
+  <div class="problem-header">
+    <h1>{{ problem.title }}</h1>
+    <div class="problem-meta">
+      <span class="difficulty" [ngClass]="'difficulty-' + problem.difficulty.toLowerCase()">
+        {{ problem.difficulty }}
+      </span>
+      <span class="acceptance">
+        Acceptance: {{ problem.acceptance | number:'1.1-1' }}%
+      </span>
+    </div>
+  </div>
+
+  <div class="problem-content">
+    <div class="problem-description">
+      <div class="description-text" [innerHTML]="problem.description"></div>
+      
+      <div class="constraints">
+        <h3>Constraints</h3>
+        <ul>
+          <li>Time Complexity: {{ problem.Expected_Time_Constraints }}</li>
+          <li>Space Complexity: {{ problem.Expected_Space_Constraints }}</li>
+        </ul>
+      </div>
+      
+      <div class="examples" *ngIf="problem.examples && problem.examples.length > 0">
+        <h3>Examples</h3>
+        <div class="example" *ngFor="let example of problem.examples; let i = index">
+          <h4>Example {{ i + 1 }}</h4>
+          <div class="example-content">
+            <div class="example-input">
+              <strong>Input:</strong> {{ example.input }}
+            </div>
+            <div class="example-output">
+              <strong>Output:</strong> {{ example.output }}
+            </div>
+            <div class="example-explanation" *ngIf="example.explanation">
+              <strong>Explanation:</strong> {{ example.explanation }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="code-editor-section">
+      <div class="editor-header">
+        <div class="language-selector">
+          <label for="language">Language:</label>
+          <select id="language" [(ngModel)]="selectedLanguage" (change)="onLanguageChange()">
+            <option *ngFor="let lang of languages" [value]="lang.id">{{ lang.name }}</option>
+          </select>
+        </div>
+        
+        <div class="editor-actions">
+          <button class="btn btn-run" (click)="runCode()" [disabled]="isExecuting">
+            {{ isExecuting ? 'Running...' : 'Run Code' }}
+          </button>
+          <button class="btn btn-submit" (click)="submitCode()" [disabled]="isExecuting">
+            {{ isExecuting ? 'Submitting...' : 'Submit' }}
+          </button>
+        </div>
+      </div>
+      
+      <div class="editor-container">
+        <app-monaco-editor></app-monaco-editor>
+      </div>
+      
+      <div class="execution-results" *ngIf="executionResult">
+        <h3>Execution Results</h3>
+        
+        <div class="results-summary">
+          <div class="result-item">
+            <span class="result-label">Status:</span>
+            <span class="result-value" [ngClass]="'status-' + (executionResult.status === 'Accepted' ? 'accepted' : 'failed')">
+              {{ executionResult.status }}
+            </span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Runtime:</span>
+            <span class="result-value">{{ executionResult.runtime | number:'1.2-2' }} ms</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Memory:</span>
+            <span class="result-value">{{ executionResult.memory / 1024 | number:'1.2-2' }} MB</span>
+          </div>
+        </div>
+        
+        <div class="test-results" *ngIf="executionResult.testResults && executionResult.testResults.length > 0">
+          <h4>Test Cases</h4>
+          <div class="test-case" *ngFor="let test of executionResult.testResults; let i = index" 
+               [ngClass]="{'test-passed': test.passed, 'test-failed': !test.passed}">
+            <div class="test-header">
+              <span class="test-number">Test Case {{ i + 1 }}</span>
+              <span class="test-status">{{ test.passed ? 'Passed' : 'Failed' }}</span>
+            </div>
+            <div class="test-details">
+              <div class="test-input">
+                <strong>Input:</strong> {{ test.input | json }}
+              </div>
+              <div class="test-expected">
+                <strong>Expected:</strong> {{ test.expected | json }}
+              </div>
+              <div class="test-output">
+                <strong>Output:</strong> {{ test.output | json }}
+              </div>
+              <div class="test-metrics">
+                <span>Time: {{ test.timeMs | number:'1.2-2' }} ms</span>
+                <span>Memory: {{ test.memoryKb / 1024 | number:'1.2-2' }} MB</span>
+              </div>
+              <div class="test-error" *ngIf="test.error">
+                <strong>Error:</strong> {{ test.error }}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="error-message" *ngIf="executionResult.error">
+          <h4>Error</h4>
+          <pre>{{ executionResult.error }}</pre>
+        </div>
+      </div>
+      
+      <div class="error-message" *ngIf="error">
+        <h4>Error</h4>
+        <p>{{ error }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading" *ngIf="loading">
+  Loading problem...
+</div>
+
+<div class="error-message" *ngIf="!loading && !problem">
+  Problem not found or failed to load.
+</div> 
