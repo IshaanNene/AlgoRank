@@ -3,29 +3,21 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    username VARCHAR(255) UNIQUE NOT NULL,
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create problems table
 CREATE TABLE IF NOT EXISTS problems (
     id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    problem_name VARCHAR(255) NOT NULL,
+    title VARCHAR(100) NOT NULL,
     description TEXT NOT NULL,
-    difficulty VARCHAR(20) CHECK (difficulty IN ('Easy', 'Medium', 'Hard')),
-    acceptance FLOAT DEFAULT 0,
-    time_complexity VARCHAR(50),
-    space_complexity VARCHAR(50),
-    submissions INTEGER DEFAULT 0,
-    accepted INTEGER DEFAULT 0,
-    tags JSONB DEFAULT '[]',
-    constraints JSONB DEFAULT '[]',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    difficulty VARCHAR(20) NOT NULL,
+    test_cases JSONB NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create problem examples table
@@ -57,14 +49,14 @@ CREATE TABLE IF NOT EXISTS test_cases (
 -- Create submissions table
 CREATE TABLE IF NOT EXISTS submissions (
     id SERIAL PRIMARY KEY,
-    problem_id INTEGER REFERENCES problems(id) ON DELETE CASCADE,
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id),
+    problem_id INTEGER REFERENCES problems(id),
     code TEXT NOT NULL,
-    language VARCHAR(50) NOT NULL,
-    status VARCHAR(50) NOT NULL,
-    runtime FLOAT,
-    memory BIGINT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    language VARCHAR(20) NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    execution_time FLOAT,
+    memory_usage INTEGER,
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create indexes

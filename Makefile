@@ -1,29 +1,46 @@
-.PHONY: build run test clean dev install lint migrate logs restart frontend backend executor db rebuild-db rebuild-backend reset-db rebuild-executor
+.PHONY: all build run stop clean test dev install lint migrate logs restart frontend backend executor db rebuild-db rebuild-backend reset-db rebuild-executor
+
+all: build run
 
 build:
-	docker-compose build
+	@echo "Building services..."
+	docker-compose build --no-cache
 
 run:
-	docker-compose up
+	@echo "Starting services..."
+	docker-compose up -d
+	@echo "Waiting for services to start..."
+	sleep 10
+	@echo "Running database migrations..."
+	docker-compose exec -T db psql -U algorank -d algorank -f /docker-entrypoint-initdb.d/init.sql || true
+	@echo "Services are ready!"
+	@echo "Frontend: http://localhost:80"
+	@echo "Backend: http://localhost:8080"
+	@echo "Executor: http://localhost:8000"
 
 run-detached:
 	docker-compose up -d
 
 stop:
+	@echo "Stopping services..."
 	docker-compose down
 
 restart:
 	docker-compose restart
 
 clean:
+	@echo "Cleaning up..."
 	docker-compose down -v
+	docker system prune -f
+	rm -rf Solutions/*
 	rm -rf dist
 	find . -name "*.pyc" -delete
 	find . -name "__pycache__" -delete
 
 test:
-	cd BackEnd && go test ./...
-	cd FrontEnd && npm test
+	@echo "Running tests..."
+	docker-compose exec backend go test ./...
+	docker-compose exec frontend npm test
 
 dev:
 	docker-compose up -d db

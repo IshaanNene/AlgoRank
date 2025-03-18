@@ -1,32 +1,29 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:16 as builder
 
 WORKDIR /app
 
-# Copy package files first for better caching
+# Copy package files
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install --legacy-peer-deps
+RUN npm install
 
-# Copy the rest of the application
+# Copy source code
 COPY . .
 
 # Build the application
-RUN npm run build
+RUN npm run build --prod
 
-# Production stage
+# Serve stage
 FROM nginx:alpine
 
-# Copy the built app to nginx's serve directory
-COPY --from=builder /app/dist/algo-rank /usr/share/nginx/html
+# Copy built files
+COPY --from=builder /app/dist/* /usr/share/nginx/html/
 
-# Copy custom nginx config
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-
-# Create a simple health check file
-RUN echo "OK" > /usr/share/nginx/html/health
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"] 
+CMD ["nginx", "-g", "daemon off;"]

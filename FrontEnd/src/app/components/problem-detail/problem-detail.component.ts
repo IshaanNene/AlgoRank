@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { Problem, TestCase, Example, Templates } from '../../models/problem.model';
 import { ProblemService } from '../../services/problem.service';
 import { MonacoEditorComponent } from '../monaco-editor/monaco-editor.component';
+import { ApiService } from '../../services/api.service';
 
 interface TestResult {
   input: any;
@@ -39,51 +40,54 @@ export class ProblemDetailComponent implements OnInit {
   problem: Problem | null = null;
   loading = true;
   error = '';
-  selectedLanguage = 'javascript';
+  selectedLanguage = 'python';
   executionResult: ExecutionResult | null = null;
   isExecuting = false;
+  code = '';
+  testResults: any;
+  isLoading = false;
   
   languages = [
-    { id: 'javascript', name: 'JavaScript' },
-    { id: 'python', name: 'Python' },
-    { id: 'java', name: 'Java' },
-    { id: 'cpp', name: 'C++' },
-    { id: 'go', name: 'Go' },
-    { id: 'rust', name: 'Rust' }
+    { value: 'python', label: 'Python' },
+    { value: 'java', label: 'Java' },
+    { value: 'cpp', label: 'C++' },
+    { value: 'go', label: 'Go' },
+    { value: 'rust', label: 'Rust' }
   ];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient,
-    private problemService: ProblemService
+    private problemService: ProblemService,
+    private apiService: ApiService
   ) {}
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       if (id) {
-        this.fetchProblem(parseInt(id, 10));
+        this.loadProblem(parseInt(id, 10));
       }
     });
   }
 
-  fetchProblem(id: number) {
+  loadProblem(id: number) {
     this.loading = true;
-    this.problemService.getProblem(id).subscribe({
-      next: (data) => {
-        this.problem = data;
+    this.apiService.getProblem(id).subscribe(
+      problem => {
+        this.problem = problem;
         this.loading = false;
         
         // Set initial code template when editor is ready
         setTimeout(() => this.setCodeTemplate(), 100);
       },
-      error: (err) => {
+      error => {
         this.error = 'Failed to load problem';
         this.loading = false;
-        console.error(err);
+        console.error('Error loading problem:', error);
       }
-    });
+    );
   }
 
   setCodeTemplate() {
@@ -101,65 +105,43 @@ export class ProblemDetailComponent implements OnInit {
     this.setCodeTemplate();
   }
 
-  runCode() {
-    if (!this.problem || !this.editor) return;
-    
-    const code = this.editor.getCode();
-    if (!code) {
-      this.error = 'Please write some code first';
-      return;
+  async runCode() {
+    this.isLoading = true;
+    try {
+      const submission = {
+        code: this.code,
+        language: this.selectedLanguage,
+        problemId: this.problem?.id || 0
+      };
+
+      this.testResults = await this.apiService.runCode(
+        this.problem?.id || 0,
+        submission
+      ).toPromise();
+    } catch (error) {
+      console.error('Error running code:', error);
+    } finally {
+      this.isLoading = false;
     }
-    
-    this.isExecuting = true;
-    this.executionResult = null;
-    this.error = '';
-    
-    this.http.post<ExecutionResult>('/api/code/run', {
-      problemId: this.problem.problem_num,
-      code: code,
-      language: this.selectedLanguage,
-      mode: 'Run'
-    }).subscribe({
-      next: (result) => {
-        this.executionResult = result;
-        this.isExecuting = false;
-      },
-      error: (err) => {
-        this.error = 'Failed to execute code';
-        this.isExecuting = false;
-        console.error(err);
-      }
-    });
   }
 
-  submitCode() {
-    if (!this.problem || !this.editor) return;
-    
-    const code = this.editor.getCode();
-    if (!code) {
-      this.error = 'Please write some code first';
-      return;
+  async submitCode() {
+    this.isLoading = true;
+    try {
+      const submission = {
+        code: this.code,
+        language: this.selectedLanguage,
+        problemId: this.problem?.id || 0
+      };
+
+      this.testResults = await this.apiService.submitCode(
+        this.problem?.id || 0,
+        submission
+      ).toPromise();
+    } catch (error) {
+      console.error('Error submitting code:', error);
+    } finally {
+      this.isLoading = false;
     }
-    
-    this.isExecuting = true;
-    this.executionResult = null;
-    this.error = '';
-    
-    this.http.post<ExecutionResult>('/api/code/submit', {
-      problemId: this.problem.problem_num,
-      code: code,
-      language: this.selectedLanguage,
-      mode: 'Submit'
-    }).subscribe({
-      next: (result) => {
-        this.executionResult = result;
-        this.isExecuting = false;
-      },
-      error: (err) => {
-        this.error = 'Failed to submit code';
-        this.isExecuting = false;
-        console.error(err);
-      }
-    });
   }
 }

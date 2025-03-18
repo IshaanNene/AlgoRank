@@ -346,7 +346,6 @@ async def run_test_case(problem_id: int, submission: CodeSubmission):
 @app.post("/api/problems/{problem_id}/submit")
 async def submit_solution(problem_id: int, submission: CodeSubmission):
     try:
-        # Similar to run_test_case but uses the permanent solution path
         lang = submission.language.upper()
         if lang not in [l.name for l in Language]:
             raise HTTPException(status_code=400, detail="Unsupported language")

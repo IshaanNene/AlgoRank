@@ -1,0 +1,20 @@
+{
+  "problem_num": 1,
+  "problem_name": "Two Sum",
+  "difficulty": "Easy",
+  "description": "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
+  "Expected_Time_Constraints": "O(n)",
+  "Expected_Space_Constraints": "O(n)",
+  "Run_testCases": [
+    {
+      "input": [2, 7, 11, 15, 9],
+      "expected": [0, 1]
+    }
+  ],
+  "Submit_testCases": [
+    {
+      "input": [2, 7, 11, 15, 9],
+      "expected": [0, 1]
+    }
+  ]
+} 

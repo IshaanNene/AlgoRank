@@ -11,7 +11,6 @@ export interface Templates {
 export interface TestCase {
   input: any;
   expected: any;
-  is_hidden?: boolean;
 }
 
 export interface Example {
@@ -22,25 +21,22 @@ export interface Example {
 
 export interface Problem {
   id: number;
-  problem_num: number;
-  problem_name: string;
   title: string;
   description: string;
-  difficulty: string;
-  acceptance: number;
-  acceptanceRate?: number;
-  Expected_Time_Constraints: string;
-  Expected_Space_Constraints: string;
-  templates: Templates;
-  examples: Example[];
-  Run_testCases: TestCase[];
-  Submit_testCases: TestCase[];
-  submissions?: number;
-  accepted?: number;
-  tags?: string[];
-  constraints?: string[];
-  createdAt: string;
-  updatedAt: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  testCases: {
+    run: TestCase[];
+    submit: TestCase[];
+  };
+  constraints: {
+    timeLimit: number;
+    memoryLimit: number;
+  };
+  examples: {
+    input: string;
+    output: string;
+    explanation: string;
+  }[];
 }
 
 export interface Submission {

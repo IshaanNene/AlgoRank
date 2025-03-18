@@ -17,35 +17,33 @@ func main() {
 		log.Println("Error loading .env file, using default environment variables")
 	}
 
-	// Connect to database
-	db, err := ConnectDB()
+	// Initialize DB
+	db, err := InitDB()
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
 	defer db.Close()
 
 	// Create router
-	router := mux.NewRouter()
+	r := mux.NewRouter()
 
-	// Register routes
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("AlgoRank API"))
-	})
+	// Initialize handlers
+	ph := NewProblemHandler(db)
+	ch := NewCodeHandler(db)
+	ah := NewAuthHandler(db)
 
-	// Register API routes
-	apiRouter := router.PathPrefix("/api").Subrouter()
-	registerAuthRoutes(apiRouter, db)
-	registerProblemRoutes(apiRouter, db)
-	registerCodeRoutes(apiRouter, db)
+	// Routes
+	r.HandleFunc("/api/problems", ph.GetProblems).Methods("GET")
+	r.HandleFunc("/api/problems/{id}", ph.GetProblem).Methods("GET")
+	r.HandleFunc("/api/problems/{id}/run", ch.RunCode).Methods("POST")
+	r.HandleFunc("/api/problems/{id}/submit", ch.SubmitCode).Methods("POST")
 
-	// Configure CORS
+	// CORS
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"*"},
-		AllowCredentials: true,
+		AllowedOrigins: []string{"http://localhost:80"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders: []string{"Content-Type", "Authorization"},
 	})
-	handler := c.Handler(router)
 
 	// Start server
 	port := os.Getenv("PORT")
@@ -53,5 +51,5 @@ func main() {
 		port = "8080"
 	}
 	log.Println("Server starting on port", port)
-	log.Fatal(http.ListenAndServe(":"+port, handler))
+	log.Fatal(http.ListenAndServe(":"+port, c.Handler(r)))
 }
