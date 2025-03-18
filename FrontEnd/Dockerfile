@@ -6,9 +6,8 @@ WORKDIR /app
 # Copy package files first for better caching
 COPY package*.json ./
 
-# Install dependencies with legacy peer deps and force the correct esbuild version
-RUN npm install --legacy-peer-deps && \
-    npm install -D esbuild@0.23.0
+# Install dependencies
+RUN npm install --legacy-peer-deps
 
 # Copy the rest of the application
 COPY . .

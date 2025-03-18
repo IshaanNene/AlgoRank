@@ -255,6 +255,7 @@ class Problem(BaseModel):
 class CodeSubmission(BaseModel):
     code: str
     language: str
+    inputs: List[Any]
 
 # Initialize FastAPI
 app = FastAPI(
@@ -385,6 +386,44 @@ async def submit_solution(problem_id: int, submission: CodeSubmission):
         }
     except Exception as e:
         logging.exception("Error submitting solution")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Function to run a solution based on language
+def run_solution(problem_id: int, language: str, inputs: List[Any]) -> str:
+    solution_file = f"Solutions/Problem{problem_id}/solution{problem_id}.{language.lower()}"
+    
+    if language == "java":
+        command = ["javac", solution_file]  # Compile the Java code
+        subprocess.run(command, check=True)
+        command = ["java", f"Solution{problem_id}"] + list(map(str, inputs))  # Run the compiled Java code
+    elif language == "go":
+        command = ["go", "run", solution_file] + list(map(str, inputs))  # Run the Go code
+    elif language == "cpp":
+        command = ["g++", solution_file, "-o", f"solution{problem_id}"]  # Compile the C++ code
+        subprocess.run(command, check=True)
+        command = [f"./solution{problem_id}"] + list(map(str, inputs))  # Run the compiled C++ code
+    elif language == "c":
+        command = ["gcc", solution_file, "-o", f"solution{problem_id}"]  # Compile the C code
+        subprocess.run(command, check=True)
+        command = [f"./solution{problem_id}"] + list(map(str, inputs))  # Run the compiled C code
+    elif language == "rust":
+        command = ["rustc", solution_file]  # Compile the Rust code
+        subprocess.run(command, check=True)
+        command = [f"./solution{problem_id}"] + list(map(str, inputs))  # Run the compiled Rust code
+    else:
+        raise ValueError("Unsupported language")
+
+    result = subprocess.run(command, capture_output=True, text=True)
+    return result.stdout.strip()
+
+@app.post("/api/problems/{problem_id}/run")
+async def run_test_case(problem_id: int, submission: CodeSubmission):
+    try:
+        language = "java"  # Example: you can modify this to dynamically determine the language
+        output = run_solution(problem_id, language, submission.inputs)
+        return {"output": output}
+    except Exception as e:
+        logging.exception("Error running test case")
         raise HTTPException(status_code=500, detail=str(e))
 
 # Main function
