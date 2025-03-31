@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/IshaanNene/AlgoRank/db"
+	"github.com/IshaanNene/AlgoRank/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
@@ -12,37 +14,34 @@ import (
 
 func main() {
 	// Load environment variables
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Error loading .env file, using default environment variables")
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using environment variables")
 	}
 
-	// Initialize DB
-	db, err := InitDB()
+	// Initialize database connection
+	database, err := db.Connect()
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	defer db.Close()
+	defer database.Close()
 
 	// Create router
-	r := mux.NewRouter()
+	router := mux.NewRouter()
 
 	// Initialize handlers
-	ph := NewProblemHandler(db)
-	ch := NewCodeHandler(db)
-	ah := NewAuthHandler(db)
+	problemHandler := handlers.NewProblemHandler(database)
+	problemHandler.RegisterRoutes(router)
 
-	// Routes
-	r.HandleFunc("/api/problems", ph.GetProblems).Methods("GET")
-	r.HandleFunc("/api/problems/{id}", ph.GetProblem).Methods("GET")
-	r.HandleFunc("/api/problems/{id}/run", ch.RunCode).Methods("POST")
-	r.HandleFunc("/api/problems/{id}/submit", ch.SubmitCode).Methods("POST")
+	// Create server
+	server := handlers.NewServer(database)
+	server.RegisterRoutes(router)
 
-	// CORS
-	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:80"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
-		AllowedHeaders: []string{"Content-Type", "Authorization"},
+	// Configure CORS
+	corsMiddleware := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
 	})
 
 	// Start server
@@ -50,6 +49,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	log.Println("Server starting on port", port)
-	log.Fatal(http.ListenAndServe(":"+port, c.Handler(r)))
+
+	log.Printf("Server starting on port %s", port)
+	log.Fatal(http.ListenAndServe(":"+port, corsMiddleware.Handler(router)))
 }

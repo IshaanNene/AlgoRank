@@ -1,21 +1,29 @@
-FROM golang:1.19-alpine
+# Build stage
+FROM golang:1.21-alpine AS builder
 
 WORKDIR /app
 
-# Copy go mod and sum files
-COPY go.mod go.sum ./
+# Install required packages
+RUN apk add --no-cache gcc musl-dev
 
-# Download dependencies
+# Copy only the go mod files first
+COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy source code
 COPY . .
 
 # Build the application
-RUN go build -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
-# Expose port
+# Final stage
+FROM alpine:3.18
+
+WORKDIR /app
+
+# Copy the binary from builder
+COPY --from=builder /app/main .
+
 EXPOSE 8080
 
-# Run the application
-CMD ["./main"]
+CMD ["./main"] 
