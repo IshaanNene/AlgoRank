@@ -1,31 +1,37 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const EXECUTOR_URL = import.meta.env.VITE_EXECUTOR_URL || 'http://localhost:8000';
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,
-  timeout: 5000, // 5 second timeout
 });
 
-// Add request interceptor for auth token
+const executorApi = axios.create({
+  baseURL: EXECUTOR_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// Add response interceptor for error handling
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('token');
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -33,69 +39,48 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  login: async (credentials: { username: string; password: string }) => {
-    const response = await api.post('/api/auth/login', credentials);
+  login: async (email: string, password: string) => {
+    const response = await api.post('/auth/login', { email, password });
     return response.data;
   },
-  signup: async (userData: any) => {
-    const response = await api.post('/api/auth/signup', userData);
+  register: async (userData: any) => {
+    const response = await api.post('/auth/register', userData);
     return response.data;
   },
-  logout: async () => {
-    const response = await api.post('/api/auth/logout');
-    return response.data;
-  },
-  checkAuth: async () => {
-    const response = await api.get('/api/auth/check');
+  getCurrentUser: async () => {
+    const response = await api.get('/auth/me');
     return response.data;
   },
 };
 
 export const problemsAPI = {
-  getAll: async () => {
-    const response = await api.get('/api/problems');
+  getProblems: async () => {
+    const response = await api.get('/problems');
     return response.data;
   },
-  getById: async (id: string) => {
-    const response = await api.get(`/api/problems/${id}`);
+  getProblem: async (id: number) => {
+    const response = await api.get(`/problems/${id}`);
     return response.data;
   },
-};
-
-export const codeAPI = {
-  runCode: async (data: { problemId: string; code: string; language: string; testCases?: any[] }) => {
-    const response = await api.post('/api/code/run', data);
+  submitSolution: async (problemId: number, code: string, language: string) => {
+    const response = await executorApi.post(`/api/problems/${problemId}/submit`, {
+      code,
+      language,
+    });
     return response.data;
   },
-  submitSolution: async (data: { problemId: string; code: string; language: string }) => {
-    const response = await api.post('/api/code/submit', data);
-    return response.data;
-  },
-};
-
-export const usersAPI = {
-  getProfile: async (username: string) => {
-    const response = await api.get(`/api/users/${username}`);
-    return response.data;
-  },
-  updateProfile: async (userData: any) => {
-    const response = await api.put('/api/users/profile', userData);
+  runCode: async (problemId: number, code: string, language: string) => {
+    const response = await executorApi.post(`/api/problems/${problemId}/run`, {
+      code,
+      language,
+    });
     return response.data;
   },
 };
 
 export const leaderboardAPI = {
-  getLeaderboard: async (params?: {
-    timeRange?: 'weekly' | 'monthly' | 'all';
-    page?: number;
-    limit?: number;
-  }) => {
-    const queryParams = new URLSearchParams();
-    if (params?.timeRange) queryParams.append('timeRange', params.timeRange);
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    
-    const response = await api.get(`/api/leaderboard?${queryParams.toString()}`);
+  getLeaderboard: async () => {
+    const response = await api.get('/leaderboard');
     return response.data;
   },
 };

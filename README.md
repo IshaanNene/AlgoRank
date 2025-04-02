@@ -15,15 +15,17 @@ A modern platform for practicing algorithmic problems and improving coding skill
 
 AlgoRank consists of four main components:
 
-1. **Frontend**: Angular-based web interface with Monaco Editor
+1. **Frontend**: React-based web interface with Monaco Editor
 2. **Backend**: Go API server for problem management and user interactions
 3. **Executor**: Python FastAPI service for secure code execution
 4. **Database**: PostgreSQL for data persistence
 
 ## Prerequisites
 
-- Docker and Docker Compose
-- Make (optional, for using Makefile commands)
+- Docker and Docker Compose (for local development)
+- Node.js and npm (for frontend development)
+- Go 1.21+ (for backend development)
+- Python 3.9+ (for executor development)
 
 ## Quick Start
 
@@ -33,99 +35,99 @@ AlgoRank consists of four main components:
    cd AlgoRank
    ```
 
-2. Start the application:
+2. Start the application locally:
    ```bash
    make build
    make run
-   ```
-
-   Or without Make:
-   ```bash
-   docker-compose build
-   docker-compose up
    ```
 
 3. Access the application:
    - Frontend: http://localhost:80
    - Backend API: http://localhost:8080
    - Executor API: http://localhost:8000
-   - Database: localhost:5432
+
+## Deployment
+
+### Frontend (Vercel)
+
+1. Fork the repository
+2. Connect your fork to Vercel
+3. Set the following environment variables in Vercel:
+   - `VITE_API_URL`: Your backend API URL
+   - `VITE_EXECUTOR_URL`: Your executor API URL
+   - `VITE_ENV`: "production"
+
+### Backend (Render)
+
+1. Create a new Web Service on Render
+2. Connect your repository
+3. Set the following environment variables:
+   - `DB_HOST`: Your PostgreSQL host
+   - `DB_USER`: Database username
+   - `DB_PASSWORD`: Database password
+   - `DB_NAME`: Database name
+   - `JWT_SECRET`: Your JWT secret key
+   - `ENV`: "production"
+
+### Executor (Render)
+
+1. Create a new Web Service on Render
+2. Connect your repository
+3. Set the following environment variables:
+   - `ENV`: "production"
+
+### Database (Render)
+
+1. Create a new PostgreSQL instance on Render
+2. Note down the connection details
+3. Use these details in your backend environment variables
 
 ## Development
 
-### Useful Commands
+### Frontend Development
 
-- Start all services:
-  ```bash
-  make run
-  ```
+```bash
+cd FrontEnd
+npm install
+npm run dev
+```
 
-- Start services in detached mode:
-  ```bash
-  make run-detached
-  ```
+### Backend Development
 
-- Rebuild and restart specific services:
-  ```bash
-  make rebuild-backend
-  make rebuild-executor
-  ```
+```bash
+cd BackEnd
+go mod download
+go run main.go
+```
 
-- Reset the database:
-  ```bash
-  make reset-db
-  ```
+### Executor Development
 
-- View logs:
-  ```bash
-  make logs
-  ```
-
-- Clean up:
-  ```bash
-  make clean
-  ```
+```bash
+cd Executor
+pip install -r requirements.txt
+python main.py
+```
 
 ## Project Structure
 
 ```
 AlgoRank/
 ├── BackEnd/               # Go backend service
-│   ├── Dockerfile
-│   ├── go.mod
-│   ├── go.sum
-│   ├── main.go
-│   ├── models.go
-│   ├── problem_handlers.go
-│   ├── code_handlers.go
-│   ├── auth_handlers.go
-│   └── init.sql           # Database initialization
-├── FrontEnd/              # Angular frontend
-│   ├── Dockerfile
-│   ├── package.json
-│   ├── angular.json
-│   └── src/               # Frontend source code
-├── Problem/               # Problem definitions
-│   ├── problem1.json
-│   ├── problem2.json
-│   └── ...
-├── Solutions/             # User solutions
-│   ├── C_Solutions/
-│   ├── Cpp_Solutions/
-│   ├── Go_Solutions/
-│   ├── Java_Solutions/
-│   └── Rust_Solutions/
-├── Dockerfile             # Executor service Dockerfile
-├── main.py                # Executor service code
-├── requirements.txt       # Python dependencies
-├── docker-compose.yml     # Service orchestration
-└── Makefile               # Convenience commands
+├── FrontEnd/             # React frontend
+├── Executor/             # Python code execution service
+├── Problem/              # Problem definitions
+├── Solutions/            # User solutions
+└── docker-compose.yml    # Service orchestration
 ```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.

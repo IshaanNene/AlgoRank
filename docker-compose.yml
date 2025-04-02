@@ -5,8 +5,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"
-    depends_on:
-      - backend
+    environment:
+      - VITE_API_URL=https://algorank-backend.onrender.com
+      - VITE_EXECUTOR_URL=https://algorank-executor.onrender.com
+      - VITE_ENV=production
     networks:
       - algorank-network
 
@@ -17,10 +19,12 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_HOST=db
-      - DB_USER=algorank
-      - DB_PASSWORD=algorank123
-      - DB_NAME=algorank
+      - DB_HOST=${DB_HOST:-db}
+      - DB_USER=${DB_USER:-algorank}
+      - DB_PASSWORD=${DB_PASSWORD:-algorank123}
+      - DB_NAME=${DB_NAME:-algorank}
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key}
+      - ENV=production
     depends_on:
       - db
     networks:
@@ -35,19 +39,22 @@ services:
     volumes:
       - ./Problem:/app/Problem:ro
       - ./Solutions:/app/Solutions
+    environment:
+      - ENV=production
     networks:
       - algorank-network
 
   db:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_USER=algorank
-      - POSTGRES_PASSWORD=algorank123
-      - POSTGRES_DB=algorank
+      - POSTGRES_USER=${DB_USER:-algorank}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-algorank123}
+      - POSTGRES_DB=${DB_NAME:-algorank}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./BackEnd/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - algorank-network
 

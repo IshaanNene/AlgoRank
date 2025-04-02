@@ -1,103 +1,116 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Bell, Lock, Eye, Monitor, User, Globe } from 'lucide-react';
-import Card from '../components/Card';
-import Button from '../components/Button';
-import Switch from '../components/Switch';
+import {
+  Box,
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  Stack,
+  Text,
+  Link,
+  Heading,
+  useColorModeValue,
+  FormErrorMessage,
+} from '@chakra-ui/react';
+import { Link as RouterLink } from 'react-router-dom';
+import { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
 
-const Settings: React.FC = () => {
-  const [activeSection, setActiveSection] = useState('profile');
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { login } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const sections = [
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'account', label: 'Account', icon: Lock },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'appearance', label: 'Appearance', icon: Monitor },
-    { id: 'privacy', label: 'Privacy', icon: Eye },
-    { id: 'language', label: 'Language', icon: Globe },
-  ];
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      await login(email, password);
+    } catch (err: any) {
+      setError(err.message || 'Failed to login');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen p-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-7xl mx-auto"
+    <Box
+      minH="calc(100vh - 200px)"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <Box
+        bg={useColorModeValue('white', 'gray.800')}
+        p={8}
+        borderRadius="lg"
+        boxShadow="lg"
+        maxW="md"
+        w="full"
       >
-        <h1 className="text-3xl font-bold mb-6">Settings</h1>
+        <Stack spacing={6}>
+          <Stack align="center">
+            <Heading fontSize="2xl">Sign in to your account</Heading>
+            <Text fontSize="md" color={useColorModeValue('gray.600', 'gray.400')}>
+              to continue to AlgoRank
+            </Text>
+          </Stack>
 
-        <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-6">
-          <Card className="h-fit">
-            <nav className="space-y-1">
-              {sections.map((section) => (
-                <button
-                  key={section.id}
-                  className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg ${
-                    activeSection === section.id
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-                  onClick={() => setActiveSection(section.id)}
-                >
-                  <section.icon className="w-5 h-5" />
-                  {section.label}
-                </button>
-              ))}
-            </nav>
-          </Card>
+          <form onSubmit={handleSubmit}>
+            <Stack spacing={4}>
+              <FormControl isInvalid={!!error}>
+                <FormLabel>Email address</FormLabel>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </FormControl>
 
-          <Card>
-            {activeSection === 'profile' && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold">Profile Settings</h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Display Name
-                    </label>
-                    <input
-                      type="text"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Bio
-                    </label>
-                    <textarea
-                      rows={4}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-                  <Button variant="primary">Save Changes</Button>
-                </div>
-              </div>
-            )}
+              <FormControl isInvalid={!!error}>
+                <FormLabel>Password</FormLabel>
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <FormErrorMessage>{error}</FormErrorMessage>
+              </FormControl>
 
-            {activeSection === 'notifications' && (
-              <div className="space-y-6">
-                <h2 className="text-xl font-semibold">Notification Preferences</h2>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">Email Notifications</h3>
-                      <p className="text-sm text-gray-500">
-                        Receive notifications about your activity
-                      </p>
-                    </div>
-                    <Switch />
-                  </div>
-                  {/* Add more notification settings */}
-                </div>
-              </div>
-            )}
+              <Button
+                type="submit"
+                colorScheme="brand"
+                size="lg"
+                fontSize="md"
+                isLoading={isLoading}
+              >
+                Sign in
+              </Button>
+            </Stack>
+          </form>
 
-            {/* Add other section contents */}
-          </Card>
-        </div>
-      </motion.div>
-    </div>
+          <Stack pt={6}>
+            <Text align="center">
+              Don't have an account?{' '}
+              <Link
+                as={RouterLink}
+                to="/register"
+                color="brand.500"
+                _hover={{ textDecoration: 'none', color: 'brand.600' }}
+              >
+                Register
+              </Link>
+            </Text>
+          </Stack>
+        </Stack>
+      </Box>
+    </Box>
   );
 };
 
-export default Settings;
+export default Login; 

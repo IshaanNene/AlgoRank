@@ -11,4 +11,4 @@ httptools>=0.1.0
 python-dotenv>=0.13.0
 PyYAML>=5.1
 websockets>=8.0
-requests>=2.25.0
+requests==2.31.0

@@ -1,132 +1,195 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Code, BookOpen, MessageSquare, Share2 } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useProblems } from '../context/ProblemsContext';
-import Card from '../components/Card';
-import Button from '../components/Button';
-import Tabs from '../components/Tabs';
-import LoadingSpinner from '../components/LoadingSpinner';
-import { Problem } from '../types/problem';
+import { useParams } from 'react-router-dom';
+import {
+  Box,
+  Grid,
+  GridItem,
+  Button,
+  Select,
+  HStack,
+  VStack,
+} from '@chakra-ui/react';
+import { useQuery } from '@tanstack/react-query';
+import { problemsAPI } from '../services/api';
+import ProblemDetails from '../components/ProblemDetails';
+import CodeEditor from '../components/CodeEditor';
+import ExecutionResults from '../components/ExecutionResults';
+import Loading from '../components/Loading';
+import useCodeEditor from '../hooks/useCodeEditor';
+import useProblemSubmission from '../hooks/useProblemSubmission';
 
-const ProblemDetail: React.FC = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const { problems } = useProblems();
-  const [activeTab, setActiveTab] = useState('description');
-  const [problem, setProblem] = useState<Problem | null>(null);
-  const [loading, setLoading] = useState(true);
+const SUPPORTED_LANGUAGES = [
+  { value: 'c', label: 'C' },
+  { value: 'cpp', label: 'C++' },
+  { value: 'java', label: 'Java' },
+  { value: 'go', label: 'Go' },
+  { value: 'rust', label: 'Rust' },
+];
 
-  useEffect(() => {
-    const currentProblem = problems.find(p => p.id === Number(id));
-    if (currentProblem) {
-      setProblem(currentProblem);
-      setLoading(false);
+const LANGUAGE_TEMPLATES = {
+  c: `#include <stdio.h>
+
+int solution() {
+    // Your code here
+    return 0;
+}
+
+int main() {
+    int result = solution();
+    printf("%d\\n", result);
+    return 0;
+}`,
+  cpp: `#include <iostream>
+using namespace std;
+
+class Solution {
+public:
+    int solve() {
+        // Your code here
+        return 0;
     }
-  }, [id, problems]);
+};
 
-  if (loading) return <LoadingSpinner />;
-  if (!problem) return <div>Problem not found</div>;
-
-  const tabs = [
-    {
-      id: 'description',
-      label: 'Description',
-      icon: <BookOpen className="w-4 h-4" />,
-      content: (
-        <div className="prose max-w-none">
-          <h1>{problem.title}</h1>
-          <div className="flex gap-2 my-4">
-            <span className={`px-2 py-1 rounded-full text-sm ${
-              problem.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
-              problem.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-              'bg-red-100 text-red-700'
-            }`}>
-              {problem.difficulty}
-            </span>
-            <span className="px-2 py-1 rounded-full text-sm bg-gray-100 text-gray-700">
-              {problem.category}
-            </span>
-          </div>
-          <div dangerouslySetInnerHTML={{ __html: problem.description }} />
-          
-          <h2>Examples:</h2>
-          {problem.examples.map((example, index) => (
-            <div key={index} className="bg-gray-50 p-4 rounded-lg mb-4">
-              <p><strong>Input:</strong> {example.input}</p>
-              <p><strong>Output:</strong> {example.output}</p>
-              {example.explanation && (
-                <p><strong>Explanation:</strong> {example.explanation}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      )
-    },
-    {
-      id: 'solutions',
-      label: 'Solutions',
-      icon: <Code className="w-4 h-4" />,
-      content: (
-        <div>
-          {/* Add solutions content */}
-        </div>
-      )
-    },
-    {
-      id: 'discussions',
-      label: 'Discussions',
-      icon: <MessageSquare className="w-4 h-4" />,
-      content: (
-        <div>
-          {/* Add discussions content */}
-        </div>
-      )
+int main() {
+    Solution solution;
+    cout << solution.solve() << endl;
+    return 0;
+}`,
+  java: `public class Solution {
+    public int solve() {
+        // Your code here
+        return 0;
     }
-  ];
+
+    public static void main(String[] args) {
+        Solution solution = new Solution();
+        System.out.println(solution.solve());
+    }
+}`,
+  go: `package main
+
+import "fmt"
+
+func solution() int {
+    // Your code here
+    return 0
+}
+
+func main() {
+    fmt.Println(solution())
+}`,
+  rust: `fn solution() -> i32 {
+    // Your code here
+    0
+}
+
+fn main() {
+    println!("{}", solution());
+}`,
+};
+
+const ProblemDetail = () => {
+  const { id } = useParams<{ id: string }>();
+  const problemId = Number(id);
+
+  const { data: problem, isLoading } = useQuery({
+    queryKey: ['problem', problemId],
+    queryFn: () => problemsAPI.getProblem(problemId),
+  });
+
+  const {
+    language,
+    code,
+    setLanguage,
+    setCode,
+    resetCode,
+    supportedLanguages,
+  } = useCodeEditor();
+
+  const {
+    executionResults,
+    isRunning,
+    isSubmitting,
+    runCode,
+    submitSolution,
+  } = useProblemSubmission({
+    problemId,
+  });
+
+  if (isLoading || !problem) {
+    return <Loading />;
+  }
 
   return (
-    <div className="min-h-screen p-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-7xl mx-auto"
-      >
-        <div className="flex justify-between items-center mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/problems')}
-            icon={<ChevronLeft />}
-          >
-            Back to Problems
-          </Button>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              icon={<Share2 />}
-              onClick={() => {/* Add share functionality */}}
-            >
-              Share
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => navigate(`/editor/${problem.id}`)}
-            >
-              Solve Problem
-            </Button>
-          </div>
-        </div>
+    <Grid
+      templateColumns={{ base: '1fr', lg: '5fr 7fr' }}
+      gap={6}
+      maxH="calc(100vh - 100px)"
+      overflow="hidden"
+    >
+      <GridItem overflowY="auto" p={4}>
+        <ProblemDetails
+          title={problem.title}
+          difficulty={problem.difficulty}
+          description={problem.description}
+          timeComplexity={problem.time_complexity}
+          spaceComplexity={problem.space_complexity}
+          examples={problem.examples}
+        />
+      </GridItem>
 
-        <Card>
-          <Tabs
-            tabs={tabs}
-            activeTab={activeTab}
-            onChange={setActiveTab}
-          />
-        </Card>
-      </motion.div>
-    </div>
+      <GridItem p={4}>
+        <VStack spacing={4} align="stretch" h="full">
+          <HStack spacing={4}>
+            <Select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as any)}
+              maxW="200px"
+            >
+              {supportedLanguages.map((lang) => (
+                <option key={lang} value={lang}>
+                  {lang.toUpperCase()}
+                </option>
+              ))}
+            </Select>
+            <Button
+              colorScheme="blue"
+              onClick={() => runCode(code, language)}
+              isLoading={isRunning}
+            >
+              Run Code
+            </Button>
+            <Button
+              colorScheme="green"
+              onClick={() => submitSolution(code, language)}
+              isLoading={isSubmitting}
+            >
+              Submit
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={resetCode}
+            >
+              Reset
+            </Button>
+          </HStack>
+
+          <Box flex="1" overflow="hidden">
+            <CodeEditor
+              code={code}
+              language={language}
+              onChange={setCode}
+            />
+          </Box>
+
+          {executionResults && (
+            <Box overflowY="auto" maxH="300px">
+              <ExecutionResults metrics={executionResults} />
+            </Box>
+          )}
+        </VStack>
+      </GridItem>
+    </Grid>
   );
 };
 
-export default ProblemDetail;
+export default ProblemDetail; 

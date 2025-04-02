@@ -1,254 +1,68 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
 
-/* Animation Keyframes & Classes */
-@keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
   }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
+  a:hover {
+    color: #747bff;
   }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-  100% {
-    transform: translate(0px, 0px) scale(1);
-  }
-}
-
-@keyframes ripple {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-.animate-blob {
-  animation: blob 7s infinite;
-}
-
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-  animation-delay: 4s;
-}
-
-.ripple {
-  position: absolute;
-  border-radius: 50%;
-  transform: scale(0);
-  animation: ripple 600ms linear;
-  background-color: rgba(255, 255, 255, 0.7);
-}
-
-/* Add these new styles */
-@layer utilities {
-  .glass-card {
-    @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl;
-  }
-  
-  .glass-input {
-    @apply bg-white/5 border border-white/10 focus:border-white/20 
-           text-white placeholder-gray-400 rounded-lg px-4 py-2
-           focus:ring-2 focus:ring-purple-500/20 focus:outline-none
-           transition-all duration-200;
-  }
-
-  .gradient-border {
-    position: relative;
-    border-radius: 0.5rem;
-  }
-
-  .gradient-border::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 0.6rem;
-    padding: 2px;
-    background: linear-gradient(45deg, #6366f1, #a855f7, #ec4899);
-    -webkit-mask: 
-      linear-gradient(#fff 0 0) content-box, 
-      linear-gradient(#fff 0 0);
-    mask: 
-      linear-gradient(#fff 0 0) content-box, 
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-  }
-}
-
-/* Enhanced animations */
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-  100% { transform: translateY(0px); }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-/* Gradient text animation */
-@keyframes gradient-text {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.animate-gradient-text {
-  background: linear-gradient(
-    to right,
-    #6366f1,
-    #a855f7,
-    #ec4899,
-    #6366f1
-  );
-  background-size: 200% auto;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  animation: gradient-text 4s linear infinite;
-}
-
-/* Add these new animations */
-@keyframes gradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradient 8s ease infinite;
-}
-
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-  100% { transform: translateY(0px); }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-/* Add more custom animations and styles */
-
-@keyframes border-gradient {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-.animate-border-gradient {
-  background: linear-gradient(
-    90deg,
-    rgba(99, 102, 241, 0.3),
-    rgba(168, 85, 247, 0.3),
-    rgba(236, 72, 153, 0.3),
-    rgba(99, 102, 241, 0.3)
-  );
-  background-size: 400% 400%;
-  animation: border-gradient 8s ease infinite;
-}
-
-/* Shimmer effect */
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
-}
-
-.animate-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.03) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite;
-}
-
-/* Pulse glow effect */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.2),
-                0 0 60px rgba(168, 85, 247, 0.1);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(99, 102, 241, 0.4),
-                0 0 80px rgba(168, 85, 247, 0.2);
-  }
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background-color: rgba(99, 102, 241, 0.5);
-  border-radius: 4px;
-}
-
-/* Additional Utility */
-.glass-card {
-  backdrop-filter: blur(10px);
-}
-
-/* Add these new styles for the animated background gradient */
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.gradient-bg {
-  background: linear-gradient(
-    -45deg,
-    rgba(79,70,229,0.15),
-    rgba(147,51,234,0.15),
-    rgba(59,130,246,0.15),
-    rgba(219,39,119,0.15)
-  );
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
-}
-
-/* Enhanced glass effect */
-.glass-card {
-  backdrop-filter: blur(16px);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Enhanced pulse glow effect */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.2),
-                0 0 60px rgba(168, 85, 247, 0.1);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(99, 102, 241, 0.4),
-                0 0 80px rgba(168, 85, 247, 0.2);
+  button {
+    background-color: #f9f9f9;
   }
 }
