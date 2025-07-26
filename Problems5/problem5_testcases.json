@@ -1,0 +1,180 @@
+{
+  "problem_id": 5,
+  "problem_name": "Valid Parentheses",
+  "test_cases_run": [
+    {
+      "input": "()",
+      "output": true
+    },
+    {
+      "input": "()[]{}",
+      "output": true
+    },
+    {
+      "input": "(]",
+      "output": false
+    }
+  ],
+  "test_cases_submit": [
+    {
+      "input": "{}",
+      "output": true
+    },
+    {
+      "input": "[]",
+      "output": true
+    },
+    {
+      "input": "()",
+      "output": true
+    },
+    {
+      "input": "()[]{}",
+      "output": true
+    },
+    {
+      "input": "{[]}",
+      "output": true
+    },
+    {
+      "input": "(([]){})",
+      "output": true
+    },
+    {
+      "input": "(()())",
+      "output": true
+    },
+    {
+      "input": "(((())))",
+      "output": true
+    },
+    {
+      "input": "({[]})",
+      "output": true
+    },
+    {
+      "input": "[({})]",
+      "output": true
+    },
+    {
+      "input": "((([[[]]])))",
+      "output": true
+    },
+    {
+      "input": "",
+      "output": true
+    },
+    {
+      "input": "(((((((((())))))))))",
+      "output": true
+    },
+    {
+      "input": "(]",
+      "output": false
+    },
+    {
+      "input": "([)]",
+      "output": false
+    },
+    {
+      "input": "(((()",
+      "output": false
+    },
+    {
+      "input": "({[)]})",
+      "output": false
+    },
+    {
+      "input": "([{})",
+      "output": false
+    },
+    {
+      "input": "{[(])}",
+      "output": false
+    },
+    {
+      "input": "([[[)",
+      "output": false
+    },
+    {
+      "input": "((())",
+      "output": false
+    },
+    {
+      "input": "(()))",
+      "output": false
+    },
+    {
+      "input": "(())(()",
+      "output": false
+    },
+    {
+      "input": "}{",
+      "output": false
+    },
+    {
+      "input": "]",
+      "output": false
+    },
+    {
+      "input": ")",
+      "output": false
+    },
+    {
+      "input": "()()()",
+      "output": true
+    },
+    {
+      "input": "{[()]}",
+      "output": true
+    },
+    {
+      "input": "([{}([])])",
+      "output": true
+    },
+    {
+      "input": "((({[]})))",
+      "output": true
+    },
+    {
+      "input": "[[[]]]",
+      "output": true
+    },
+    {
+      "input": "({[}])",
+      "output": false
+    },
+    {
+      "input": "[(]{})",
+      "output": false
+    },
+    {
+      "input": "({{{[[]]}}})",
+      "output": true
+    },
+    {
+      "input": "(((((((((())))))))))",
+      "output": true
+    },
+    {
+      "input": "(][)",
+      "output": false
+    },
+    {
+      "input": "[(])",
+      "output": false
+    },
+    {
+      "input": "{([]})",
+      "output": false
+    },
+    {
+      "input": "[{({})}]",
+      "output": true
+    },
+    {
+      "input": "[({)}]",
+      "output": false
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "problem_id": 7,
+  "problem_name": "Palindrome Check",
+  "test_cases_run": [
+    {
+      "input": "A man, a plan, a canal: Panama",
+      "output": true
+    },
+    {
+      "input": "race a car",
+      "output": false
+    },
+    {
+      "input": " ",
+      "output": true
+    }
+  ],
+  "test_cases_submit": [
+    {
+      "input": "Was it a car or a cat I saw?",
+      "output": true
+    },
+    {
+      "input": "hello",
+      "output": false
+    },
+    {
+      "input": "0P",
+      "output": false
+    },
+    {
+      "input": "No lemon, no melon",
+      "output": true
+    },
+    {
+      "input": "Eva, can I see bees in a cave?",
+      "output": true
+    },
+    {
+      "input": "Madam In Eden, I'm Adam",
+      "output": true
+    },
+    {
+      "input": "Step on no pets",
+      "output": true
+    },
+    {
+      "input": "Not a palindrome!",
+      "output": false
+    },
+    {
+      "input": "12321",
+      "output": true
+    },
+    {
+      "input": "123abccba321",
+      "output": true
+    },
+    {
+      "input": "12a3b21",
+      "output": false
+    },
+    {
+      "input": "Able was I, I saw Elba",
+      "output": true
+    },
+    {
+      "input": "Red roses run no risk, sir, on Nurse’s order",
+      "output": true
+    },
+    {
+      "input": "Never odd or even",
+      "output": true
+    },
+    {
+      "input": "Was it Eliot's toilet I saw?",
+      "output": true
+    },
+    {
+      "input": "A Toyota! Race fast... safe car: a Toyota",
+      "output": true
+    },
+    {
+      "input": "Dot saw I was Tod",
+      "output": true
+    },
+    {
+      "input": "Pull up if I pull up",
+      "output": true
+    },
+    {
+      "input": "Some men interpret nine memos",
+      "output": true
+    },
+    {
+      "input": "1234567890987654321",
+      "output": true
+    },
+    {
+      "input": "Was it a car or a cat I saw",
+      "output": true
+    },
+    {
+      "input": "palindromeemordnilap",
+      "output": true
+    },
+    {
+      "input": "!@#$$#@!",
+      "output": true
+    },
+    {
+      "input": "Nope12321epon",
+      "output": true
+    },
+    {
+      "input": "1a2",
+      "output": false
+    },
+    {
+      "input": "ab",
+      "output": false
+    },
+    {
+      "input": "a",
+      "output": true
+    },
+    {
+      "input": "0",
+      "output": true
+    },
+    {
+      "input": ".,",
+      "output": true
+    },
+    {
+      "input": "Able, was I ere I saw eLba",
+      "output": true
+    },
+    {
+      "input": "Sir, I demand, I am a maid named Iris",
+      "output": true
+    },
+    {
+      "input": "Top spot",
+      "output": true
+    },
+    {
+      "input": "Yo, Banana Boy!",
+      "output": true
+    },
+    {
+      "input": "Yo, Banana Girl!",
+      "output": false
+    },
+    {
+      "input": "No x in Nixon",
+      "output": true
+    },
+    {
+      "input": "Never a foot too far, even",
+      "output": true
+    },
+    {
+      "input": "Was it a rat I saw?",
+      "output": true
+    },
+    {
+      "input": "Don't nod",
+      "output": true
+    },
+    {
+      "input": "Ishan",
+      "output": false
+    }
+  ]
+}

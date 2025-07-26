@@ -1,0 +1,62 @@
+{
+  "problem_id": 3,
+  "problem_name": "Group Anagrams",
+  "test_cases_run": [
+    {
+      "input": ["eat", "tea", "tan", "ate", "nat", "bat"],
+      "output": [
+        ["bat"],
+        ["nat", "tan"],
+        ["ate", "eat", "tea"]
+      ]
+    },
+    {
+      "input": [""],
+      "output": [[""]]
+    },
+    {
+      "input": ["a"],
+      "output": [["a"]]
+    }
+  ],
+  "test_cases_submit": [
+    { "input": ["", ""], "output": [["", ""]] },
+    { "input": ["abc", "bcd", "cba"], "output": [["abc", "cba"], ["bcd"]] },
+    { "input": ["dog", "god", "cat"], "output": [["dog", "god"], ["cat"]] },
+    { "input": ["listen", "silent", "enlist"], "output": [["listen", "silent", "enlist"]] },
+    { "input": ["rat", "tar", "art", "star"], "output": [["rat", "tar", "art"], ["star"]] },
+    { "input": ["evil", "vile", "veil", "live"], "output": [["evil", "vile", "veil", "live"]] },
+    { "input": ["abc", "def", "ghi"], "output": [["abc"], ["def"], ["ghi"]] },
+    { "input": ["aaa", "aaa", "aaa"], "output": [["aaa", "aaa", "aaa"]] },
+    { "input": ["looped", "poodle", "pooled"], "output": [["looped", "poodle", "pooled"]] },
+    { "input": ["a", "b", "c"], "output": [["a"], ["b"], ["c"]] },
+    { "input": ["aab", "aba", "baa", "abb"], "output": [["aab", "aba", "baa"], ["abb"]] },
+    { "input": ["xyz", "zyx", "zxy", "yxz", "xzy", "yzx"], "output": [["xyz", "zyx", "zxy", "yxz", "xzy", "yzx"]] },
+    { "input": ["top", "pot", "opt", "stop", "post", "spot"], "output": [["top", "pot", "opt"], ["stop", "post", "spot"]] },
+    { "input": ["abcde", "edcba", "a", "b", "ab", "ba"], "output": [["abcde", "edcba"], ["a"], ["b"], ["ab", "ba"]] },
+    { "input": ["ab", "abc", "abcd", "a", "bc", "cab", "bac"], "output": [["ab"], ["abc", "cab", "bac"], ["abcd"], ["a"], ["bc"]] },
+    { "input": [""], "output": [[""]] },
+    { "input": ["a", "b", "c", "a"], "output": [["a", "a"], ["b"], ["c"]] },
+    { "input": ["z"], "output": [["z"]] },
+    { "input": ["abc", "acb", "bac", "cab", "cba", "bca"], "output": [["abc", "acb", "bac", "cab", "cba", "bca"]] },
+    { "input": ["x", "y", "z", "x", "y"], "output": [["x", "x"], ["y", "y"], ["z"]] },
+    { "input": ["one", "neo", "eon", "two", "owt", "notanagram"], "output": [["one", "neo", "eon"], ["two", "owt"], ["notanagram"]] },
+    { "input": ["flow", "wolf", "fowl", "flwo"], "output": [["flow", "wolf", "fowl", "flwo"]] },
+    { "input": [""], "output": [[""]] },
+    { "input": ["tab", "bat", "abt", "bta", "tba"], "output": [["tab", "bat", "abt", "bta", "tba"]] },
+    { "input": ["random", "words", "won't", "group"], "output": [["random"], ["words"], ["won't"], ["group"]] },
+    { "input": ["abc", "bca", "cab", "bac", "acb", "cba", "aabb", "abab", "baba", "bbaa"], "output": [["abc", "bca", "cab", "bac", "acb", "cba"], ["aabb", "abab", "baba", "bbaa"]] },
+    { "input": ["qwe", "ewq", "eqw", "zxc", "cxz"], "output": [["qwe", "ewq", "eqw"], ["zxc", "cxz"]] },
+    { "input": ["aaa", "aa", "aaaa", "a"], "output": [["aaa"], ["aa"], ["aaaa"], ["a"]] },
+    { "input": ["word", "drow", "lord", "rol"], "output": [["word", "drow"], ["lord"], ["rol"]] },
+    { "input": ["go", "og", "goo", "oog"], "output": [["go", "og"], ["goo", "oog"]] },
+    { "input": ["abc", "def", "fed", "cba"], "output": [["abc", "cba"], ["def", "fed"]] },
+    { "input": ["xxy", "yxx", "xyx", "yxy"], "output": [["xxy", "yxx", "xyx", "yxy"]] },
+    { "input": ["same", "mesa", "seam", "mean", "name"], "output": [["same", "mesa", "seam"], ["mean", "name"]] },
+    { "input": ["mirror", "rimorr", "morror", "roomir"], "output": [["mirror", "rimorr", "morror"], ["roomir"]] },
+    { "input": ["tone", "note", "eton", "neot"], "output": [["tone", "note", "eton", "neot"]] },
+    { "input": ["zoo", "ooz", "ozo", "zooz"], "output": [["zoo", "ooz", "ozo"], ["zooz"]] },
+    { "input": ["pin", "nip", "in", "ni"], "output": [["pin", "nip"], ["in", "ni"]] },
+    { "input": ["low", "owl", "howl", "whol"], "output": [["low", "owl"], ["howl", "whol"]] }
+  ]
+}

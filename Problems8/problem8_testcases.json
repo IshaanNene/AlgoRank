@@ -1,0 +1,164 @@
+{
+  "problem_id": 8,
+  "problem_name": "Reverse Words in a String",
+  "test_cases_run": [
+    {
+      "input": "the sky is blue",
+      "output": "blue is sky the"
+    },
+    {
+      "input": "  hello world  ",
+      "output": "world hello"
+    },
+    {
+      "input": "a good   example",
+      "output": "example good a"
+    }
+  ],
+  "test_cases_submit": [
+    {
+      "input": "  ",
+      "output": ""
+    },
+    {
+      "input": "hi",
+      "output": "hi"
+    },
+    {
+      "input": "a b c",
+      "output": "c b a"
+    },
+    {
+      "input": "one",
+      "output": "one"
+    },
+    {
+      "input": "  spaced   out words   ",
+      "output": "words out spaced"
+    },
+    {
+      "input": "Hello",
+      "output": "Hello"
+    },
+    {
+      "input": "Multiple   spaces    between words",
+      "output": "words between spaces Multiple"
+    },
+    {
+      "input": "Word",
+      "output": "Word"
+    },
+    {
+      "input": "first second",
+      "output": "second first"
+    },
+    {
+      "input": "  reverse    this please ",
+      "output": "please this reverse"
+    },
+    {
+      "input": "trailing    ",
+      "output": "trailing"
+    },
+    {
+      "input": "    leading",
+      "output": "leading"
+    },
+    {
+      "input": "   hello    world   again  ",
+      "output": "again world hello"
+    },
+    {
+      "input": "testing",
+      "output": "testing"
+    },
+    {
+      "input": "  a  b  c  ",
+      "output": "c b a"
+    },
+    {
+      "input": "Go for it",
+      "output": "it for Go"
+    },
+    {
+      "input": "Test with single word",
+      "output": "word single with Test"
+    },
+    {
+      "input": "Numbers 123 456",
+      "output": "456 123 Numbers"
+    },
+    {
+      "input": "punctuation, stays!",
+      "output": "stays! punctuation,"
+    },
+    {
+      "input": "UPPER lower MIX",
+      "output": "MIX lower UPPER"
+    },
+    {
+      "input": "camelCase PascalCase",
+      "output": "PascalCase camelCase"
+    },
+    {
+      "input": "    extra    spaces   here",
+      "output": "here spaces extra"
+    },
+    {
+      "input": "Line\nBreak",
+      "output": "Line\nBreak"
+    },
+    {
+      "input": "tab\tseparated",
+      "output": "tab\tseparated"
+    },
+    {
+      "input": "slash/word another/word",
+      "output": "another/word slash/word"
+    },
+    {
+      "input": "edge   case   test",
+      "output": "test case edge"
+    },
+    {
+      "input": "just   another   test",
+      "output": "test another just"
+    },
+    {
+      "input": "   reverse     it now  ",
+      "output": "now it reverse"
+    },
+    {
+      "input": "one two three four five",
+      "output": "five four three two one"
+    },
+    {
+      "input": "  this  is   hard-coded   ",
+      "output": "hard-coded is this"
+    },
+    {
+      "input": "caseSensitive CASESENSITIVE",
+      "output": "CASESENSITIVE caseSensitive"
+    },
+    {
+      "input": "Mix3d Input 42",
+      "output": "42 Input Mix3d"
+    },
+    {
+      "input": "Ends with period.",
+      "output": "period. with Ends"
+    },
+    {
+      "input": "middle     spacing     issue",
+      "output": "issue spacing middle"
+    },
+    {
+      "input": "last     one    here",
+      "output": "here one last"
+    },
+    {
+      "input": "     x      y       z       ",
+      "output": "z y x"
+    }
+  ]
+}

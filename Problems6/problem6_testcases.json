@@ -1,0 +1,180 @@
+{
+  "problem_id": 6,
+  "problem_name": "Longest Substring Without Repeating Characters",
+  "test_cases_run": [
+    {
+      "input": "abcabcbb",
+      "output": 3
+    },
+    {
+      "input": "bbbbb",
+      "output": 1
+    },
+    {
+      "input": "pwwkew",
+      "output": 3
+    }
+  ],
+  "test_cases_submit": [
+    {
+      "input": "",
+      "output": 0
+    },
+    {
+      "input": "dvdf",
+      "output": 3
+    },
+    {
+      "input": "aaba",
+      "output": 2
+    },
+    {
+      "input": "abcdef",
+      "output": 6
+    },
+    {
+      "input": "abba",
+      "output": 2
+    },
+    {
+      "input": "abccba",
+      "output": 3
+    },
+    {
+      "input": "abcabcbbabcabcbb",
+      "output": 3
+    },
+    {
+      "input": "aab",
+      "output": 2
+    },
+    {
+      "input": "a",
+      "output": 1
+    },
+    {
+      "input": "abcdeafghij",
+      "output": 10
+    },
+    {
+      "input": "aababcabcdabcde",
+      "output": 5
+    },
+    {
+      "input": " ",
+      "output": 1
+    },
+    {
+      "input": "au",
+      "output": 2
+    },
+    {
+      "input": "tmmzuxt",
+      "output": 5
+    },
+    {
+      "input": "ckilbkd",
+      "output": 5
+    },
+    {
+      "input": "anviaj",
+      "output": 5
+    },
+    {
+      "input": "abbaabcd",
+      "output": 4
+    },
+    {
+      "input": "abcbdeafghijklm",
+      "output": 11
+    },
+    {
+      "input": "abcabcbbxyz",
+      "output": 4
+    },
+    {
+      "input": "abcadefg",
+      "output": 7
+    },
+    {
+      "input": "abcabcbbabcabcbbabcabcbb",
+      "output": 3
+    },
+    {
+      "input": "aabbccddeeffgghhiijjkkll",
+      "output": 2
+    },
+    {
+      "input": "abcddefghijklmnopqrstuvwxyz",
+      "output": 25
+    },
+    {
+      "input": "abcdefghijklmnopqrstuvwxyza",
+      "output": 26
+    },
+    {
+      "input": "thequickbrownfoxjumpsoverthelazydog",
+      "output": 12
+    },
+    {
+      "input": "abcbdeafghijklmno",
+      "output": 13
+    },
+    {
+      "input": "ababababababababababababababababab",
+      "output": 2
+    },
+    {
+      "input": "aabcdefghijklmnopqrstuvwxyzaa",
+      "output": 26
+    },
+    {
+      "input": "aabcadeafghijklm",
+      "output": 11
+    },
+    {
+      "input": "abcdeffedcba",
+      "output": 6
+    },
+    {
+      "input": "abcdefghijklmnopqrstuvwxyz",
+      "output": 26
+    },
+    {
+      "input": "abbaacddcba",
+      "output": 3
+    },
+    {
+      "input": "bbbbbbbabbbbbbb",
+      "output": 2
+    },
+    {
+      "input": "zxcvbnmasdfghjklqwertyuiop",
+      "output": 26
+    },
+    {
+      "input": "aabbccddeeffgghh",
+      "output": 2
+    },
+    {
+      "input": "pwwkewabc",
+      "output": 6
+    },
+    {
+      "input": "abcdefga",
+      "output": 7
+    },
+    {
+      "input": "abacdefbgh",
+      "output": 8
+    },
+    {
+      "input": "qwertyuiopasdfghjklzxcvbnmqwerty",
+      "output": 26
+    },
+    {
+      "input": "abacabadabacaba",
+      "output": 4
+    }
+  ]
+}

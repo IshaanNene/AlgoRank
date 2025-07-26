@@ -1,0 +1,176 @@
+{
+  "problem_id": 9,
+  "problem_name": "First Unique Character in a String",
+  "test_cases_run": [
+    {
+      "input": "leetcode",
+      "output": 0
+    },
+    {
+      "input": "loveleetcode",
+      "output": 2
+    },
+    {
+      "input": "aabb",
+      "output": -1
+    }
+  ],
+  "test_cases_submit": [
+    {
+      "input": "cc",
+      "output": -1
+    },
+    {
+      "input": "z",
+      "output": 0
+    },
+    {
+      "input": "aabbccddeeffg",
+      "output": 12
+    },
+    {
+      "input": "abcabc",
+      "output": -1
+    },
+    {
+      "input": "a",
+      "output": 0
+    },
+    {
+      "input": "aaabcccdeeef",
+      "output": 11
+    },
+    {
+      "input": "aabbccddeeffgg",
+      "output": -1
+    },
+    {
+      "input": "abcdabcdz",
+      "output": 8
+    },
+    {
+      "input": "aaabbbc",
+      "output": 6
+    },
+    {
+      "input": "aabbccddeeggffhhiiijklm",
+      "output": 21
+    },
+    {
+      "input": "ababababa",
+      "output": -1
+    },
+    {
+      "input": "xxyz",
+      "output": 2
+    },
+    {
+      "input": "aabbccddee",
+      "output": -1
+    },
+    {
+      "input": "abcde",
+      "output": 0
+    },
+    {
+      "input": "aabbccddeeabc",
+      "output": -1
+    },
+    {
+      "input": "mnopmnopq",
+      "output": 8
+    },
+    {
+      "input": "abcdabc",
+      "output": 3
+    },
+    {
+      "input": "abcabcdd",
+      "output": -1
+    },
+    {
+      "input": "aabbc",
+      "output": 4
+    },
+    {
+      "input": "aabbccddeeffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyz",
+      "output": -1
+    },
+    {
+      "input": "xyz",
+      "output": 0
+    },
+    {
+      "input": "aa",
+      "output": -1
+    },
+    {
+      "input": "abcabcddf",
+      "output": 8
+    },
+    {
+      "input": "abcdefg",
+      "output": 0
+    },
+    {
+      "input": "zzz",
+      "output": -1
+    },
+    {
+      "input": "aabbccddx",
+      "output": 8
+    },
+    {
+      "input": "zxyxzyz",
+      "output": -1
+    },
+    {
+      "input": "ababcdcde",
+      "output": 8
+    },
+    {
+      "input": "aabcbd",
+      "output": 4
+    },
+    {
+      "input": "ab",
+      "output": 0
+    },
+    {
+      "input": "ba",
+      "output": 0
+    },
+    {
+      "input": "abcddcba",
+      "output": -1
+    },
+    {
+      "input": "abcddcbaz",
+      "output": 8
+    },
+    {
+      "input": "abcdedcba",
+      "output": 4
+    },
+    {
+      "input": "abccbaabccba",
+      "output": -1
+    },
+    {
+      "input": "helloworld",
+      "output": 0
+    },
+    {
+      "input": "racecar",
+      "output": 1
+    },
+    {
+      "input": "aabccbd",
+      "output": 6
+    },
+    {
+      "input": "aabbccddeefgghhiijjkkllmmnn",
+      "output": -1
+    }
+  ]
+}

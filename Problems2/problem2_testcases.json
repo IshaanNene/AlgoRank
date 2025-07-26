@@ -1,0 +1,59 @@
+{
+  "problem_id": 2,
+  "problem_name": "Valid Anagram",
+  "test_cases_run": [
+    {
+      "input": { "s": "anagram", "t": "nagaram" },
+      "output": true
+    },
+    {
+      "input": { "s": "rat", "t": "car" },
+      "output": false
+    },
+    {
+      "input": { "s": "a", "t": "a" },
+      "output": true
+    }
+  ],
+  "test_cases_submit": [
+    { "input": { "s": "listen", "t": "silent" }, "output": true },
+    { "input": { "s": "hello", "t": "bello" }, "output": false },
+    { "input": { "s": "", "t": "" }, "output": true },
+    { "input": { "s": "abc", "t": "cab" }, "output": true },
+    { "input": { "s": "abc", "t": "abcd" }, "output": false },
+    { "input": { "s": "aabbcc", "t": "abcabc" }, "output": true },
+    { "input": { "s": "aabbcc", "t": "aabbc" }, "output": false },
+    { "input": { "s": "binary", "t": "brainy" }, "output": true },
+    { "input": { "s": "test", "t": "sett" }, "output": true },
+    { "input": { "s": "night", "t": "thing" }, "output": true },
+    { "input": { "s": "dusty", "t": "study" }, "output": true },
+    { "input": { "s": "evil", "t": "vile" }, "output": true },
+    { "input": { "s": "evil", "t": "vill" }, "output": false },
+    { "input": { "s": "aaabbb", "t": "ababab" }, "output": true },
+    { "input": { "s": "aaabbb", "t": "aabb" }, "output": false },
+    { "input": { "s": "abcdef", "t": "fedcba" }, "output": true },
+    { "input": { "s": "a", "t": "b" }, "output": false },
+    { "input": { "s": "aaa", "t": "aaa" }, "output": true },
+    { "input": { "s": "aa", "t": "aaa" }, "output": false },
+    { "input": { "s": "race", "t": "care" }, "output": true },
+    { "input": { "s": "arc", "t": "car" }, "output": true },
+    { "input": { "s": "act", "t": "cat" }, "output": true },
+    { "input": { "s": "python", "t": "typhon" }, "output": true },
+    { "input": { "s": "fluster", "t": "restful" }, "output": true },
+    { "input": { "s": "forty five", "t": "over fifty" }, "output": true },
+    { "input": { "s": "eleven plus two", "t": "twelve plus one" }, "output": true },
+    { "input": { "s": "schoolmaster", "t": "theclassroom" }, "output": true },
+    { "input": { "s": "debit card", "t": "bad credit" }, "output": true },
+    { "input": { "s": "conversation", "t": "voices rant on" }, "output": true },
+    { "input": { "s": "a decimal point", "t": "I'm a dot in place" }, "output": true },
+    { "input": { "s": "slot machines", "t": "cash lost in me" }, "output": true },
+    { "input": { "s": "astronomer", "t": "moon starer" }, "output": true },
+    { "input": { "s": "the eyes", "t": "they see" }, "output": true },
+    { "input": { "s": "not anagram", "t": "definitely not" }, "output": false },
+    { "input": { "s": "abcde", "t": "edcba" }, "output": true },
+    { "input": { "s": "silent", "t": "listen" }, "output": true },
+    { "input": { "s": "tiger", "t": "grite" }, "output": true },
+    { "input": { "s": "looped", "t": "poodle" }, "output": true },
+    { "input": { "s": "cat", "t": "cut" }, "output": false }
+  ]
+}
