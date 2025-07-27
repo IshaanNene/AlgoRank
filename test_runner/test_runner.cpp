@@ -2,7 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <nlohmann/json.hpp>
+#include "json.hpp"
 #include "starter_code.cpp"
 
 using namespace std;
