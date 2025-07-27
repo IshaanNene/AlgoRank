@@ -18,10 +18,10 @@ int main() {
     json testcases;
     file >> testcases;
 
-    if (!testcases.contains("run") || testcases["run"].empty()) {
-        cerr << "❌ No testcases under 'run' key in JSON.\n";
+    if (!testcases.contains("test_cases_run") || testcases["test_cases_run"].empty()) {
+        cerr << "❌ No testcases under 'test_cases_run' key in JSON.\n";
         return 1;
-    }
+    }   
 
     Solution sol;
     int passed = 0, total = 0;
