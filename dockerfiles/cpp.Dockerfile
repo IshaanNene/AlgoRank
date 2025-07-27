@@ -13,4 +13,6 @@ RUN apt-get update && apt-get install -y curl && \
 RUN g++ test_runner.cpp starter_code.cpp -o runner -std=c++17
 
 # Run the compiled binary
+RUN echo "==> Files in /app:" && ls -l /app && cat testcases.json
+
 CMD ["./runner"]
