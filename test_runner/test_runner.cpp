@@ -3,9 +3,10 @@
 #include <vector>
 #include <string>
 #include "json.hpp"
-#include "starter_code.cpp" 
-using json = nlohmann::json;
+#include "starter_code.cpp" // includes Solution class and twoSum
+
 using namespace std;
+using json = nlohmann::json;
 
 int main() {
     ifstream file("testcases.json");
@@ -17,7 +18,13 @@ int main() {
     json testcases;
     file >> testcases;
 
+    if (!testcases.contains("run") || testcases["run"].empty()) {
+        cerr << "❌ No testcases under 'run' key in JSON.\n";
+        return 1;
+    }
+
     Solution sol;
+    int passed = 0, total = 0;
 
     for (const auto& tc : testcases["run"]) {
         vector<int> nums = tc["input"]["nums"];
@@ -25,17 +32,21 @@ int main() {
         vector<int> expected = tc["output"];
 
         vector<int> result = sol.twoSum(nums, target);
+        total++;
 
         if (result == expected) {
-            cout << "✅ Passed\n";
+            cout << "✅ Test " << total << " passed\n";
+            passed++;
         } else {
-            cout << "❌ Failed\nExpected: ";
-            for (int x : expected) cout << x << " ";
-            cout << "\nGot: ";
-            for (int x : result) cout << x << " ";
-            cout << "\n\n";
+            cout << "❌ Test " << total << " failed\n";
+            cout << "   Expected: ";
+            for (int n : expected) cout << n << " ";
+            cout << "\n   Got     : ";
+            for (int n : result) cout << n << " ";
+            cout << "\n";
         }
     }
 
+    cout << "\nSummary: " << passed << "/" << total << " tests passed.\n";
     return 0;
 }
