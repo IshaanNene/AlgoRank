@@ -1,9 +1,12 @@
-FROM gcc:13
+FROM gcc:latest
 
 WORKDIR /app
-COPY . /app
 
-RUN g++ -o solution solution.cpp
+COPY . .
 
-CMD ["./solution"]
+RUN apt-get update && apt-get install -y curl && \
+    curl -sSLo json.hpp https://raw.githubusercontent.com/nlohmann/json/develop/single_include/nlohmann/json.hpp
 
+RUN g++ test_runner.cpp -o runner -std=c++17
+
+CMD ["./runner"]

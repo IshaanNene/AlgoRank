@@ -1,9 +1,9 @@
-FROM golang:1.22
+FROM golang:latest
 
 WORKDIR /app
-COPY . /app
 
-RUN go build -o solution solution.go
+COPY . .
 
-CMD ["./solution"]
+RUN go build -o runner test_runner.go starter_code.go
 
+CMD ["./runner"]
