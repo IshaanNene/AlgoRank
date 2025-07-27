@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 #include "json.hpp"
-#include "starter_code.cpp" // includes Solution class and twoSum
+#include "starter_code.cpp"  // must contain Solution class and your function
 
 using namespace std;
 using json = nlohmann::json;
@@ -11,7 +11,7 @@ using json = nlohmann::json;
 int main() {
     ifstream file("testcases.json");
     if (!file.is_open()) {
-        cerr << "❌ Failed to open testcases.json" << endl;
+        cerr << "❌ Failed to open testcases.json\n";
         return 1;
     }
 
@@ -19,9 +19,9 @@ int main() {
     file >> testcases;
 
     if (!testcases.contains("test_cases_run") || testcases["test_cases_run"].empty()) {
-        cerr << "❌ No testcases under 'test_cases_run' key in JSON.\n";
+        cerr << "❌ No test cases under 'test_cases_run'\n";
         return 1;
-    }   
+    }
 
     Solution sol;
     int passed = 0, total = 0;
