@@ -30,8 +30,8 @@ int main() {
         vector<int> nums = test["input"]["nums"];
         int target = test["input"]["target"];
         vector<int> expected = test["output"];
-
-        vector<int> result = twoSum(nums, target);
+        Solution sol;
+        vector<int> result = sol.twoSum(nums, target);
 
         if (areEqual(result, expected)) {
             cout << "✅ Test " << (i + 1) << " passed\n";
