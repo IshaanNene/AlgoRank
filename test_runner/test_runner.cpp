@@ -26,7 +26,7 @@ int main() {
     Solution sol;
     int passed = 0, total = 0;
 
-    for (const auto& tc : testcases["run"]) {
+    for (const auto& tc : testcases["test_cases_run"]) {
         vector<int> nums = tc["input"]["nums"];
         int target = tc["input"]["target"];
         vector<int> expected = tc["output"];
