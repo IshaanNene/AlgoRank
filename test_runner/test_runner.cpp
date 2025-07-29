@@ -71,31 +71,31 @@ TestResult run_test(const Solution& solution, const json& test_case, size_t inde
     }
 }
 
-int main() {
+int main(int argc, char* argv[]) {
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(nullptr);
-    
+
     try {
         std::ifstream file("testcases.json");
         if (!file) {
             throw std::runtime_error("Cannot open testcases.json");
         }
 
-        std::stringstream buffer;
-        buffer << file.rdbuf();
-        std::cout << "📦 Loaded JSON (raw):\n" << buffer.str() << "\n\n";
+        json test_data;
+        file >> test_data;
 
-        json test_data = json::parse(buffer.str());
-
-        if (!test_data.contains("test_cases_run") || !test_data["test_cases_run"].is_array() || test_data["test_cases_run"].empty()) {
-            std::cerr << "❌ No valid test cases found under 'test_cases_run'.\n";
-            return 1;
+        // 🧠 Determine mode
+        std::string mode = "run"; // default
+        if (const char* env_mode = std::getenv("RUN_MODE")) {
+            mode = std::string(env_mode);
         }
 
-        const auto& test_cases = test_data["test_cases_run"];
+        const auto& test_cases = test_data.contains("test_cases_" + mode)
+            ? test_data["test_cases_" + mode]
+            : throw std::runtime_error("Missing test_cases_" + mode);
 
-        std::cout << "\nRunning tests for: " << test_data["problem_name"] << "\n";
-        std::cout << "Number of test cases: " << test_cases.size() << "\n\n";
+        std::cout << "\nRunning tests for: " << test_data["problem_name"] << " [" << mode << " mode]"
+                  << "\nNumber of test cases: " << test_cases.size() << "\n\n";
 
         Solution solution;
         auto total_start = high_resolution_clock::now();
@@ -104,7 +104,7 @@ int main() {
         for (size_t i = 0; i < test_cases.size(); ++i) {
             futures.push_back(
                 std::async(std::launch::async, run_test, std::ref(solution),
-                          std::ref(test_cases[i]), i)
+                           std::ref(test_cases[i]), i)
             );
         }
 
@@ -130,7 +130,7 @@ int main() {
         return passed == test_cases.size() ? 0 : 1;
 
     } catch (const std::exception& e) {
-        std::cerr << "❌ Error: " << e.what() << std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
 }
