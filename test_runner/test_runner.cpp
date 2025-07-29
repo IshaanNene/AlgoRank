@@ -81,8 +81,11 @@ int main() {
             throw std::runtime_error("Cannot open testcases.json");
         }
 
-        json test_data;
-        file >> test_data;
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        std::cout << "📦 Loaded JSON (raw):\n" << buffer.str() << "\n\n";
+
+        json test_data = json::parse(buffer.str());
 
         if (!test_data.contains("test_cases_run") || !test_data["test_cases_run"].is_array() || test_data["test_cases_run"].empty()) {
             std::cerr << "❌ No valid test cases found under 'test_cases_run'.\n";
