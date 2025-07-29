@@ -1,6 +1,7 @@
 {
   "problem_id": 5,
   "problem_name": "Valid Parentheses",
+  "function_name": "isValid",
   "test_cases_run": [
     {
       "input": "()",

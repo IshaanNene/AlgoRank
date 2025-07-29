@@ -1,6 +1,7 @@
 {
   "problem_id": 7,
   "problem_name": "Palindrome Check",
+  "function_name": "isPalindrome",
   "test_cases_run": [
     {
       "input": "A man, a plan, a canal: Panama",

@@ -1,6 +1,7 @@
 {
   "problem_id": 9,
   "problem_name": "First Unique Character in a String",
+  "function_name": "firstUniqChar",
   "test_cases_run": [
     {
       "input": "leetcode",

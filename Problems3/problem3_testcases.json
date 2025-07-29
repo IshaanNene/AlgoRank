@@ -1,6 +1,7 @@
 {
   "problem_id": 3,
   "problem_name": "Group Anagrams",
+  "function_name": "groupAnagrams",
   "test_cases_run": [
     {
       "input": ["eat", "tea", "tan", "ate", "nat", "bat"],

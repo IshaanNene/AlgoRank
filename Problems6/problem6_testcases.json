@@ -1,6 +1,7 @@
 {
   "problem_id": 6,
   "problem_name": "Longest Substring Without Repeating Characters",
+  "function_name": "lengthOfLongestSubstring",
   "test_cases_run": [
     {
       "input": "abcabcbb",

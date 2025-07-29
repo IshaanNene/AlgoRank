@@ -1,6 +1,7 @@
 {
   "problem_id": 8,
   "problem_name": "Reverse Words in a String",
+  "function_name": "reverseWords",
   "test_cases_run": [
     {
       "input": "the sky is blue",
