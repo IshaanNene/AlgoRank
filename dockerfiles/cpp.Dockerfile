@@ -1,14 +1,21 @@
-FROM gcc:13
+FROM gcc:13 as builder
 
-WORKDIR /app
+WORKDIR /build
 COPY . .
 
-# Get single-header JSON library
-RUN apt-get update && apt-get install -y curl && \
-    curl -sSLo json.hpp https://raw.githubusercontent.com/nlohmann/json/develop/single_include/nlohmann/json.hpp
+# Get JSON library
+RUN curl -sSLo json.hpp https://raw.githubusercontent.com/nlohmann/json/develop/single_include/nlohmann/json.hpp
 
-# Compile test runner + starter code
-RUN g++ test_runner.cpp starter_code.cpp -o runner -std=c++17
+# Compile with maximum optimization
+RUN g++ -O3 -march=native -flto -std=c++20 \
+    -Wall -Wextra \
+    test_runner.cpp -o runner \
+    -pthread
 
-# Run on container start
+# Create minimal runtime image
+FROM debian:bullseye-slim
+WORKDIR /app
+COPY --from=builder /build/runner .
+COPY testcases.json .
+
 CMD ["./runner"]

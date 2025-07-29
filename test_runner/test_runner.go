@@ -4,63 +4,95 @@ import (
     "encoding/json"
     "fmt"
     "os"
+    "reflect"
+    "sort"
+    "sync"
 )
 
-type Input struct {
-    Nums   []int `json:"nums"`
-    Target int   `json:"target"`
-}
-
 type TestCase struct {
-    Input  Input `json:"input"`
-    Output []int `json:"output"`
+    Input       map[string]interface{} `json:"input"`
+    Output      interface{}            `json:"output"`
+    FunctionName string               `json:"function_name"`
 }
 
-type TestSet struct {
-    Run []TestCase `json:"run"`
+type TestData struct {
+    TestCasesRun []TestCase `json:"test_cases_run"`
 }
 
-// assumes starter_code.go has: func TwoSum(nums []int, target int) []int
-
-func areEqual(a, b []int) bool {
-    if len(a) != len(b) {
+func areEqual(actual, expected interface{}) bool {
+    if reflect.TypeOf(actual) != reflect.TypeOf(expected) {
         return false
     }
-    for i := range a {
-        if a[i] != b[i] {
+
+    switch actual := actual.(type) {
+    case []int:
+        expectedSlice := expected.([]int)
+        if len(actual) != len(expectedSlice) {
             return false
         }
+        actualCopy := make([]int, len(actual))
+        expectedCopy := make([]int, len(expectedSlice))
+        copy(actualCopy, actual)
+        copy(expectedCopy, expectedSlice)
+        sort.Ints(actualCopy)
+        sort.Ints(expectedCopy)
+        return reflect.DeepEqual(actualCopy, expectedCopy)
+    default:
+        return reflect.DeepEqual(actual, expected)
     }
-    return true
+}
+
+func runTest(wg *sync.WaitGroup, results chan<- bool, tc TestCase, idx int) {
+    defer wg.Done()
+    
+    defer func() {
+        if r := recover(); r != nil {
+            fmt.Printf("Test %d: ✗ (Panic: %v)\n", idx+1, r)
+            results <- false
+        }
+    }()
+
+    result := solve(tc.Input) // Call your solution function
+    passed := areEqual(result, tc.Output)
+    fmt.Printf("Test %d: %s\n", idx+1, map[bool]string{true: "✓", false: "✗"}[passed])
+    results <- passed
 }
 
 func main() {
-    f, err := os.ReadFile("testcases.json")
+    data, err := os.ReadFile("testcases.json")
     if err != nil {
-        fmt.Println("❌ Failed to open testcases.json:", err)
-        return
+        fmt.Fprintf(os.Stderr, "Error reading testcases.json: %v\n", err)
+        os.Exit(1)
     }
 
-    var tests TestSet
-    err = json.Unmarshal(f, &tests)
-    if err != nil {
-        fmt.Println("❌ Invalid JSON format:", err)
-        return
+    var testData TestData
+    if err := json.Unmarshal(data, &testData); err != nil {
+        fmt.Fprintf(os.Stderr, "Error parsing JSON: %v\n", err)
+        os.Exit(1)
     }
+
+    var wg sync.WaitGroup
+    results := make(chan bool, len(testData.TestCasesRun))
+
+    for i, tc := range testData.TestCasesRun {
+        wg.Add(1)
+        go runTest(&wg, results, tc, i)
+    }
+
+    go func() {
+        wg.Wait()
+        close(results)
+    }()
 
     passed := 0
-    for i, t := range tests.Run {
-        result := TwoSum(t.Input.Nums, t.Input.Target)
-        if areEqual(result, t.Output) {
-            fmt.Printf("✅ Test %d passed\n", i+1)
+    for result := range results {
+        if result {
             passed++
-        } else {
-            fmt.Printf("❌ Test %d failed\n", i+1)
-            fmt.Println("   Expected:", t.Output)
-            fmt.Println("   Got     :", result)
         }
     }
 
-    fmt.Printf("\nSummary: %d/%d tests passed.\n", passed, len(tests.Run))
+    fmt.Printf("\nSummary: %d/%d tests passed\n", passed, len(testData.TestCasesRun))
+    if passed != len(testData.TestCasesRun) {
+        os.Exit(1)
+    }
 }
-

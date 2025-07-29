@@ -1,52 +1,66 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <string>
+#include <future>
+#include <thread>
 #include "json.hpp"
-#include "starter_code.cpp"  // must contain Solution class and your function
+#include "starter_code.cpp"
 
-using namespace std;
 using json = nlohmann::json;
 
+template<typename T>
+bool are_equal(const T& actual, const T& expected) {
+    if constexpr (std::is_same_v<T, std::vector<int>>) {
+        auto a = actual, b = expected;
+        std::sort(a.begin(), a.end());
+        std::sort(b.begin(), b.end());
+        return a == b;
+    }
+    return actual == expected;
+}
+
+bool run_test(const Solution& solution, const json& test_case, size_t index) {
+    try {
+        auto result = solution.solve(test_case["input"]);
+        bool passed = are_equal(result, test_case["output"]);
+        std::cout << "Test " << index + 1 << ": " << (passed ? "✓" : "✗") << std::endl;
+        return passed;
+    } catch (const std::exception& e) {
+        std::cout << "Test " << index + 1 << ": ✗ (Error: " << e.what() << ")" << std::endl;
+        return false;
+    }
+}
+
 int main() {
-    ifstream file("testcases.json");
-    if (!file.is_open()) {
-        cerr << "❌ Failed to open testcases.json\n";
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+    
+    std::ifstream file("testcases.json");
+    if (!file) {
+        std::cerr << "Error: Cannot open testcases.json\n";
         return 1;
     }
 
-    json testcases;
-    file >> testcases;
-
-    if (!testcases.contains("test_cases_run") || testcases["test_cases_run"].empty()) {
-        cerr << "❌ No test cases under 'test_cases_run'\n";
-        return 1;
+    json test_data;
+    file >> test_data;
+    
+    const auto& test_cases = test_data["test_cases_run"];
+    Solution solution;
+    
+    std::vector<std::future<bool>> futures;
+    for (size_t i = 0; i < test_cases.size(); ++i) {
+        futures.push_back(
+            std::async(std::launch::async, run_test, std::ref(solution), 
+                      std::ref(test_cases[i]), i)
+        );
     }
 
-    Solution sol;
-    int passed = 0, total = 0;
-
-    for (const auto& tc : testcases["test_cases_run"]) {
-        vector<int> nums = tc["input"]["nums"];
-        int target = tc["input"]["target"];
-        vector<int> expected = tc["output"];
-
-        vector<int> result = sol.twoSum(nums, target);
-        total++;
-
-        if (result == expected) {
-            cout << "✅ Test " << total << " passed\n";
-            passed++;
-        } else {
-            cout << "❌ Test " << total << " failed\n";
-            cout << "   Expected: ";
-            for (int n : expected) cout << n << " ";
-            cout << "\n   Got     : ";
-            for (int n : result) cout << n << " ";
-            cout << "\n";
-        }
+    size_t passed = 0;
+    for (auto& f : futures) {
+        passed += f.get();
     }
 
-    cout << "\nSummary: " << passed << "/" << total << " tests passed.\n";
-    return 0;
+    std::cout << "\nSummary: " << passed << "/" << test_cases.size() 
+              << " tests passed\n";
+    return passed == test_cases.size() ? 0 : 1;
 }
