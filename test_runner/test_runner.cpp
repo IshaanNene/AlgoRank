@@ -83,26 +83,31 @@ int main() {
 
         json test_data;
         file >> test_data;
-        
+
+        if (!test_data.contains("test_cases_run") || !test_data["test_cases_run"].is_array() || test_data["test_cases_run"].empty()) {
+            std::cerr << "❌ No valid test cases found under 'test_cases_run'.\n";
+            return 1;
+        }
+
         const auto& test_cases = test_data["test_cases_run"];
-        
+
         std::cout << "\nRunning tests for: " << test_data["problem_name"] << "\n";
         std::cout << "Number of test cases: " << test_cases.size() << "\n\n";
 
         Solution solution;
         auto total_start = high_resolution_clock::now();
-        
+
         std::vector<std::future<TestResult>> futures;
         for (size_t i = 0; i < test_cases.size(); ++i) {
             futures.push_back(
-                std::async(std::launch::async, run_test, std::ref(solution), 
+                std::async(std::launch::async, run_test, std::ref(solution),
                           std::ref(test_cases[i]), i)
             );
         }
 
         size_t passed = 0;
         double total_time = 0;
-        
+
         for (auto& f : futures) {
             auto result = f.get();
             passed += result.passed;
@@ -122,7 +127,7 @@ int main() {
         return passed == test_cases.size() ? 0 : 1;
 
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "❌ Error: " << e.what() << std::endl;
         return 1;
     }
 }
