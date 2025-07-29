@@ -28,6 +28,14 @@ bool are_equal(const T& actual, const T& expected) {
         auto a = actual, b = expected;
         std::sort(a.begin(), a.end());
         std::sort(b.begin(), b.end());
+
+        if (a != b) {
+            std::cout << "Expected: ";
+            for (int x : b) std::cout << x << " ";
+            std::cout << "\nGot     : ";
+            for (int x : a) std::cout << x << " ";
+            std::cout << "\n";
+        }
         return a == b;
     }
     return actual == expected;
