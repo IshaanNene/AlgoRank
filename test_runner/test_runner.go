@@ -7,16 +7,25 @@ import (
     "reflect"
     "sort"
     "sync"
+    "time"
 )
 
 type TestCase struct {
-    Input       map[string]interface{} `json:"input"`
-    Output      interface{}            `json:"output"`
-    FunctionName string               `json:"function_name"`
+    Input  interface{} `json:"input"`
+    Output interface{} `json:"output"`
 }
 
 type TestData struct {
-    TestCasesRun []TestCase `json:"test_cases_run"`
+    ProblemID    int         `json:"problem_id"`
+    ProblemName  string      `json:"problem_name"`
+    FunctionName string      `json:"function_name"`
+    TestCasesRun []TestCase  `json:"test_cases_run"`
+}
+
+type TestResult struct {
+    Passed   bool
+    Error    string
+    TimeInMs float64
 }
 
 func areEqual(actual, expected interface{}) bool {
@@ -42,41 +51,87 @@ func areEqual(actual, expected interface{}) bool {
     }
 }
 
-func runTest(wg *sync.WaitGroup, results chan<- bool, tc TestCase, idx int) {
+func runTest(wg *sync.WaitGroup, results chan<- TestResult, solution interface{}, tc TestCase, funcName string, idx int) {
     defer wg.Done()
+    start := time.Now()
     
+    result := TestResult{}
     defer func() {
         if r := recover(); r != nil {
-            fmt.Printf("Test %d: ✗ (Panic: %v)\n", idx+1, r)
-            results <- false
+            result.Error = fmt.Sprintf("Panic: %v", r)
+            result.Passed = false
         }
+        result.TimeInMs = float64(time.Since(start).Microseconds()) / 1000.0
+        results <- result
+        
+        status := "✓"
+        color := "\033[32m" // Green
+        if !result.Passed {
+            status = "✗"
+            color = "\033[31m" // Red
+        }
+        fmt.Printf("Test %2d: %s%s\033[0m (%.2fms)", idx+1, color, status, result.TimeInMs)
+        if result.Error != "" {
+            fmt.Printf(" Error: %s", result.Error)
+        }
+        fmt.Println()
     }()
 
-    result := solve(tc.Input) // Call your solution function
-    passed := areEqual(result, tc.Output)
-    fmt.Printf("Test %d: %s\n", idx+1, map[bool]string{true: "✓", false: "✗"}[passed])
-    results <- passed
+    // Get the solution function by name
+    method := reflect.ValueOf(solution).MethodByName(funcName)
+    if !method.IsValid() {
+        result.Error = fmt.Sprintf("Function '%s' not found", funcName)
+        result.Passed = false
+        return
+    }
+
+    // Convert input to reflect.Value
+    var args []reflect.Value
+    switch input := tc.Input.(type) {
+    case map[string]interface{}:
+        for _, v := range input {
+            args = append(args, reflect.ValueOf(v))
+        }
+    default:
+        args = []reflect.Value{reflect.ValueOf(tc.Input)}
+    }
+
+    // Call the function
+    outputs := method.Call(args)
+    if len(outputs) != 1 {
+        result.Error = "Expected single return value"
+        result.Passed = false
+        return
+    }
+
+    result.Passed = areEqual(outputs[0].Interface(), tc.Output)
 }
 
 func main() {
+    // Read test cases
     data, err := os.ReadFile("testcases.json")
     if err != nil {
-        fmt.Fprintf(os.Stderr, "Error reading testcases.json: %v\n", err)
+        fmt.Fprintf(os.Stderr, "\033[31mError reading testcases.json: %v\033[0m\n", err)
         os.Exit(1)
     }
 
     var testData TestData
     if err := json.Unmarshal(data, &testData); err != nil {
-        fmt.Fprintf(os.Stderr, "Error parsing JSON: %v\n", err)
+        fmt.Fprintf(os.Stderr, "\033[31mError parsing JSON: %v\033[0m\n", err)
         os.Exit(1)
     }
 
-    var wg sync.WaitGroup
-    results := make(chan bool, len(testData.TestCasesRun))
+    fmt.Printf("\nRunning tests for function: \033[36m%s\033[0m\n", testData.FunctionName)
+    fmt.Printf("Number of test cases: %d\n\n", len(testData.TestCasesRun))
 
+    startTime := time.Now()
+    var wg sync.WaitGroup
+    results := make(chan TestResult, len(testData.TestCasesRun))
+
+    solution := &Solution{}
     for i, tc := range testData.TestCasesRun {
         wg.Add(1)
-        go runTest(&wg, results, tc, i)
+        go runTest(&wg, results, solution, tc, testData.FunctionName, i)
     }
 
     go func() {
@@ -85,13 +140,28 @@ func main() {
     }()
 
     passed := 0
+    totalTime := 0.0
     for result := range results {
-        if result {
+        if result.Passed {
             passed++
         }
+        totalTime += result.TimeInMs
     }
 
-    fmt.Printf("\nSummary: %d/%d tests passed\n", passed, len(testData.TestCasesRun))
+    elapsed := float64(time.Since(startTime).Microseconds()) / 1000.0
+    
+    // Print summary
+    fmt.Printf("\nSummary:\n--------\n")
+    passColor := "\033[32m"
+    if passed != len(testData.TestCasesRun) {
+        passColor = "\033[31m"
+    }
+    fmt.Printf("Passed: %s%d/%d (%.1f%%)\033[0m\n", 
+        passColor, passed, len(testData.TestCasesRun), 
+        float64(passed) * 100 / float64(len(testData.TestCasesRun)))
+    fmt.Printf("Total time: %.2fms\n", elapsed)
+    fmt.Printf("Average time per test: %.2fms\n", totalTime/float64(len(testData.TestCasesRun)))
+
     if passed != len(testData.TestCasesRun) {
         os.Exit(1)
     }
