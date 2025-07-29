@@ -14,6 +14,9 @@ struct TestResult {
     bool passed;
     std::string error;
     double timeMs;
+    
+    TestResult(bool p = false, const std::string& e = "", double t = 0.0) 
+        : passed(p), error(e), timeMs(t) {}
 };
 
 template<typename T>
@@ -28,41 +31,25 @@ bool are_equal(const T& actual, const T& expected) {
     return actual == expected;
 }
 
-TestResult run_test(const Solution& solution, const json& test_case, const std::string& func_name, size_t index) {
+template<typename T>
+T convert_input(const json& input) {
+    return input.get<T>();
+}
+
+TestResult run_test(const Solution& solution, const json& test_case, size_t index) {
     auto start = high_resolution_clock::now();
     try {
         auto& input = test_case["input"];
-        std::variant<std::vector<int>, bool, int, std::string> result;
-
-        // Call appropriate function based on name
-        if (func_name == "twoSum") {
-            result = solution.twoSum(input["nums"].get<std::vector<int>>(), input["target"].get<int>());
-        } else if (func_name == "isAnagram") {
-            result = solution.isAnagram(input["s"].get<std::string>(), input["t"].get<std::string>());
-        } else if (func_name == "groupAnagrams") {
-            result = solution.groupAnagrams(input.get<std::vector<std::string>>());
-        } else if (func_name == "topKFrequent") {
-            result = solution.topKFrequent(input["nums"].get<std::vector<int>>(), input["k"].get<int>());
-        } else if (func_name == "isValid") {
-            result = solution.isValid(input["s"].get<std::string>());
-        } else if (func_name == "lengthOfLongestSubstring") {
-            result = solution.lengthOfLongestSubstring(input["s"].get<std::string>());
-        } else if (func_name == "isPalindrome") {
-            result = solution.isPalindrome(input["s"].get<std::string>());
-        } else if (func_name == "reverseWords") {
-            result = solution.reverseWords(input["s"].get<std::string>());
-        } else if (func_name == "firstUniqChar") {
-            result = solution.firstUniqChar(input["s"].get<std::string>());
-        } else if (func_name == "findDuplicates") {
-            result = solution.findDuplicates(input.get<std::vector<int>>());
-        } else {
-            throw std::runtime_error("Unknown function: " + func_name);
-        }
-
-        bool passed = std::visit([&](auto&& arg) {
-            return are_equal(arg, test_case["output"].get<std::decay_t<decltype(arg)>>());
-        }, result);
-
+        auto& output = test_case["output"];
+        
+        // Convert input based on output type
+        auto result = solution.twoSum(
+            convert_input<std::vector<int>>(input["nums"]),
+            input["target"].get<int>()
+        );
+        
+        bool passed = are_equal(result, output.get<std::vector<int>>());
+        
         auto end = high_resolution_clock::now();
         double timeMs = duration_cast<microseconds>(end - start).count() / 1000.0;
 
@@ -71,6 +58,7 @@ TestResult run_test(const Solution& solution, const json& test_case, const std::
                  << " (" << std::fixed << std::setprecision(2) << timeMs << "ms)\n";
 
         return {passed, "", timeMs};
+
     } catch (const std::exception& e) {
         auto end = high_resolution_clock::now();
         double timeMs = duration_cast<microseconds>(end - start).count() / 1000.0;
@@ -97,31 +85,28 @@ int main() {
         file >> test_data;
         
         const auto& test_cases = test_data["test_cases_run"];
-        const std::string& func_name = test_data["function_name"].get<std::string>();
         
-        std::cout << "\nRunning tests for function: " << func_name << "\n";
+        std::cout << "\nRunning tests for: " << test_data["problem_name"] << "\n";
         std::cout << "Number of test cases: " << test_cases.size() << "\n\n";
 
-        auto total_start = high_resolution_clock::now();
         Solution solution;
+        auto total_start = high_resolution_clock::now();
         
         std::vector<std::future<TestResult>> futures;
         for (size_t i = 0; i < test_cases.size(); ++i) {
             futures.push_back(
                 std::async(std::launch::async, run_test, std::ref(solution), 
-                          std::ref(test_cases[i]), std::ref(func_name), i)
+                          std::ref(test_cases[i]), i)
             );
         }
 
         size_t passed = 0;
         double total_time = 0;
-        std::vector<TestResult> results;
         
         for (auto& f : futures) {
             auto result = f.get();
             passed += result.passed;
             total_time += result.timeMs;
-            results.push_back(result);
         }
 
         auto total_end = high_resolution_clock::now();
