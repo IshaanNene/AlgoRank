@@ -4,6 +4,8 @@
 #include <future>
 #include <chrono>
 #include <iomanip>
+#include <cstdlib> // for getenv
+#include <sstream>
 #include "json.hpp"
 #include "starter_code.cpp"
 
@@ -14,8 +16,8 @@ struct TestResult {
     bool passed;
     std::string error;
     double timeMs;
-    
-    TestResult(bool p = false, const std::string& e = "", double t = 0.0) 
+
+    TestResult(bool p = false, const std::string& e = "", double t = 0.0)
         : passed(p), error(e), timeMs(t) {}
 };
 
@@ -41,21 +43,20 @@ TestResult run_test(const Solution& solution, const json& test_case, size_t inde
     try {
         auto& input = test_case["input"];
         auto& output = test_case["output"];
-        
-        // Convert input based on output type
+
         auto result = solution.twoSum(
             convert_input<std::vector<int>>(input["nums"]),
             input["target"].get<int>()
         );
-        
+
         bool passed = are_equal(result, output.get<std::vector<int>>());
-        
+
         auto end = high_resolution_clock::now();
         double timeMs = duration_cast<microseconds>(end - start).count() / 1000.0;
 
-        std::cout << "Test " << std::setw(2) << index + 1 << ": " 
-                 << (passed ? "\033[32m✓\033[0m" : "\033[31m✗\033[0m")
-                 << " (" << std::fixed << std::setprecision(2) << timeMs << "ms)\n";
+        std::cout << "Test " << std::setw(2) << index + 1 << ": "
+                  << (passed ? "\033[32m✓\033[0m" : "\033[31m✗\033[0m")
+                  << " (" << std::fixed << std::setprecision(2) << timeMs << "ms)\n";
 
         return {passed, "", timeMs};
 
@@ -64,53 +65,51 @@ TestResult run_test(const Solution& solution, const json& test_case, size_t inde
         double timeMs = duration_cast<microseconds>(end - start).count() / 1000.0;
 
         std::cout << "Test " << std::setw(2) << index + 1 << ": \033[31m✗\033[0m"
-                 << " (Error: " << e.what() << ") "
-                 << "(" << std::fixed << std::setprecision(2) << timeMs << "ms)\n";
+                  << " (Error: " << e.what() << ") "
+                  << "(" << std::fixed << std::setprecision(2) << timeMs << "ms)\n";
 
         return {false, e.what(), timeMs};
     }
 }
 
-int main(int argc, char* argv[]) {
+int main() {
     std::ios_base::sync_with_stdio(false);
     std::cin.tie(nullptr);
 
     try {
         std::ifstream file("testcases.json");
-        if (!file) {
-            throw std::runtime_error("Cannot open testcases.json");
+        if (!file) throw std::runtime_error("Cannot open testcases.json");
+
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+
+        json test_data = json::parse(buffer.str());
+
+        const char* mode_env = std::getenv("RUN_MODE");
+        std::string run_mode = mode_env ? mode_env : "run";
+
+        std::string field = (run_mode == "submit") ? "test_cases_submit" : "test_cases_run";
+        std::cout << "📦 Mode: " << run_mode << " | Field: " << field << "\n";
+
+        if (!test_data.contains(field) || !test_data[field].is_array() || test_data[field].empty()) {
+            std::cerr << "❌ No valid test cases found under '" << field << "'.\n";
+            return 1;
         }
 
-        json test_data;
-        file >> test_data;
-
-        // 🧠 Determine mode
-        std::string mode = "run"; // default
-        if (const char* env_mode = std::getenv("RUN_MODE")) {
-            mode = std::string(env_mode);
-        }
-
-        const auto& test_cases = test_data.contains("test_cases_" + mode)
-            ? test_data["test_cases_" + mode]
-            : throw std::runtime_error("Missing test_cases_" + mode);
-
-        std::cout << "\nRunning tests for: " << test_data["problem_name"] << " [" << mode << " mode]"
-                  << "\nNumber of test cases: " << test_cases.size() << "\n\n";
+        const auto& test_cases = test_data[field];
+        std::cout << "\nRunning tests for: " << test_data["problem_name"] << "\n";
+        std::cout << "Number of test cases: " << test_cases.size() << "\n\n";
 
         Solution solution;
         auto total_start = high_resolution_clock::now();
 
         std::vector<std::future<TestResult>> futures;
         for (size_t i = 0; i < test_cases.size(); ++i) {
-            futures.push_back(
-                std::async(std::launch::async, run_test, std::ref(solution),
-                           std::ref(test_cases[i]), i)
-            );
+            futures.push_back(std::async(std::launch::async, run_test, std::ref(solution), std::ref(test_cases[i]), i));
         }
 
         size_t passed = 0;
-        double total_time = 0;
-
+        double total_time = 0.0;
         for (auto& f : futures) {
             auto result = f.get();
             passed += result.passed;
@@ -130,7 +129,7 @@ int main(int argc, char* argv[]) {
         return passed == test_cases.size() ? 0 : 1;
 
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "❌ Error: " << e.what() << std::endl;
         return 1;
     }
 }
