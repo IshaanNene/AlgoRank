@@ -23,4 +23,4 @@ RUN echo "=== BUILD INFO ===" && \
     ldd runner && \
     echo "=== END BUILD INFO ==="
 
-CMD ["./runner"]
+CMD ["VERBOSE=1 ","./runner"]

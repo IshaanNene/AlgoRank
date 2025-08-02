@@ -296,7 +296,7 @@ int main() {
 
         std::string field = (run_mode == "submit") ? "test_cases_submit" : "test_cases_run";
         
-        std::cout << "🚀 Test Runner Configuration:"
+        std::cout << "Test Runner Configuration:"
                   << "\n   Mode: " << run_mode
                   << "\n   Field: " << field
                   << "\n   Verbose: " << (verbose ? "ON" : "OFF")
@@ -304,13 +304,13 @@ int main() {
                   << "\n   Parallel: " << (parallel ? "ON" : "OFF") << "\n";
 
         if (!test_data.contains(field) || !test_data[field].is_array() || test_data[field].empty()) {
-            std::cerr << "❌ No valid test cases found under '" << field << "'.\n";
+            std::cerr << "No valid test cases found under '" << field << "'.\n";
             return 1;
         }
 
         const auto& test_cases = test_data[field];
-        std::cout << "\n📝 Problem: " << test_data.value("problem_name", "Unknown")
-                  << "\n📊 Test cases: " << test_cases.size() << "\n\n";
+        std::cout << "\nProblem: " << test_data.value("problem_name", "Unknown")
+                  << "\nTest cases: " << test_cases.size() << "\n\n";
 
         Solution solution;
         auto total_start = high_resolution_clock::now();
@@ -318,14 +318,11 @@ int main() {
         std::vector<TestResult> results;
         
         if (parallel && test_cases.size() > 1) {
-            // Note: Parallel execution disabled due to non-const method calls
-            // Each thread would need its own Solution instance for thread safety
-            std::cout << "⚠️  Parallel execution disabled (using serial mode for thread safety)\n";
+            std::cout << "Parallel execution disabled (using serial mode for thread safety)\n";
             for (size_t i = 0; i < test_cases.size(); ++i) {
                 results.push_back(run_test(solution, test_cases[i], i, show_failures));
             }
         } else {
-            // Serial execution (better for debugging)
             for (size_t i = 0; i < test_cases.size(); ++i) {
                 results.push_back(run_test(solution, test_cases[i], i, show_failures));
             }
@@ -353,10 +350,16 @@ int main() {
         return passed == test_cases.size() ? 0 : 1;
 
     } catch (const json::parse_error& e) {
-        std::cerr << "❌ JSON Parse Error: " << e.what() << std::endl;
+        std::cerr << "JSON Parse Error: " << e.what() << std::endl;
         return 1;
     } catch (const std::exception& e) {
-        std::cerr << "❌ Error: " << e.what() << std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
 }
+
+// Usage:
+// Normal mode:     ./test_runner
+// Verbose mode:    VERBOSE=1 ./test_runner  
+// Serial mode:     PARALLEL=0 ./test_runner
+// Submit mode:     RUN_MODE=submit ./test_runner
