@@ -159,18 +159,18 @@ T convert_input(const json& input) {
     return input.get<T>();
 }
 
-TestResult run_test(const Solution& solution, const json& test_case, size_t index, bool verbose = false) {
+TestResult run_test(Solution& solution, const json& test_case, size_t index, bool verbose = false) {
     auto start = high_resolution_clock::now();
     
     try {
         auto& input = test_case["input"];
         auto& output = test_case["output"];
 
-        // Generic function call - modify this based on your problem
-        auto result = solution.twoSum(
-            convert_input<std::vector<int>>(input["nums"]),
-            input["target"].get<int>()
-        );
+        // Convert input and store in variables to allow reference binding
+        auto nums = convert_input<std::vector<int>>(input["nums"]);
+        auto target = input["target"].get<int>();
+        
+        auto result = solution.twoSum(nums, target);
 
         bool passed = are_equal(result, output.get<std::vector<int>>(), verbose);
 
@@ -248,20 +248,20 @@ int main() {
 
         std::string field = (run_mode == "submit") ? "test_cases_submit" : "test_cases_run";
         
-        std::cout << "Test Runner Configuration:"
+        std::cout << "🚀 Test Runner Configuration:"
                   << "\n   Mode: " << run_mode
                   << "\n   Field: " << field
                   << "\n   Verbose: " << (verbose ? "ON" : "OFF")
                   << "\n   Parallel: " << (parallel ? "ON" : "OFF") << "\n";
 
         if (!test_data.contains(field) || !test_data[field].is_array() || test_data[field].empty()) {
-            std::cerr << "No valid test cases found under '" << field << "'.\n";
+            std::cerr << "❌ No valid test cases found under '" << field << "'.\n";
             return 1;
         }
 
         const auto& test_cases = test_data[field];
-        std::cout << "\nProblem: " << test_data.value("problem_name", "Unknown")
-                  << "\nTest cases: " << test_cases.size() << "\n\n";
+        std::cout << "\n📝 Problem: " << test_data.value("problem_name", "Unknown")
+                  << "\n📊 Test cases: " << test_cases.size() << "\n\n";
 
         Solution solution;
         auto total_start = high_resolution_clock::now();
@@ -269,15 +269,11 @@ int main() {
         std::vector<TestResult> results;
         
         if (parallel && test_cases.size() > 1) {
-            // Parallel execution
-            std::vector<std::future<TestResult>> futures;
+            // Note: Parallel execution disabled due to non-const method calls
+            // Each thread would need its own Solution instance for thread safety
+            std::cout << "⚠️  Parallel execution disabled (using serial mode for thread safety)\n";
             for (size_t i = 0; i < test_cases.size(); ++i) {
-                futures.push_back(std::async(std::launch::async, run_test, 
-                    std::ref(solution), std::ref(test_cases[i]), i, verbose));
-            }
-
-            for (auto& f : futures) {
-                results.push_back(f.get());
+                results.push_back(run_test(solution, test_cases[i], i, verbose));
             }
         } else {
             // Serial execution (better for debugging)
@@ -297,7 +293,7 @@ int main() {
 
         // Print summary
         std::cout << "\n" << std::string(50, '=');
-        std::cout << "\n Test Summary:"
+        std::cout << "\n📈 Test Summary:"
                   << "\n   Passed: " << passed << "/" << test_cases.size()
                   << " (" << std::fixed << std::setprecision(1) << (passed * 100.0 / test_cases.size()) << "%)"
                   << "\n   Status: " << (passed == test_cases.size() ? "\033[32mALL PASSED ✓\033[0m" : "\033[31mSOME FAILED ✗\033[0m");
@@ -308,16 +304,10 @@ int main() {
         return passed == test_cases.size() ? 0 : 1;
 
     } catch (const json::parse_error& e) {
-        std::cerr << "JSON Parse Error: " << e.what() << std::endl;
+        std::cerr << "❌ JSON Parse Error: " << e.what() << std::endl;
         return 1;
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "❌ Error: " << e.what() << std::endl;
         return 1;
     }
 }
-
-// Usage:
-// Normal mode:     ./test_runner
-// Verbose mode:    VERBOSE=1 ./test_runner  
-// Serial mode:     PARALLEL=0 ./test_runner
-// Submit mode:     RUN_MODE=submit ./test_runner
