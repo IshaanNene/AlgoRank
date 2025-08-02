@@ -47,7 +47,10 @@ std::string format_container(const Container& container, const std::string& name
     bool first = true;
     for (const auto& item : container) {
         if (!first) oss << ", ";
-        if constexpr (std::is_same_v<Container, std::vector<std::vector<typename Container::value_type::value_type>>>) {
+        // Check if this is a nested container (2D vector)
+        if constexpr (std::is_same_v<typename Container::value_type, std::vector<int>> ||
+                      std::is_same_v<typename Container::value_type, std::vector<double>> ||
+                      std::is_same_v<typename Container::value_type, std::vector<long>>) {
             oss << format_container(item);
         } else {
             oss << format_value(item);
