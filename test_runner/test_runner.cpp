@@ -292,9 +292,7 @@ int main() {
         bool parallel = !parallel_env || std::string(parallel_env) != "0"; // Default to parallel
         
         // Auto-enable verbose mode for failed tests in submit mode
-        if (run_mode == "submit") {
-            verbose = true;  // Always show failures in submit mode
-        }
+        bool show_failures = verbose || (run_mode == "submit");
 
         std::string field = (run_mode == "submit") ? "test_cases_submit" : "test_cases_run";
         
@@ -302,6 +300,7 @@ int main() {
                   << "\n   Mode: " << run_mode
                   << "\n   Field: " << field
                   << "\n   Verbose: " << (verbose ? "ON" : "OFF")
+                  << "\n   Show Failures: " << (show_failures ? "ON" : "OFF")
                   << "\n   Parallel: " << (parallel ? "ON" : "OFF") << "\n";
 
         if (!test_data.contains(field) || !test_data[field].is_array() || test_data[field].empty()) {
@@ -323,12 +322,12 @@ int main() {
             // Each thread would need its own Solution instance for thread safety
             std::cout << "⚠️  Parallel execution disabled (using serial mode for thread safety)\n";
             for (size_t i = 0; i < test_cases.size(); ++i) {
-                results.push_back(run_test(solution, test_cases[i], i, verbose));
+                results.push_back(run_test(solution, test_cases[i], i, show_failures));
             }
         } else {
             // Serial execution (better for debugging)
             for (size_t i = 0; i < test_cases.size(); ++i) {
-                results.push_back(run_test(solution, test_cases[i], i, verbose));
+                results.push_back(run_test(solution, test_cases[i], i, show_failures));
             }
         }
 
