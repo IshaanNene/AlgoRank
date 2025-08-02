@@ -89,6 +89,15 @@ bool are_equal(const T& actual, const T& expected, bool verbose = false) {
                 std::cout << "    Size mismatch: expected " << expected.size() 
                          << ", got " << actual.size() << "\n";
             }
+            
+            // Show sorted versions for comparison
+            auto a_sorted = actual, b_sorted = expected;
+            std::sort(a_sorted.begin(), a_sorted.end());
+            std::sort(b_sorted.begin(), b_sorted.end());
+            if (a_sorted != actual || b_sorted != expected) {
+                std::cout << "    " << format_container(b_sorted, "Expected (sorted)") << "\n";
+                std::cout << "    " << format_container(a_sorted, "Got      (sorted)") << "\n";
+            }
         }
         
     } 
@@ -125,6 +134,18 @@ bool are_equal(const T& actual, const T& expected, bool verbose = false) {
             for (size_t i = 0; i < actual.size(); ++i) {
                 std::cout << "      [" << i << "]: " << format_container(actual[i]) << "\n";
             }
+            
+            // Show which specific rows differ
+            if (actual.size() == expected.size()) {
+                for (size_t i = 0; i < actual.size(); ++i) {
+                    auto a_row = actual[i], b_row = expected[i];
+                    std::sort(a_row.begin(), a_row.end());
+                    std::sort(b_row.begin(), b_row.end());
+                    if (a_row != b_row) {
+                        std::cout << "    Row " << i << " differs after sorting\n";
+                    }
+                }
+            }
         }
     }
     // Handle regular types
@@ -134,6 +155,24 @@ bool are_equal(const T& actual, const T& expected, bool verbose = false) {
         if (!result && verbose) {
             std::cout << "    Expected: " << format_value(expected) << "\n";
             std::cout << "    Got     : " << format_value(actual) << "\n";
+            
+            // For string comparisons, show character differences
+            if constexpr (std::is_same_v<T, std::string>) {
+                if (actual.length() != expected.length()) {
+                    std::cout << "    Length mismatch: expected " << expected.length() 
+                             << ", got " << actual.length() << "\n";
+                }
+                // Show first difference
+                size_t min_len = std::min(actual.length(), expected.length());
+                for (size_t i = 0; i < min_len; ++i) {
+                    if (actual[i] != expected[i]) {
+                        std::cout << "    First difference at position " << i 
+                                 << ": expected '" << expected[i] 
+                                 << "', got '" << actual[i] << "'\n";
+                        break;
+                    }
+                }
+            }
         }
     }
     
@@ -185,10 +224,13 @@ TestResult run_test(Solution& solution, const json& test_case, size_t index, boo
                   << " (" << std::fixed << std::setprecision(2) << timeMs << "ms)";
         
         if (!passed && verbose) {
-            std::cout << "\n";
-        } else {
-            std::cout << "\n";
+            std::cout << "\n    Input:    nums=" << format_container(nums) 
+                      << ", target=" << target << "\n";
+        } else if (!passed) {
+            std::cout << " [Use VERBOSE=1 to see details]";
         }
+        
+        std::cout << "\n";
 
         return {passed, "", timeMs};
 
@@ -248,6 +290,11 @@ int main() {
         std::string run_mode = mode_env ? mode_env : "run";
         bool verbose = verbose_env && std::string(verbose_env) == "1";
         bool parallel = !parallel_env || std::string(parallel_env) != "0"; // Default to parallel
+        
+        // Auto-enable verbose mode for failed tests in submit mode
+        if (run_mode == "submit") {
+            verbose = true;  // Always show failures in submit mode
+        }
 
         std::string field = (run_mode == "submit") ? "test_cases_submit" : "test_cases_run";
         
