@@ -15,7 +15,6 @@ RUN g++ -O2 -std=c++20 \
     test_runner.cpp -o runner \
     -pthread
 
-# Debug: Show what we built
 RUN echo "=== BUILD INFO ===" && \
     uname -a && \
     file runner && \
